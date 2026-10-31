@@ -1,0 +1,224 @@
+# Local backend: docker compose up -d --build
+x-node-environment: &node-environment
+  NODE_ENV: production
+  RABBITMQ_URL: "amqp://${RABBITMQ_USER:-goleve}:${RABBITMQ_PASSWORD:-goleve-local}@rabbitmq:5672"
+  JWT_SECRET: "${JWT_SECRET:-development-only-change-me}"
+
+x-node-service: &node-service
+  restart: unless-stopped
+  init: true
+  networks: [backend]
+  depends_on:
+    mongodb:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+  healthcheck:
+    test:
+      - CMD
+      - node
+      - -e
+      - "fetch('http://127.0.0.1:' + process.env.PORT + '/health', { signal: AbortSignal.timeout(3000) }).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+    interval: 15s
+    timeout: 5s
+    retries: 5
+    start_period: 20s
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MONGO_PORT:-27019}:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ ping: 1 }).ok ? 0 : 1)"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER:-goleve}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-goleve-local}"
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping && rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_port_connectivity"]
+      interval: 15s
+      timeout: 15s
+      retries: 5
+      start_period: 40s
+
+  api-gateway:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3000"
+      AUTH_SERVICE_URL: "http://auth-service:3001"
+      USER_SERVICE_URL: "http://user-service:3002"
+      TRAINING_SERVICE_URL: "http://training-service:3003"
+      AGENDA_SERVICE_URL: "http://agenda-service:3004"
+      PERFORMANCE_SERVICE_URL: "http://performance-service:3005"
+      HYDRATION_SERVICE_URL: "http://hydration-service:3006"
+      PROFESSIONAL_SERVICE_URL: "http://professional-service:3007"
+      MANAGEMENT_SERVICE_URL: "http://management-service:3008"
+      PAYMENT_SERVICE_URL: "http://payment-service:3009"
+      NOTIFICATION_SERVICE_URL: "http://notification-service:3010"
+      AI_COACH_SERVICE_URL: "http://ai-coach-service:3011"
+    ports:
+      - "127.0.0.1:${API_GATEWAY_PORT:-3000}:3000"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      training-service:
+        condition: service_healthy
+      agenda-service:
+        condition: service_healthy
+      performance-service:
+        condition: service_healthy
+      hydration-service:
+        condition: service_healthy
+      professional-service:
+        condition: service_healthy
+      management-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      ai-coach-service:
+        condition: service_healthy
+
+  auth-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/auth-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3001"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_auth"
+
+  user-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/user-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3002"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_user"
+
+  training-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/training-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3003"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_training"
+
+  agenda-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/agenda-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3004"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_agenda"
+
+  performance-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/performance-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3005"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_performance"
+
+  hydration-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/hydration-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3006"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_hydration"
+
+  professional-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/professional-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3007"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_professional"
+
+  management-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/management-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3008"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_management"
+
+  payment-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/payment-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3009"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_payment"
+
+  notification-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/notification-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3010"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_notification"
+
+  ai-coach-service:
+    <<: *node-service
+    build:
+      context: ./backend
+      dockerfile: services/ai-coach-service/Dockerfile
+    environment:
+      <<: *node-environment
+      PORT: "3011"
+      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_ai_coach"
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  rabbitmq_data:

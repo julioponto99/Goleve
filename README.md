@@ -1,1 +1,80 @@
-# MSProject
+# GoLeve
+
+Monorepo local com API Gateway, 11 microserviços TypeScript/Express, MongoDB e RabbitMQ.
+Pagamentos: apenas simulados, nunca reais.
+
+## Arranque
+
+Requisitos: Docker Engine com contentores Linux e Docker Compose v2 ou superior.
+Na raiz do projeto:
+
+~~~sh
+docker compose up -d --build
+docker compose ps
+~~~
+
+O build instala as dependências com `npm ci` a partir do lockfile central e compila cada workspace com `npm run build --workspace=<caminho>`. Não requer Node.js nem dependências instaladas no anfitrião. Os 12 Dockerfiles usam `backend/` como contexto de build, respeitam os workspaces e criam imagens Node.js 22 sem dependências de desenvolvimento, executadas pelo utilizador `node`.
+
+Os microserviços aguardam MongoDB e RabbitMQ saudáveis; o gateway aguarda os 11 microserviços. O arranque em segundo plano pode terminar antes do health check final do gateway. Para aguardar por todos:
+
+~~~sh
+docker compose up -d --build --wait --wait-timeout 240
+~~~
+
+## Portas
+
+Todas as portas publicadas estão limitadas a `127.0.0.1`.
+
+| Serviço | Porta interna | Acesso no anfitrião |
+|---|---:|---|
+| API Gateway | 3000 | http://localhost:3000/health |
+| auth-service | 3001 | Apenas rede Docker |
+| user-service | 3002 | Apenas rede Docker |
+| training-service | 3003 | Apenas rede Docker |
+| agenda-service | 3004 | Apenas rede Docker |
+| performance-service | 3005 | Apenas rede Docker |
+| hydration-service | 3006 | Apenas rede Docker |
+| professional-service | 3007 | Apenas rede Docker |
+| management-service | 3008 | Apenas rede Docker |
+| payment-service | 3009 | Apenas rede Docker |
+| notification-service | 3010 | Apenas rede Docker |
+| ai-coach-service | 3011 | Apenas rede Docker |
+| MongoDB | 27017 | localhost:27019 |
+| RabbitMQ AMQP | 5672 | localhost:5672 |
+| RabbitMQ Management | 15672 | http://localhost:15672 |
+
+As portas publicadas são configuráveis em `.env` por `API_GATEWAY_PORT`, `MONGO_PORT`, `RABBITMQ_PORT` e `RABBITMQ_MANAGEMENT_PORT`. Por exemplo, `MONGO_PORT=27020` muda apenas a porta no anfitrião. A porta local MongoDB por defeito e 27019 para evitar conflitos com instancias existentes em 27017/27018. Os contentores continuam a usar `mongodb:27017`. Os microserviços não publicam portas.
+
+## Ambiente e comunicação
+
+`.env.example` documenta as opções. Copiá-lo para `.env` é opcional: o Compose tem valores locais por defeito e preserva o `.env` existente.
+
+Todos os serviços partilham a rede `backend` e comunicam por DNS:
+
+- `MONGO_URI` é configurado por microserviço: `mongodb://mongodb:27017/goleve_<serviço>`. O prefixo é alterável por `MONGO_DB_PREFIX`.
+- `RABBITMQ_URL` usa o nome `rabbitmq`, porta 5672 e as credenciais `RABBITMQ_USER` / `RABBITMQ_PASSWORD`. Usar caracteres seguros para URLs.
+- O gateway recebe as 11 variáveis `AUTH_SERVICE_URL`, `USER_SERVICE_URL`, `TRAINING_SERVICE_URL`, `AGENDA_SERVICE_URL`, `PERFORMANCE_SERVICE_URL`, `HYDRATION_SERVICE_URL`, `PROFESSIONAL_SERVICE_URL`, `MANAGEMENT_SERVICE_URL`, `PAYMENT_SERVICE_URL`, `NOTIFICATION_SERVICE_URL`, `AI_COACH_SERVICE_URL`, por exemplo `USER_SERVICE_URL=http://user-service:3002`.
+- `JWT_SECRET` é obtido de `.env`, com um valor de desenvolvimento por defeito.
+
+Os valores `MONGO_URI` e `RABBITMQ_URL` da raiz podem continuar a servir para execução local. O Compose fornece explicitamente os endereços dos contentores para evitar usar `localhost` do anfitrião.
+
+RabbitMQ Management usa `goleve / goleve-local` por defeito. As variáveis de criação do utilizador só se aplicam à primeira inicialização do volume. Num broker já inicializado, gerir as alterações de credenciais no próprio RabbitMQ.
+
+O gateway ainda não implementa encaminhamento e os serviços não estabelecem ligações Mongoose nem publicam/consomem eventos RabbitMQ. A configuração Docker disponibiliza a rede e as variáveis. Os health checks `/health` confirmam a resposta HTTP, não as ligações da aplicação à infraestrutura.
+
+## Persistência e diagnóstico
+
+`mongo_data:/data/db` preserva os dados MongoDB e o volume existente do projeto.
+`rabbitmq_data:/var/lib/rabbitmq` mantém os dados do broker, com hostname estável. Este novo volume não importa automaticamente dados de volumes anónimos anteriores; esses volumes não são eliminados.
+
+~~~sh
+docker compose logs --tail=100 api-gateway auth-service
+docker compose logs --tail=100 mongodb rabbitmq
+docker compose exec user-service node -e "fetch('http://127.0.0.1:3002/health').then(r=>r.json()).then(console.log)"
+docker compose stop
+docker compose start
+~~~
+
+`docker compose down` conserva os volumes nomeados. Não usar `docker compose down -v` para preservar os dados.
+
+A estrutura MVC e os scripts locais `dev`, `build` e `start` permanecem disponíveis.
