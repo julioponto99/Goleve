@@ -1,0 +1,15 @@
+import express from 'express';
+import { createAuthRoutes } from './routes/auth.routes';
+import { createAuthRateLimiter } from './middlewares/auth-rate-limit.middleware';
+
+export function createApp() {
+  const app = express();
+  app.disable('x-powered-by');
+  app.set('trust proxy', false);
+  app.get('/health', (_req, res) => res.json({ service: 'api-gateway', status: 'ok' }));
+  app.post(['/auth/register', '/auth/login'], createAuthRateLimiter());
+  // Proxy the original request stream before any JSON body parser consumes it.
+  app.use('/auth', createAuthRoutes());
+  app.use(express.json());
+  return app;
+}

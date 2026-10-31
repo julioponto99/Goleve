@@ -6,7 +6,13 @@ Pagamentos: apenas simulados, nunca reais.
 ## Arranque
 
 Requisitos: Docker Engine com contentores Linux e Docker Compose v2 ou superior.
-Na raiz do projeto:
+Antes do primeiro arranque, definir `JWT_SECRET` no `.env` local. Se o ficheiro ainda não existir, criá-lo a partir de `.env.example`. Para gerar uma chave aleatória de 32 bytes:
+
+~~~sh
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+~~~
+
+Guardar o valor apenas no `.env`, que está ignorado pelo Git. Depois, na raiz do projeto:
 
 ~~~sh
 docker compose up -d --build
@@ -47,20 +53,22 @@ As portas publicadas são configuráveis em `.env` por `API_GATEWAY_PORT`, `MONG
 
 ## Ambiente e comunicação
 
-`.env.example` documenta as opções. Copiá-lo para `.env` é opcional: o Compose tem valores locais por defeito e preserva o `.env` existente.
+`.env.example` documenta as opções. As portas e os serviços de infraestrutura têm valores locais por defeito; `JWT_SECRET` é obrigatório no auth-service e não tem fallback nesse serviço.
 
 Todos os serviços partilham a rede `backend` e comunicam por DNS:
 
 - `MONGO_URI` é configurado por microserviço: `mongodb://mongodb:27017/goleve_<serviço>`. O prefixo é alterável por `MONGO_DB_PREFIX`.
 - `RABBITMQ_URL` usa o nome `rabbitmq`, porta 5672 e as credenciais `RABBITMQ_USER` / `RABBITMQ_PASSWORD`. Usar caracteres seguros para URLs.
 - O gateway recebe as 11 variáveis `AUTH_SERVICE_URL`, `USER_SERVICE_URL`, `TRAINING_SERVICE_URL`, `AGENDA_SERVICE_URL`, `PERFORMANCE_SERVICE_URL`, `HYDRATION_SERVICE_URL`, `PROFESSIONAL_SERVICE_URL`, `MANAGEMENT_SERVICE_URL`, `PAYMENT_SERVICE_URL`, `NOTIFICATION_SERVICE_URL`, `AI_COACH_SERVICE_URL`, por exemplo `USER_SERVICE_URL=http://user-service:3002`.
-- `JWT_SECRET` é obtido de `.env`, com um valor de desenvolvimento por defeito.
+- `JWT_SECRET` é obtido de `.env`. Em produção, o auth-service rejeita valores curtos, placeholders de desenvolvimento e padrões repetidos. A rotação da chave invalida os tokens anteriores.
 
 Os valores `MONGO_URI` e `RABBITMQ_URL` da raiz podem continuar a servir para execução local. O Compose fornece explicitamente os endereços dos contentores para evitar usar `localhost` do anfitrião.
 
 RabbitMQ Management usa `goleve / goleve-local` por defeito. As variáveis de criação do utilizador só se aplicam à primeira inicialização do volume. Num broker já inicializado, gerir as alterações de credenciais no próprio RabbitMQ.
 
-O gateway ainda não implementa encaminhamento e os serviços não estabelecem ligações Mongoose nem publicam/consomem eventos RabbitMQ. A configuração Docker disponibiliza a rede e as variáveis. Os health checks `/health` confirmam a resposta HTTP, não as ligações da aplicação à infraestrutura.
+O gateway encaminha `/auth/*` para o auth-service, que já estabelece a ligação MongoDB e disponibiliza registo, login e consulta do utilizador autenticado. Consultar [endpoints, validação e testes de autenticação](documentation/api/authentication.md). O `/health` do auth-service verifica também o MongoDB. Os restantes serviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
+
+O gateway limita os pedidos de registo e login. Consultar o [relatório da revisão de segurança e ficheiros para commit](documentation/api/authentication-security-review.md).
 
 ## Persistência e diagnóstico
 

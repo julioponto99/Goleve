@@ -113,6 +113,7 @@ services:
     environment:
       <<: *node-environment
       PORT: "3001"
+      JWT_SECRET: "${JWT_SECRET:?Set a strong JWT_SECRET in the local .env before starting auth-service}"
       MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_auth"
 
   user-service:
