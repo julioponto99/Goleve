@@ -1,6 +1,6 @@
 # Plano de conclusão do backend
 
-> Leitura atual: as secções de implementação 10–15 atualizam progressivamente a auditoria original. Resumos/estimativas iniciais são históricos e não substituem os contratos executados. A Fase 5.6 mantém atendimento real bloqueado e não ativa o ambiente principal; ver [Agenda Profissional](api/professional-agenda.md).
+> Leitura atual: as secções de implementação 10–16 atualizam progressivamente a auditoria original. Resumos/estimativas iniciais são históricos e não substituem os contratos executados. As Fases 5.6 e 5.7 mantêm utilização real bloqueada e não ativam o ambiente principal; ver [Agenda Profissional](api/professional-agenda.md) e [Coach IA](api/ai-coach.md).
 
 **Âmbito:** auditoria documental do código existente em 2026-11-01.
 **Restrições desta auditoria:** não foram alterados serviços, bases de dados,
@@ -732,3 +732,48 @@ provisionamento seguro, partilha sensível, operação produtiva de credenciais
 e infraestrutura transacional, cancelamentos excepcionais, consumidores dos
 eventos, localização presencial/links online e notificações externas. Não há
 pagamentos ou consentimentos específicos de IA nesta fase.
+
+## 16. Fase 5.7 implementada — Coach IA local isolado
+
+Contrato executado: [API do Coach IA](api/ai-coach.md).
+Ownership e decisões aprovadas: [arquitetura](architecture/ai-coach.md).
+
+- Conversas, mensagens, histórico paginado, recomendações com proveniência,
+  propostas imutáveis, confirmação/rejeição, expiração e histórico de ações.
+- Autorização explícita de categorias e ferramentas por conversa, sem criar
+  ConsentRecord/AccessGrant de produção. Contexto mínimo construído pelas APIs
+  reais de User, Training, Hydration, Performance e Agenda; Professional não
+  é contexto autorizado por inferência do contrato interno da Fase 5.6.
+- Persistência própria, payloads AES-256-GCM com AAD, retenção de sete dias,
+  propostas de dez minutos, eliminação física pelo titular e auditoria mínima
+  sem conteúdo por trinta dias. TTL e purga síncrona própria; sem jobs de IA
+  em fundo. O monitor TTL tem atraso físico possível, documentado na API.
+- JWT e audiência comum `goleve-api` verificados no Auth e nos destinos.
+  Bearer transitório apenas em pedidos síncronos confirmados; sem segredo JWT
+  no Coach ou token em fornecedor, DB, logs, filas ou histórico.
+- Quatro ferramentas reais validadas por HTTP: alterar objetivo existente de
+  hidratação, criar plano autónomo de treino, objetivo de atividade no User e
+  atividade pessoal na Agenda, preservando o aviso de sobreposição.
+- Claims/recibos/auditoria locais transacionais, idempotência, isolamento e
+  concorrência; resultado incerto bloqueia novas tentativas de escrita.
+  Reconciliação só consulta um recurso próprio e não prova causalidade.
+- Fornecedor `none` ou adaptador HTTPS `http-json-v1`, sem assumir vendor
+  configurado. Mock/relógio injetados apenas em testes; nenhum LLM externo
+  foi chamado. O Gateway tem proxy `/ai-coach` e o percurso autónomo mantém
+  independência da IA.
+
+**Validação:** 42 testes do Coach + 377 de regressão dos serviços + 14 antigos
+da demonstração = **433 distintos aprovados**, sem falhas/ignorados. Todos os
+workspaces TypeScript compilaram. Replica set, standalone e RabbitMQ foram
+criados exclusivamente para os testes autorizados, com tmpfs, rede própria e
+portas loopback. O ambiente principal não foi reiniciado ou modificado.
+Os três recursos e a rede temporários, fixtures e ficheiros auxiliares desta
+execução foram removidos. Nenhum volume foi eliminado. Os 31 contentores
+preexistentes foram preservados e os 14 serviços principais estão saudáveis.
+
+`AI_COACH_ENABLED=false` por defeito; produção é recusada quando ativo. Faltam
+políticas e fornecedores para dados reais, identidade técnica/grants,
+delegação com scopes por destino, recibos/idempotência nos proprietários,
+KMS/rotação/TLS/ACLs, direitos/expurgo operacional e avaliação do modelo.
+Não houve migração, backup real, alteração de chaves ou volumes principais,
+commit ou push. Limites completos e ficheiros desta etapa constam da API.
