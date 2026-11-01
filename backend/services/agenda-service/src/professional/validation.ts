@@ -53,16 +53,16 @@ export function exceptionInput(value: unknown) {
   return { ...configuration, capabilityId: objectId(data.capabilityId), type: data.type as 'block'|'extra_availability'|'replacement', startAtUtc, endAtUtc,
     reasonCode: String(data.reasonCode), ...(data.replacesRuleId ? { replacesRuleId: objectId(data.replacesRuleId) } : {}) };
 }
-export interface BookingInput { professionalId: string; capabilityId: string; appointmentType: AppointmentType; relationshipId?: string; mode: string; environment?: string; startAtUtc: Date; endAtUtc: Date; timezone: string }
+export interface BookingInput { serviceId?: string; professionalId: string; capabilityId: string; appointmentType: AppointmentType; relationshipId?: string; mode: string; environment?: string; startAtUtc: Date; endAtUtc: Date; timezone: string }
 export function bookingInput(value: unknown): BookingInput {
-  const d = object(value, ['professionalId','capabilityId','appointmentType','relationshipId','mode','environment','startAtUtc','endAtUtc','timezone']);
+  const d = object(value, ['serviceId','professionalId','capabilityId','appointmentType','relationshipId','mode','environment','startAtUtc','endAtUtc','timezone']);
   if (!APPOINTMENT_TYPES.includes(d.appointmentType as AppointmentType)) return invalid('Invalid appointment type');
   if (d.appointmentType === 'follow_up' ? !d.relationshipId : d.relationshipId !== undefined) return invalid('Relationship is required only for follow_up');
   if (!['online','in_person'].includes(String(d.mode))) return invalid('Invalid session mode');
   if (d.mode === 'in_person' ? !['home','gym','outdoor'].includes(String(d.environment)) : d.environment !== undefined) return invalid('Invalid session environment');
   const startAtUtc = instant(d.startAtUtc), endAtUtc = instant(d.endAtUtc), minutes = (endAtUtc.getTime() - startAtUtc.getTime()) / 60000;
   if (![30,45,60,90].includes(minutes) || startAtUtc.getUTCSeconds() || startAtUtc.getUTCMilliseconds()) return invalid('Invalid duration or non-minute-aligned start');
-  return { professionalId: objectId(d.professionalId), capabilityId: objectId(d.capabilityId), appointmentType: d.appointmentType as AppointmentType,
+  return { ...(d.serviceId!==undefined?{serviceId:objectId(d.serviceId)}:{}),professionalId: objectId(d.professionalId), capabilityId: objectId(d.capabilityId), appointmentType: d.appointmentType as AppointmentType,
     ...(d.relationshipId ? { relationshipId: objectId(d.relationshipId) } : {}), mode: String(d.mode), ...(d.environment ? { environment: String(d.environment) } : {}), startAtUtc, endAtUtc, timezone: validZone(d.timezone) };
 }
 export function commandKey(value: unknown): string { if (typeof value !== 'string' || !/^[A-Za-z0-9._-]{8,128}$/.test(value)) return invalid('Idempotency-Key of 8-128 safe characters required'); return value; }

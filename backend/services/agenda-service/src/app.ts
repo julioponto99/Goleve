@@ -12,10 +12,14 @@ import { ProfessionalAgendaModels } from './professional/models';
 import { AppointmentEligibility, ProfessionalEligibilityClient } from './professional/eligibility';
 import { ProfessionalAgendaService } from './professional/service';
 import { createProfessionalAgendaRoutes } from './routes/professional-agenda.routes';
+import { AgendaBilling } from './payment-demo/billing';
+import { internalBillingRoutes,publicBillingRoutes } from './payment-demo/routes';
 export interface ProfessionalAgendaRuntime { settings: ProfessionalAgendaSettings; models: ProfessionalAgendaModels; eligibilityForTests?: AppointmentEligibility; nowForTests?: () => Date }
 
 export function createApp(authServiceUrl: string, connection: Connection, models: AgendaModels, professional?: ProfessionalAgendaRuntime) {
   const app = express();
+  const billing=professional?.settings.paymentDemo?new AgendaBilling(connection,professional.models,professional.settings.paymentDemo):undefined;
+  if(billing)app.use('/internal/v1/payment-demo',internalBillingRoutes(connection,billing));
   app.disable('x-powered-by'); app.disable('etag');
   app.get('/health', async (_req, res) => {
     const healthy = await isDatabaseHealthy(connection);
@@ -28,10 +32,11 @@ export function createApp(authServiceUrl: string, connection: Connection, models
   let professionalService: ProfessionalAgendaService | undefined;
   if (professional?.settings.enabled) {
     if ((professional.eligibilityForTests || professional.nowForTests) && (process.env.NODE_ENV !== 'test' || !/^goleve_agenda56_test_/.test(connection.name))) throw new Error('Eligibility overrides are restricted to isolated automated tests');
-    const provider = professional.eligibilityForTests || (professional.settings.keys && new ProfessionalEligibilityClient(professional.settings.professionalServiceUrl, professional.settings.keys));
+    const provider = billing?.eligibility || professional.eligibilityForTests || (professional.settings.keys && new ProfessionalEligibilityClient(professional.settings.professionalServiceUrl, professional.settings.keys));
     if (!provider) throw new Error('Dedicated Professional identity contract is required');
-    professionalService = new ProfessionalAgendaService(connection, professional.models, models, provider, professional.nowForTests);
+    professionalService = new ProfessionalAgendaService(connection, professional.models, models, provider, professional.nowForTests,billing);
   }
+  if(billing)app.use('/agenda',publicBillingRoutes(billing));
   app.use('/agenda', createProfessionalAgendaRoutes(professionalService));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'Endpoint not found')));
   app.use(errorHandler);

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "test:agenda": "node --test tests/agenda-integration.test.cjs",
     "start": "node dist/server.js"
   },
   "dependencies": {

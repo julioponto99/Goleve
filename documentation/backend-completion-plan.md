@@ -777,3 +777,38 @@ delegação com scopes por destino, recibos/idempotência nos proprietários,
 KMS/rotação/TLS/ACLs, direitos/expurgo operacional e avaliação do modelo.
 Não houve migração, backup real, alteração de chaves ou volumes principais,
 commit ou push. Limites completos e ficheiros desta etapa constam da API.
+
+## 17. Fase 5.8.2 implementada — Payment + Agenda + Professional em demonstração
+
+Contrato: [integração de pagamentos e reservas](api/payment-agenda-integration.md).
+
+- Cotação autenticada no Professional, vinculada ao titular e válida por
+  15 minutos; serviço, capacidade, duração e elegibilidade revalidados.
+- Adaptador de elegibilidade sintética exclusivo da demonstração aprovada,
+  com provas autenticadas e frescas. O adaptador normal continua a exigir
+  autoridade real. Não há aprovação automática nem atribuição de papéis.
+- Reserva aceite e titularidade verificadas na Agenda; associação explícita
+  de serviço para reservas anteriores, sem migração ou inferência financeira.
+- Claim de cobrança serializado pelo calendário profissional, ledger e
+  histórico transacionais; CAS e unicidade por cadeia no Payment antes do
+  MockBankProvider. Sem cobrança para serviços gratuitos.
+- Idempotência, recusa e nova tentativa controlada, bloqueio de resultados
+  incertos e reconciliação apenas com recibo conclusivo já persistido.
+- Cancelamentos preservam histórico e sinalizam reembolso simulado pendente;
+  reagendamentos equivalentes conservam a cobrança, diferenças bloqueiam
+  para reconciliação. Não há reembolsos reais.
+- JWT interno por par, audiência, validade curta, hash do pedido, proteção de
+  replay e prova da resposta vinculada ao pedido. Nenhuma rota interna nova
+  no Gateway; o proxy Payment existente serve os novos endpoints públicos.
+
+**Validação:** 29 testes direcionados da integração e 3 existentes do Payment
+aprovados (32 distintos, zero falhas). Professional, Agenda e Payment
+compilaram. Testes com os três serviços reais por HTTP e transações num único
+MongoDB replica set temporário em tmpfs; Auth simulado e proxy Payment do
+Gateway testado isoladamente. Sem regressão completa ou ponta a ponta global.
+
+`PAYMENT_AGENDA_DEMO_ENABLED=false` por defeito; produção recusada e bases
+isoladas identificadas pela instância obrigatórias. Apenas fixtures fictícias
+nos testes; sem alteração do ambiente principal, contas ou credenciais reais.
+Ficam pendentes operação produtiva, conciliação sem recibo durável, banco e
+reembolso reais e integração Notification. Limitações e configuração na API.

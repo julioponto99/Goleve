@@ -7,6 +7,7 @@ import { createProfessionalAgendaModels, initializeProfessionalAgendaModels } fr
 import { ProfessionalAgendaService } from './professional/service';
 import { ProfessionalEligibilityClient } from './professional/eligibility';
 import { publishProfessionalOutbox } from './professional/outbox';
+import { AgendaBilling } from './payment-demo/billing';
 
 let connection: Awaited<ReturnType<typeof openDatabase>> | undefined;
 async function start() {
@@ -17,6 +18,7 @@ async function start() {
   await initializeModels(models);
   const professionalModels = settings.enabled ? createProfessionalAgendaModels(connection) : undefined;
   if (professionalModels) await initializeProfessionalAgendaModels(professionalModels);
+  if(professionalModels&&settings.paymentDemo)await new AgendaBilling(connection,professionalModels,settings.paymentDemo).initialize();
   const server = createApp(process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001', connection, models, professionalModels ? { settings, models: professionalModels } : undefined).listen(Number(process.env.PORT || 3004), () => console.log('agenda-service running'));
   const timers: ReturnType<typeof setInterval>[] = [];
   if (professionalModels && settings.keys) {

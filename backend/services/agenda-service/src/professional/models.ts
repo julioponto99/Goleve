@@ -17,6 +17,7 @@ export interface ExceptionData extends WindowConfiguration {
   type: 'block'|'extra_availability'|'replacement'; replacesRuleId?: string; reasonCode: string; active: boolean; version: number; createdAt: Date; updatedAt: Date;
 }
 export interface AppointmentData {
+  serviceId?: string; billingRootId?: string;
   appointmentType: AppointmentType; subjectAuthUserId: string; professionalAuthUserId: string; professionalId: string; capabilityId: string;
   relationshipId?: string; mode: string; environment?: string; startAtUtc: Date; endAtUtc: Date; timezone: string;
   occupiedStartAtUtc: Date; occupiedEndAtUtc: Date; bufferBeforeMinutes: number; bufferAfterMinutes: number; availabilitySourceId: string;
@@ -51,6 +52,7 @@ export const availabilityExceptionSchema = new Schema<ExceptionData>({
 }, { ...options, collection: 'agenda_professional_availability_exceptions' });
 availabilityExceptionSchema.index({ professionalAuthUserId: 1, active: 1, startAtUtc: 1, endAtUtc: 1 });
 export const appointmentSchema = new Schema<AppointmentData>({
+  serviceId:{type:String,match:/^[a-f0-9]{24}$/},billingRootId:{type:String,match:/^[a-f0-9]{24}$/},
   ...owner, appointmentType: { type: String, required: true, immutable: true, enum: APPOINTMENT_TYPES }, subjectAuthUserId: { ...id, immutable: true },
   relationshipId: { type: String, immutable: true, match: /^[a-f0-9]{24}$/ }, mode: { type: String, required: true, enum: ['online','in_person'] }, environment: { type: String, enum: ['home','gym','outdoor'] },
   startAtUtc: { type: Date, required: true, immutable: true }, endAtUtc: { type: Date, required: true, immutable: true }, timezone: { type: String, required: true },

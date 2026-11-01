@@ -8,6 +8,7 @@ import { availabilityWindows, subtractIntervals } from './availability';
 import { calendarTransaction } from './transaction';
 import { bookingInput, BookingInput, commandKey, exceptionInput, fail, invalid, object, objectId, period, ruleInput, ruleKeys } from './validation';
 import { intersects, localParts } from './time';
+import { AgendaBilling } from '../payment-demo/billing';
 type Session = ClientSession;
 type Appointment = HydratedDocument<AppointmentData>;
 type Resource = { id: string; version: number } & Record<string, unknown>;
@@ -25,7 +26,7 @@ function exceptionDto(d: HydratedDocument<ExceptionData>): Resource {
     slotDurationMinutes:d.type==='block'?undefined:d.slotDurationMinutes,bufferBeforeMinutes:d.type==='block'?undefined:d.bufferBeforeMinutes,bufferAfterMinutes:d.type==='block'?undefined:d.bufferAfterMinutes,createdAt:d.createdAt,updatedAt:d.updatedAt };
 }
 export function appointmentDto(d: Appointment): Resource {
-  return { id:String(d._id),version:d.version,appointmentType:d.appointmentType,professionalId:d.professionalId,capabilityId:d.capabilityId,relationshipId:d.relationshipId,
+  return { id:String(d._id),version:d.version,serviceId:d.serviceId,appointmentType:d.appointmentType,professionalId:d.professionalId,capabilityId:d.capabilityId,relationshipId:d.relationshipId,
     mode:d.mode,environment:d.environment,startAtUtc:d.startAtUtc,endAtUtc:d.endAtUtc,timezone:d.timezone,status:d.status,expiresAtUtc:d.expiresAtUtc,
     bufferBeforeMinutes:d.bufferBeforeMinutes,bufferAfterMinutes:d.bufferAfterMinutes,rescheduleOfId:d.rescheduleOfId,rescheduledToId:d.rescheduledToId,
     acceptedAt:d.acceptedAt,closedAt:d.closedAt,reasonCode:d.reasonCode,createdAt:d.createdAt,updatedAt:d.updatedAt,sensitiveDataAuthorized:false };
@@ -34,7 +35,7 @@ export class ProfessionalAgendaService {
   private readonly now:()=>Date;
   private readonly databaseNow:()=>Date|string;
   constructor(private readonly connection:Connection, private readonly models:ProfessionalAgendaModels, private readonly personal:AgendaModels,
-    private readonly eligibility:AppointmentEligibility, clock?:()=>Date) { this.now=clock||(()=>new Date()); this.databaseNow=clock?clock:()=>'$$NOW'; }
+    private readonly eligibility:AppointmentEligibility, clock?:()=>Date,private readonly billing?:AgendaBilling) { this.now=clock||(()=>new Date()); this.databaseNow=clock?clock:()=>'$$NOW'; }
   private participant(actor:string) { return { $or:[{subjectAuthUserId:actor},{professionalAuthUserId:actor}] }; }
   private live(now:Date) { return { $or:[{status:'accepted'},{status:'requested',expiresAtUtc:{$gt:now}}] }; }
   private async decision(input:EligibilityInput, professionalActor?:RequestContext):Promise<EligibilityDecision> {
@@ -79,7 +80,7 @@ export class ProfessionalAgendaService {
     }
     const updated=await this.models.Appointment.findOneAndUpdate(query,{$set:{status,reasonCode:reason,...(status==='accepted'?{acceptedAt:this.now()}:{closedAt:this.now()}),...extra},$inc:{version:1}},{new:true,runValidators:true,session});
     if(!updated)return fail(409,'CONCURRENT_UPDATE','Appointment changed concurrently');
-    await this.audit(updated,doc.status,action,ctx,session);return updated;
+    await this.audit(updated,doc.status,action,ctx,session);if(this.billing)await this.billing.changed(updated,action,session);return updated;
   }
   private async ownerAppointment(ctx:RequestContext,id:string) {
     const d=await this.models.Appointment.findOne({_id:objectId(id),...this.participant(ctx.identity.id)});
@@ -154,6 +155,7 @@ export class ProfessionalAgendaService {
     });
   }
   async request(ctx:RequestContext,input:unknown,key:string,parentId?:string,parentVersion?:number) {
+    if((input as {serviceId?:unknown})?.serviceId!==undefined&&!this.billing)return invalid('Service association requires the isolated payment integration');
     const data=bookingInput(input),d=await this.decision({capabilityId:data.capabilityId,professionalId:data.professionalId,subjectAuthUserId:ctx.identity.id,...(data.relationshipId?{relationshipId:data.relationshipId}:{})});
     if(d.professionalAuthUserId===ctx.identity.id)return fail(403,'SELF_BOOKING','Self-booking is forbidden');
     return this.mutate(ctx,d.professionalAuthUserId,key,['request',data,parentId||null,parentVersion||null],async session=>{
@@ -162,17 +164,19 @@ export class ProfessionalAgendaService {
         if(parent.version!==parentVersion)return fail(412,'VERSION_CONFLICT','Original version does not match');
         if(parent.status!=='accepted'||parent.startAtUtc.getTime()-now.getTime()<86400000)return fail(409,'RESCHEDULE_CUTOFF','Original appointment cannot be rescheduled');
         if(parent.professionalId!==data.professionalId||parent.capabilityId!==data.capabilityId||parent.appointmentType!==data.appointmentType||parent.relationshipId!==data.relationshipId)return invalid('Rescheduling preserves the original participants, type, capacity and relationship');
+        if(this.billing&&data.serviceId===undefined&&parent.serviceId)data.serviceId=parent.serviceId;
         if(await this.models.Appointment.exists({rescheduleOfId:parentId,status:'requested',expiresAtUtc:{$gt:now}}).session(session))return fail(409,'RESCHEDULE_PENDING','An active reschedule request already exists');
       }
       const current=await this.decision({capabilityId:data.capabilityId,professionalId:data.professionalId,subjectAuthUserId:ctx.identity.id,...(data.relationshipId?{relationshipId:data.relationshipId}:{})});
       if(current.professionalAuthUserId!==d.professionalAuthUserId)return fail(409,'PROFESSIONAL_CHANGED','Professional identity changed');this.permitsModes(current,[data.mode],data.environment?[data.environment]:[]);
       const checkedNow=this.now(),expiry=new Date(Math.min(checkedNow.getTime()+86400000,data.startAtUtc.getTime()-3600000,parent?parent.startAtUtc.getTime()-86400000:Infinity));
       if(expiry<=checkedNow)return fail(422,'REQUEST_WINDOW_CLOSED','Request expiry must be in the future');
+      if(this.billing&&data.serviceId)await this.billing.eligibility.quote(ctx.identity.id,data.serviceId,data.professionalId,data.capabilityId,(data.endAtUtc.getTime()-data.startAtUtc.getTime())/60000);
       const slot=await this.selectedWindow(data,d.professionalAuthUserId,session,parentId?[parentId]:[]);
       if(expiry<=this.now())return fail(422,'REQUEST_WINDOW_CLOSED','Request window elapsed during validation');
       const [doc]=await this.models.Appointment.create([{...data,subjectAuthUserId:ctx.identity.id,professionalAuthUserId:d.professionalAuthUserId,occupiedStartAtUtc:slot.occupiedStartAtUtc,occupiedEndAtUtc:slot.occupiedEndAtUtc,
         availabilitySourceId:slot.source.sourceId,bufferBeforeMinutes:slot.source.bufferBeforeMinutes,bufferAfterMinutes:slot.source.bufferAfterMinutes,
-        expiresAtUtc:expiry,status:'requested',version:1,createdAt:checkedNow,updatedAt:checkedNow,...(parentId?{rescheduleOfId:parentId}:{})}],{session});
+        expiresAtUtc:expiry,status:'requested',version:1,createdAt:checkedNow,updatedAt:checkedNow,...(parentId?{rescheduleOfId:parentId,...(this.billing&&parent?{billingRootId:await this.billing.root(parent,session)}:{})}:{})}],{session});
       await this.audit(doc,undefined,'requested',ctx,session);return {type:'appointment',data:appointmentDto(doc)};
     });
   }
@@ -209,11 +213,13 @@ export class ProfessionalAgendaService {
       }
       let updated:Appointment;
       if(action==='accept'){
+        const quote=this.billing&&doc.serviceId?await this.billing.quote(doc):undefined;
         let parent:Appointment|null=null;if(doc.rescheduleOfId){parent=await this.models.Appointment.findOne({_id:doc.rescheduleOfId,subjectAuthUserId:doc.subjectAuthUserId,professionalAuthUserId:doc.professionalAuthUserId}).session(session);
           if(!parent||parent.status!=='accepted'||parent.startAtUtc.getTime()-this.now().getTime()<86400000)return fail(409,'RESCHEDULE_CUTOFF','Original appointment can no longer be replaced');}
         await this.selectedWindow({...doc.toObject(),professionalId:doc.professionalId} as BookingInput,doc.professionalAuthUserId,session,[id,...(parent?[String(parent._id)]:[])]);
         updated=await this.change(doc,'accepted','accepted','professional_accepted',ctx,session);
         if(parent){await this.change(parent,'cancelled','rescheduled','rescheduled',ctx,session,{rescheduledToId:id});}
+        if(this.billing)await this.billing.accepted(updated,quote,session);
       }else if(action==='decline')updated=await this.change(doc,'declined','declined',String(d.reasonCode),ctx,session);
       else if(action==='complete'){
         if(!professional||ctx.identity.userType!=='profissional')return fail(403,'PROFESSIONAL_REQUIRED','Only the targeted professional may complete an appointment');
