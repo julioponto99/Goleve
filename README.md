@@ -80,7 +80,9 @@ A fase 1 do User Service está autorizada apenas para desenvolvimento local com 
 
 O gateway encaminha `/professionals/*` para o Professional Service. A fase 1 permite candidaturas privadas de PT/Nutricionista, qualificações declaradas e horários preferidos privados, sem conceder papéis ou privilégios profissionais. `PROFESSIONAL_DATA_MODE=disabled` é o valor seguro por defeito; `synthetic` permite exclusivamente dados fictícios no desenvolvimento local. A disponibilidade operacional e os agendamentos continuam a pertencer ao Agenda Service. Consultar [endpoints, decisões e testes do Professional Service](documentation/api/professional-service.md).
 
-Os outros oito microserviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
+A fase 2 permite submeter candidaturas e simular aprovação, rejeição e suspensão através de `/management/professional-applications/*`. A revisão fica desativada por defeito; exige papel atual de administrador no Auth e ID explicitamente autorizado no servidor Professional. Não cria contas nem atribui papéis. `/professionals/catalog` mostra apenas resumos aprovados com publicação autorizada; os códigos fictícios estão em `/professionals/specializations`. Consultar [configuração, estados, segurança e testes da aprovação simulada](documentation/api/professional-applications.md).
+
+Os outros sete microserviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
 
 O gateway limita os pedidos de registo e login. Consultar o [relatório da revisão de segurança e ficheiros para commit](documentation/api/authentication-security-review.md).
 

@@ -12,6 +12,7 @@ import { ProfileData } from '../models/professional-profile.model';
 import { CapabilityData } from '../models/professional-capability.model';
 import { QualificationData } from '../models/professional-qualification.model';
 import { AvailabilityData } from '../models/availability-declaration.model';
+import { acquireDraftLock, releaseDraftLock } from './draft-lock.service';
 export interface RequestContext { identity: { id: string; userType: string }; requestId: string }
 type Resource = 'profile' | 'capability' | 'qualification' | 'availability';
 type Action = 'read' | 'create' | 'update';
@@ -34,13 +35,17 @@ export class ProfessionalService {
   }
   private async operation<T>(ctx: RequestContext, type: Resource, action: Action, work: () => Promise<T>): Promise<T> {
     await this.audit(ctx, type, action, 'intent');
+    let lock: string | undefined;
     try {
+      if (action !== 'read' && !(type === 'profile' && action === 'create')) lock = await acquireDraftLock(this.models, ctx.identity.id);
       const result = await work();
       const resource = result && typeof result === 'object' ? result as { id?: string; version?: number } : undefined;
       await this.audit(ctx, type, action, 'allowed', resource); return result;
     } catch (error) {
       try { await this.audit(ctx, type, action, 'failed'); } catch { console.error('professional-service audit completion unavailable'); }
       throw error;
+    } finally {
+      if (lock) await releaseDraftLock(this.models, ctx.identity.id, lock, type !== 'profile');
     }
   }
   private notFound(): never { throw new ApiError(404, 'NOT_FOUND', 'Resource not found'); }
@@ -49,6 +54,10 @@ export class ProfessionalService {
     const doc = await this.models.Profile.findOne({ authUserId: owner });
     if (!doc) throw new ApiError(404, 'PROFILE_REQUIRED', 'Create your professional draft profile first');
     if (editing && doc.profileStatus !== 'draft') throw new ApiError(403, 'APPLICATION_NOT_EDITABLE', 'Only draft applications can be edited in this phase');
+    if (editing) {
+      const application = await this.models.Application.findOne({ authUserId: owner }).select('status');
+      if (application && application.status !== 'draft') throw new ApiError(403, 'APPLICATION_NOT_EDITABLE', 'Reopen a rejected application before editing');
+    }
     return doc;
   }
   private profileDto(doc: HydratedDocument<ProfileData>) {
@@ -72,7 +81,11 @@ export class ProfessionalService {
       visibility: 'private', operational: false, purpose: 'application_preferences' };
   }
   async getProfile(ctx: RequestContext) {
-    return this.operation(ctx, 'profile', 'read', async () => this.profileDto(await this.profile(ctx.identity.id)));
+    return this.operation(ctx, 'profile', 'read', async () => {
+      const profile = await this.profile(ctx.identity.id);
+      const application = await this.models.Application.findOne({ authUserId: ctx.identity.id }).select('status');
+      return { ...this.profileDto(profile), applicationStatus: application?.status || 'draft' };
+    });
   }
   async createProfile(ctx: RequestContext, input: JsonObject) {
     return this.operation(ctx, 'profile', 'create', async () => {

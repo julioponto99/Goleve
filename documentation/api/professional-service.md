@@ -1,5 +1,7 @@
 # Professional Service — fase 1
 
+> Documento da entrega da fase 1. A [fase 2 de aprovação simulada](professional-applications.md) acrescenta submissão, decisões administrativas e catálogo público aprovado. Os códigos de especialização autenticados passaram de `/professionals/catalog` para `/professionals/specializations`; `/professionals/catalog` passa a listar apenas resumos aprovados e publicados. As limitações e resultados abaixo descrevem a entrega original da fase 1.
+
 Implementação de candidaturas privadas de Personal Trainer e Nutricionista, baseada na leitura integral de [professional-profiles](../architecture/professional-profiles.md), [profile-relationships](../architecture/profile-relationships.md) e [profile-permissions](../architecture/profile-permissions.md). Os documentos de desenho foram preservados; as decisões desta fase estão registadas abaixo.
 
 ## Decisões apresentadas antes da implementação

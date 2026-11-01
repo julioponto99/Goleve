@@ -1,7 +1,6 @@
-import express from 'express';
 import 'dotenv/config';
-const app = express();
-app.use(express.json());
-app.get('/health', (_req, res) => res.json({ service: 'management-service', status: 'ok' }));
-const port = Number(process.env.PORT || 3008);
-app.listen(port, () => console.log(`management-service running on ${port}`));
+import { createApp } from './app';
+try {
+  const server = createApp().listen(Number(process.env.PORT || 3008), () => console.log('management-service running'));
+  const close = () => server.close(); process.once('SIGTERM', close); process.once('SIGINT', close);
+} catch { console.error('management-service failed to start; check required configuration'); process.exitCode = 1; }

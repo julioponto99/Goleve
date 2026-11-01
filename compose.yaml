@@ -187,6 +187,8 @@ services:
       MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_professional"
       AUTH_SERVICE_URL: "http://auth-service:3001"
       PROFESSIONAL_DATA_MODE: "${PROFESSIONAL_DATA_MODE:-disabled}"
+      PROFESSIONAL_REVIEW_MODE: "${PROFESSIONAL_REVIEW_MODE:-disabled}"
+      PROFESSIONAL_REVIEWER_IDS: "${PROFESSIONAL_REVIEWER_IDS:-}"
     depends_on:
       mongodb:
         condition: service_healthy
@@ -199,9 +201,12 @@ services:
       context: ./backend
       dockerfile: services/management-service/Dockerfile
     environment:
-      <<: *node-environment
+      NODE_ENV: production
       PORT: "3008"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_management"
+      PROFESSIONAL_SERVICE_URL: "http://professional-service:3007"
+    depends_on:
+      professional-service:
+        condition: service_healthy
 
   payment-service:
     <<: *node-service

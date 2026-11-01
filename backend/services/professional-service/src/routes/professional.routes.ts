@@ -2,9 +2,15 @@ import { Router } from 'express';
 import { catalogDto } from '../config/catalog';
 import { createProfessionalController } from '../controllers/professional.controller';
 import { ProfessionalService } from '../services/professional.service';
-export function createProfessionalRoutes(service: ProfessionalService) {
+import { ApplicationService } from '../services/application.service';
+import { createApplicationController } from '../controllers/application.controller';
+export function createProfessionalRoutes(service: ProfessionalService, applications: ApplicationService) {
   const router = Router(), controller = createProfessionalController(service);
-  router.get('/catalog', (_req, res) => res.json({ data: catalogDto() }));
+  const application = createApplicationController(applications);
+  router.get('/specializations', (_req, res) => res.json({ data: catalogDto() }));
+  router.post('/me/submit', application.submit);
+  router.post('/me/reopen', application.reopen);
+  router.get('/me/application-status', application.status);
   router.get('/me', controller.getProfile);
   router.put('/me', controller.createProfile);
   router.patch('/me', controller.updateProfile);

@@ -2,8 +2,8 @@ import { Schema } from 'mongoose';
 export const auditSchema = new Schema({
   eventId: { type: String, required: true }, requestId: { type: String, required: true },
   actorId: { type: String, required: true, match: /^[a-f0-9]{24}$/ },
-  purposeCode: { type: String, required: true, enum: ['synthetic_self_application'] },
-  resourceType: { type: String, required: true, enum: ['profile', 'capability', 'qualification', 'availability'] },
+  purposeCode: { type: String, required: true, enum: ['synthetic_self_application', 'synthetic_application_review'] },
+  resourceType: { type: String, required: true, enum: ['profile', 'capability', 'qualification', 'availability', 'application'] },
   actionCode: { type: String, required: true, enum: ['read', 'create', 'update'] },
   decision: { type: String, required: true, enum: ['intent', 'allowed', 'failed'] },
   resourceOpaqueId: String, resourceVersion: Number,

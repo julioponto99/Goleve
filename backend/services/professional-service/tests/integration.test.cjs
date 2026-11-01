@@ -65,7 +65,7 @@ describe('Professional phase 1 with real Auth, Gateway and isolated MongoDB', { 
     assert.equal((await request('/health')).status, 200);
     const health = await request('/health', { base: professionalUrl }); assert.equal(health.status, 200); assert.equal(health.body.database, 'connected');
     for (const [method, path] of [['GET', '/professionals/me'], ['PUT', '/professionals/me'], ['PATCH', '/professionals/me'],
-      ['GET', '/professionals/catalog'], ['POST', '/professionals/me/capabilities'], ['GET', '/professionals/me/capabilities'],
+      ['GET', '/professionals/specializations'], ['POST', '/professionals/me/capabilities'], ['GET', '/professionals/me/capabilities'],
       ['GET', '/professionals/me/qualifications'], ['POST', '/professionals/me/qualifications'],
       ['GET', '/professionals/me/availability-declaration'], ['PUT', '/professionals/me/availability-declaration'], ['PATCH', '/professionals/me/availability-declaration']]) {
       for (const base of [gatewayUrl, professionalUrl]) assert.equal((await request(path, { method, base })).status, 401);
@@ -82,10 +82,10 @@ describe('Professional phase 1 with real Auth, Gateway and isolated MongoDB', { 
   ]) test('real Auth rejects ' + label + ' JWT for Professional', async () => {
     assert.equal((await own('/professionals/me', { token: makeToken(userA.user.id) })).status, 401);
   });
-  test('profile is explicit onboarding; current account may read the synthetic catalog without a profile', async () => {
+  test('profile is explicit onboarding; current account may read specialization codes without a profile', async () => {
     assert.equal((await own('/professionals/me')).status, 404);
     assert.equal(await models.Profile.countDocuments({}), 0);
-    const result = await own('/professionals/catalog'); assert.equal(result.status, 200); safe(result);
+    const result = await own('/professionals/specializations'); assert.equal(result.status, 200); safe(result);
     assert.equal(result.body.data.grantsProfessionalPrivileges, false); assert.equal(result.body.data.version, 'synthetic-v1');
   });
   test('normal users create only hidden draft candidacies without modifying their Auth account', async () => {
@@ -195,8 +195,8 @@ describe('Professional phase 1 with real Auth, Gateway and isolated MongoDB', { 
     assert.deepEqual(results.map((r) => r.status).sort(), [200, 412]); availabilityA = results.find((r) => r.status === 200);
     const stored = await models.Availability.findOne({ authUserId: userA.user.id }).lean(); assert.equal(stored.operational, false);
   });
-  test('no directory, review, role promotion, reservations, clients, consultations, plans or payment endpoints exist', async () => {
-    for (const [method, path] of [['GET', '/professionals'], ['GET', '/professionals/directory'], ['POST', '/professionals/me/submit'],
+  test('unsupported aliases, direct self-approval, role promotion, reservations, clients, consultations, plans and payments stay unavailable', async () => {
+    for (const [method, path] of [['GET', '/professionals'], ['GET', '/professionals/directory'],
       ['POST', '/professionals/me/verify'], ['POST', '/professionals/me/publish'], ['GET', '/professionals/me/clients'],
       ['POST', '/professionals/me/appointments'], ['POST', '/professionals/me/nutrition-plans'], ['POST', '/professionals/me/payments'],
       ['POST', '/professionals/me/ai-consents'], ['GET', '/professionals/' + profileB.body.data.id], ['DELETE', '/professionals/me']]) {

@@ -6,7 +6,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "npm run build && npm run build --workspace=@goleve/api-gateway && npm run build --workspace=@goleve/auth-service && node --test tests/*.test.cjs"
+    "test": "npm run build && npm run build --workspace=@goleve/management-service && npm run build --workspace=@goleve/api-gateway && npm run build --workspace=@goleve/auth-service && node --test tests/*.test.cjs"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
