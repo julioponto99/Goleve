@@ -7,6 +7,7 @@ export interface ProfessionalSettings {
   dataMode: 'disabled' | 'synthetic';
   reviewMode?: 'disabled' | 'synthetic';
   reviewerIds?: readonly string[];
+  demoEligibilityEnabled?: boolean;
   careInvitationTtlDays?: number;
 }
 export function loadSettings(): ProfessionalSettings {
@@ -33,5 +34,13 @@ export function loadSettings(): ProfessionalSettings {
   if (!['false','true'].includes(agendaFlag)) throw new Error('Invalid Agenda service contract flag');
   if (agendaFlag === 'true' && (!['test','development'].includes(process.env.NODE_ENV || '') || process.env.AGENDA_PROFESSIONAL_MODE !== 'isolated')) throw new Error('Agenda contract requires isolated local mode');
   const agendaServiceKeys = agendaFlag === 'true' ? loadServiceKeys() : undefined;
-  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds, careInvitationTtlDays: Number(ttl), ...(demoIdentity ? { demoIdentity } : {}), ...(agendaServiceKeys ? { agendaServiceKeys } : {}) };
+  const demoEligibility = process.env.PROFESSIONAL_DEMO_ELIGIBILITY_ENABLED || 'false';
+  if (!['false', 'true'].includes(demoEligibility)
+    || (demoEligibility === 'true' && (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test'
+      || dataMode !== 'synthetic' || reviewMode !== 'synthetic' || agendaFlag !== 'true'))) {
+    throw new Error('Demo eligibility requires explicit isolated synthetic Agenda configuration');
+  }
+  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds,
+    careInvitationTtlDays: Number(ttl), demoEligibilityEnabled: demoEligibility === 'true',
+    ...(demoIdentity ? { demoIdentity } : {}), ...(agendaServiceKeys ? { agendaServiceKeys } : {}) };
 }

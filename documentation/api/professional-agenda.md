@@ -20,6 +20,10 @@ Prazo já vencido impede criação. Requested vencido deixa imediatamente de ocu
 
 ## Modelos
 
+### Elegibilidade de demonstração
+
+Em ambiente local isolado, o Professional Service pode responder `authority=synthetic` apenas com uma flag explícita e após candidatura publicada, capacidade válida e serviço ativo correspondente. A Agenda continua a rejeitar esta autoridade no adaptador normal de produção; a configuração não é válida para produção nem para o MongoDB standalone principal. Suspender/revogar a publicação ou desativar o último serviço faz a revalidação falhar.
+
 Todos pertencem à base Agenda, sem acesso direto às bases de outros serviços.
 
 | Modelo / coleção | Responsabilidade |

@@ -149,6 +149,8 @@ Para `follow_up`, deve validar também que o `relationshipId` pertence aos parti
 
 O contrato atual ainda não fornece uma decisão positiva real: `ProfessionalCareEligibility` permanece fechado por defeito. A implementação não pode usar catálogo, fixtures normais ou `/auth/me` de terceiros como prova de elegibilidade.
 
+Para demonstração isolada existe uma decisão sintética explicitamente configurável. O Professional Service verifica a candidatura publicada, o estado da capacidade e um serviço ativo da mesma capacidade antes de responder positivamente. A flag exige dados/revisão sintéticos, Agenda isolada e `NODE_ENV` local/teste; sem estes pré-requisitos responde `authority=unavailable`. Esta decisão nunca altera papéis Auth nem é aceite pelo adaptador normal como verificação profissional real.
+
 ### Auth e chamadas internas
 
 JWT do utilizador é obrigatório nas rotas públicas e deve ser validado pelo Auth Service conforme os contratos existentes. Chamadas Agenda -> Professional não devem confiar apenas na rede Docker. Alternativas:

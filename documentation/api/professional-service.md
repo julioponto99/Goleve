@@ -44,6 +44,27 @@ Em execução fora do Docker, definir explicitamente `MONGO_URI` para uma base P
 
 ## Modelos Mongoose
 
+### Serviços para demonstração
+
+O modo de demonstração permite ao titular criar e gerir serviços sintéticos associados a uma capacidade própria. Estes serviços não representam credenciais, preços comerciais ou verificação profissional real.
+
+| Método | Endpoint | Regra |
+|---|---|---|
+| POST | `/professionals/me/services` | Criar serviço próprio |
+| GET | `/professionals/me/services` | Listar serviços próprios, com `limit` e `before` |
+| GET | `/professionals/me/services/:serviceId` | Consultar serviço próprio |
+| PATCH | `/professionals/me/services/:serviceId` | Editar com `If-Match` |
+| POST | `/professionals/me/services/:serviceId/deactivate` | Desativar com `If-Match` |
+| GET | `/professionals/services` | Catálogo público de serviços ativos aprovados |
+
+Os preços são valores EUR entre 0 e 1000, as durações são 30, 45, 60 ou 90 minutos e os buffers são inteiros entre 0 e 120 minutos. A categoria é verificada contra a capacidade, nunca aceite como prova de elegibilidade. O catálogo público só inclui serviços ativos de candidaturas `approved` com `publicationEnabled=true`; suporta `category`, `capabilityId`, `q`, `limit` e `before`.
+
+O modelo `ProfessionalService` / `professional_services` guarda titular Auth, profissional, capacidade, categoria, nome, descrição, preço, duração, buffers, estado ativo e versão otimista. A desativação é lógica e não elimina histórico.
+
+### Elegibilidade administrativa de demonstração
+
+A rota interna Agenda (`POST /internal/v1/agenda/eligibility`) só pode devolver `authority=synthetic` quando `PROFESSIONAL_DEMO_ELIGIBILITY_ENABLED=true`, `PROFESSIONAL_DATA_MODE=synthetic`, `PROFESSIONAL_REVIEW_MODE=synthetic`, `PROFESSIONAL_AGENDA_CONTRACT_ENABLED=true`, `NODE_ENV` é `development` ou `test` e o modo Agenda é `isolated`. Exige ainda candidatura aprovada/publicada, capacidade não suspensa/expirada/rejeitada e pelo menos um serviço ativo correspondente. Em qualquer outro ambiente, ou perante falha de dependência, a resposta permanece inelegível/indisponível. Isto é uma aprovação administrativa sintética e não uma verificação profissional real.
+
 Todos os documentos de negócio têm titular Auth imutável, timestamps, `schemaVersion=1`, `version` e `dataMode=synthetic`. IDs Auth são referências externas; não há `populate` nem leitura direta de bases de outros serviços. Os schemas são estritos e os DTOs usam listas explícitas de campos.
 
 | Modelo / coleção | Dados desta fase |

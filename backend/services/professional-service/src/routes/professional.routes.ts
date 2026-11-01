@@ -4,9 +4,12 @@ import { createProfessionalController } from '../controllers/professional.contro
 import { ProfessionalService } from '../services/professional.service';
 import { ApplicationService } from '../services/application.service';
 import { createApplicationController } from '../controllers/application.controller';
+import { createProfessionalOfferingController } from '../controllers/professional-offering.controller';
+import { ProfessionalOfferingService } from '../services/professional-offering.service';
 export function createProfessionalRoutes(service: ProfessionalService, applications: ApplicationService) {
   const router = Router(), controller = createProfessionalController(service);
   const application = createApplicationController(applications);
+  const offerings = createProfessionalOfferingController(new ProfessionalOfferingService(service.models));
   router.get('/specializations', (_req, res) => res.json({ data: catalogDto() }));
   router.post('/me/submit', application.submit);
   router.post('/me/reopen', application.reopen);
@@ -25,5 +28,10 @@ export function createProfessionalRoutes(service: ProfessionalService, applicati
   router.get('/me/availability-declaration', controller.getAvailability);
   router.put('/me/availability-declaration', controller.createAvailability);
   router.patch('/me/availability-declaration', controller.updateAvailability);
+  router.post('/me/services', offerings.create);
+  router.get('/me/services', offerings.listMine);
+  router.get('/me/services/:serviceId', offerings.get);
+  router.patch('/me/services/:serviceId', offerings.update);
+  router.post('/me/services/:serviceId/deactivate', offerings.deactivate);
   return router;
 }

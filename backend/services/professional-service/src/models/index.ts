@@ -6,6 +6,7 @@ import { auditSchema } from './audit-access.model';
 import { availabilitySchema } from './availability-declaration.model';
 import { applicationSchema } from './professional-application.model';
 import { relationshipSchema } from './care-relationship.model';
+import { professionalServiceSchema } from './professional-service.model';
 export function createProfessionalModels(connection: Connection) {
   return { Profile: connection.model('ProfessionalProfile', profileSchema),
     Capability: connection.model('ProfessionalCapability', capabilitySchema),
@@ -13,7 +14,8 @@ export function createProfessionalModels(connection: Connection) {
     Audit: connection.model('ProfessionalAuditAccessRecord', auditSchema),
     Availability: connection.model('ProfessionalAvailabilityDeclaration', availabilitySchema),
     Application: connection.model('ProfessionalApplication', applicationSchema),
-    Relationship: connection.model('CareRelationship', relationshipSchema) };
+    Relationship: connection.model('CareRelationship', relationshipSchema),
+    Service: connection.model('ProfessionalService', professionalServiceSchema) };
 }
 export type ProfessionalModels = ReturnType<typeof createProfessionalModels>;
 export async function initializeModels(models: ProfessionalModels): Promise<void> {

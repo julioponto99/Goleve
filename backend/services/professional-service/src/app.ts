@@ -18,16 +18,19 @@ import { createCareRelationshipController } from './controllers/care-relationshi
 import { createCareRelationshipRoutes } from './routes/care-relationship.routes';
 import { DemoIdentityClient } from './demo/identity-client';
 import { createAgendaInternalRoutes } from './internal/agenda.routes';
+import { createProfessionalOfferingController } from './controllers/professional-offering.controller';
+import { ProfessionalOfferingService } from './services/professional-offering.service';
 export interface CareDependencies { eligibility?: CareEligibilityProvider; now?: () => Date }
 export function createApp(settings: ProfessionalSettings, connection: Connection, models: ProfessionalModels, dependencies: CareDependencies = {}) {
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
-  if (settings.agendaServiceKeys) app.use('/internal/v1/agenda', createAgendaInternalRoutes(connection, models, settings.agendaServiceKeys));
+  if (settings.agendaServiceKeys) app.use('/internal/v1/agenda', createAgendaInternalRoutes(connection, models, settings.agendaServiceKeys, settings.demoEligibilityEnabled));
   app.get('/health', async (_req, res) => {
     res.set('Cache-Control', 'no-store'); const healthy = await isDatabaseHealthy(connection);
     res.status(healthy ? 200 : 503).json({ service: 'professional-service', status: healthy ? 'ok' : 'unavailable',
       database: healthy ? 'connected' : 'unavailable', dataMode: settings.dataMode });
   });
   const applications = new ApplicationService(models, settings);
+  const offerings = createProfessionalOfferingController(new ProfessionalOfferingService(models));
   const identity = settings.demoIdentity ? new DemoIdentityClient(settings.authServiceUrl, settings.demoIdentity) : undefined;
   const relationships = new CareRelationshipService(models, dependencies.eligibility || new ProfessionalCareEligibility(models, settings, identity), settings.careInvitationTtlDays ?? 7, dependencies.now);
   const careController = createCareRelationshipController(relationships);
@@ -40,6 +43,7 @@ export function createApp(settings: ProfessionalSettings, connection: Connection
     next();
   };
   app.get('/professionals/catalog', available, createApplicationController(applications).catalog);
+  app.get('/professionals/services', available, offerings.publicCatalog);
   app.use(['/professionals', '/professional-applications', '/care-relationships'], authenticate(settings.authServiceUrl));
   app.use('/professional-applications', (_req, res, next) => {
     try { requireReviewer(res.locals.context, settings); next(); } catch (error) { next(error); }
