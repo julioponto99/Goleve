@@ -12,10 +12,13 @@ import { NotificationConsumer } from './messaging/rabbitmq';
 export async function createApp(authServiceUrl: string, connection: import('mongoose').Connection, service: NotificationService, consumer?: NotificationConsumer) {
   const app = express();
   app.disable('x-powered-by'); app.disable('etag');
-  app.get('/health', async (_req, res) => {
+  app.get('/health', (_req, res) => {
+    res.set('Cache-Control', 'no-store').json({ service: 'notification-service', status: 'ok' });
+  });
+  app.get('/ready', async (_req, res) => {
     const database = await isDatabaseHealthy(connection);
     const rabbitmq = consumer ? consumer.isHealthy() : false;
-    res.status(database ? 200 : 503).json({ service: 'notification-service', status: database && rabbitmq ? 'ok' : 'degraded', database: database ? 'connected' : 'unavailable', rabbitmq: rabbitmq ? 'connected' : 'unavailable' });
+    res.set('Cache-Control', 'no-store').status(database && rabbitmq ? 200 : 503).json({ service: 'notification-service', status: database && rabbitmq ? 'ok' : 'degraded', database: database ? 'connected' : 'unavailable', rabbitmq: rabbitmq ? 'connected' : 'unavailable' });
   });
   app.use('/notifications', authenticate(authServiceUrl), express.json({ limit: '32kb' }), async (_req, _res, next) => { if (!await isDatabaseHealthy(connection)) { next(new ApiError(503, 'DATABASE_UNAVAILABLE', 'Notification database is unavailable')); return; } next(); }, createNotificationRoutes(service));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'Endpoint not found')));

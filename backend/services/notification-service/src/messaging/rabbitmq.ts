@@ -14,9 +14,16 @@ export class NotificationConsumer {
   constructor(private readonly url: string, private readonly service: NotificationService, private readonly retryDelayMs = 1000) {}
   isHealthy() { return this.healthy; }
   async start() {
+    this.healthy = false;
+    let unavailable = false;
+    const markUnavailable = () => { unavailable = true; this.healthy = false; };
     this.connection = await amqp.connect(this.url);
+    this.connection.on('error', markUnavailable);
+    this.connection.on('close', markUnavailable);
     const channel = await this.connection.createChannel();
     this.channel = channel;
+    channel.on('error', markUnavailable);
+    channel.on('close', markUnavailable);
     await channel.assertExchange(notificationExchange, 'topic', { durable: true });
     await channel.assertExchange(`${notificationExchange}.retry`, 'direct', { durable: true });
     await channel.assertExchange(`${notificationExchange}.failed`, 'direct', { durable: true });
@@ -27,8 +34,8 @@ export class NotificationConsumer {
     await channel.bindQueue(retryQueue, `${notificationExchange}.retry`, 'retry');
     await channel.bindQueue(failedQueue, `${notificationExchange}.failed`, 'failed');
     await channel.prefetch(10);
-    await channel.consume(notificationQueue, (message) => { if (message) void this.handle(message); });
-    this.healthy = true;
+    await channel.consume(notificationQueue, (message) => { if (message) void this.handle(message).catch(markUnavailable); else markUnavailable(); });
+    this.healthy = !unavailable;
   }
   private retryCount(message: ConsumeMessage) {
     const deaths = message.properties.headers?.['x-death'];
