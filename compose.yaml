@@ -155,6 +155,12 @@ services:
       <<: *node-environment
       PORT: "3004"
       MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_agenda"
+      AUTH_SERVICE_URL: "http://auth-service:3001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
 
   performance-service:
     <<: *node-service

@@ -21,10 +21,10 @@ Estado observado por leitura de código e contratos existentes, sem executar ser
 | Professional | Candidaturas, capacidades/qualificações declaradas, horários preferidos privados, revisão simulada, catálogo condicionado e relações com histórico/expiração | Revisão desativada por defeito; sem habilitação real, profissionais elegíveis confirmados no servidor normal, consultas ou acesso sensível delegado |
 | Training | Processo Express com `/health` | Planos, sessões, ambientes/contexto, duração, equipamentos e fluxos autónomos/acompanhados |
 | Hydration | Processo Express com `/health` | Registos de água, totais e lembretes funcionais; um objetivo de hidratação no User não equivale a ingestões registadas |
-| Agenda | Processo Express com `/health` | Compromissos pessoais, treino planeado, disponibilidade operacional e reservas profissionais |
+| Agenda | Atividades pessoais e treinos planeados em `/agenda/activities`, com JWT, MongoDB, filtros, paginação e transições atómicas | Disponibilidade operacional e reservas profissionais continuam fora deste escopo |
 | Payment | Processo Express com `/health` | Não há transações ou cobrança, nem sequer fluxo funcional de pagamento simulado; contratação/preços/pagamentos por definir |
 | AI Coach | Processo Express com `/health` | Não há recomendações, tarefas ou contexto IA implementados; privacidade e consentimentos específicos continuam futuros |
-| Gateway | Encaminha Auth, User, Professional, Management e CareRelationship | Não há rotas de negócio de Training, Agenda, Hydration, Payment ou AI Coach |
+| Gateway | Encaminha Auth, User, Professional, Management, CareRelationship e Agenda | Training, Hydration, Payment e AI Coach continuam sem rotas de negócio |
 
 A demonstração separada tem cinco componentes reais. O fluxo de acompanhamento positivo foi testado por HTTP entre aplicações reais **dentro de testes automatizados com elegibilidade simulada**; no servidor real a aprovação permanece bloqueada. Ver [relatório da demonstração](../api/isolated-demo.md). Os 311 testes anteriormente reportados são resultados dessa entrega, não testes executados nesta revisão documental. Saúde de um processo não demonstra funções de domínio.
 
@@ -89,11 +89,11 @@ Regras de falha e privacidade:
 
 ## 5. Implicações para a Fase 4: Agenda
 
-A sequência anterior designa **Fase 4 = Agenda** e **Fase 5 = Treinos/Hidratação**. Mantém-se essa identificação; esta revisão não antecipa implementações de Training ou Hydration. A Fase 4 deve contemplar agenda pessoal independente e separar o futuro agendamento profissional.
+A sequência anterior designa **Fase 4 = Agenda** e **Fase 5 = Treinos/Hidratação**. A Fase 4.1 entrega a agenda pessoal independente; esta revisão não antecipa implementações de Training ou Hydration e mantém o agendamento profissional separado.
 
 | Frente proposta para planeamento | Entrega a especificar | Pré-condições e exclusões |
 | --- | --- | --- |
-| 4A — Agenda pessoal | Compromissos do próprio, intervalo, fuso, atualização/cancelamento, titularidade e controlo de concorrência | Auth e política local; sem profissional, ginásio, relação, IA ou pagamento obrigatório. Escopo exato e contratos ainda por aprovar |
+| 4A — Agenda pessoal | Entregue: atividades pessoais e treinos em casa/ginásio/exterior, criação/consulta/edição, conclusão/cancelamento, filtros/paginação e controlo atómico de concorrência | JWT obrigatório; sobreposições avisadas mas permitidas; datas UTC com fuso original; sem profissional, relação, IA ou pagamento obrigatório |
 | Integração futura com Training | Referência a sessão/atividade planeada e contexto confirmado pelo Training | Training ainda não tem contratos de domínio; não copiar planos/execução para Agenda nem publicar uma integração fictícia na 4A |
 | 4B — Disponibilidade/reservas profissionais | Calendário canónico, regras/exceções, validação de capacidade/relação, idempotência e prevenção atómica de sobreposição | Elegibilidade/provisionamento seguros e autorizações mínimas de participantes pendentes; não desbloquear por fixtures no servidor real |
 | Integrações comerciais/IA | Fora desta entrega inicial de Agenda | Sem preços, cobranças, consentimentos IA ou dependências obrigatórias nesses serviços |
