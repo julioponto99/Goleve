@@ -1,6 +1,6 @@
 # Fase 4.2 — Agenda profissional
 
-**Estado:** desenho consolidado; não implementado.
+**Estado:** Fase 5.6 implementada no âmbito local isolado, desligada por defeito. Contrato executado, decisões aprovadas e limites em [API da Agenda Profissional](../api/professional-agenda.md). Elegibilidade real continua bloqueada; não foi alterado o ambiente principal.
 **Âmbito:** ambiente local e demonstração isolada com dados fictícios.
 **Referências:** [utilização autónoma](./autonomous-use.md), [requisitos funcionais](../requirements/autonomous-use.md), [relações](./profile-relationships.md), [API de relações](../api/care-relationships.md) e commit da Fase 4.1 `a872598296eb6a35464290cea59ee1ea8e4aa753`.
 
@@ -69,6 +69,8 @@ Regras aprovadas:
 
 Situações excepcionais não criam permissões implícitas. Devem ser definidas por política própria.
 
+**Decisão aprovada na implementação:** manter a original aceite e ocupada até à aceitação manual da nova. A nova ocupa temporariamente o seu intervalo. Aceitação confirma a nova e cancela a original na mesma transação. Recusa, retirada ou expiração preservam a original. Pedido e aceitação respeitam 24 horas antes do início original, e o prazo da nova também é limitado a esse instante. Não são permitidos reagendamentos pendentes concorrentes incompatíveis.
+
 ## 5. Conflitos e concorrência MongoDB
 
 O calendário operacional considera:
@@ -80,13 +82,13 @@ O calendário operacional considera:
 
 Não considera ocupados `declined`, `cancelled` ou `expired`.
 
-Uma consulta seguida de `insert` não é suficiente para excluir intervalos concorrentes. Antes da implementação é necessário escolher uma estratégia:
+Uma consulta seguida de `insert` não é suficiente para excluir intervalos concorrentes. Na Fase 5.6 foi aprovada e implementada a estratégia de transações com **documento de calendário por identidade profissional**, comum a todas as capacidades. A primeira escrita disputa esse documento; reserva, histórico, auditoria, comando idempotente e outbox seguem na mesma transação, com retries limitados. Sem replica set a ativação é recusada. As alternativas consideradas no desenho inicial foram:
 
 1. **Slots discretos:** normalizar sessões e buffers para unidades fixas e aplicar unicidade por profissional/slot.
 2. **Lock lógico:** documento de lock por profissional/janela, adquirido com operação atómica e expiração segura.
 3. **Transação MongoDB:** reservar intervalo e outbox numa transação, exigindo replica set ou cluster apropriado.
 
-O MongoDB do `compose.yaml` atual é standalone, sem configuração de replica set. Portanto, transações multi-documento e outbox transacional não podem ser prometidos sem alterar a infraestrutura e aprovar essa alteração. A recomendação é decidir primeiro entre slots discretos ou preparar replica set; não simular atomicidade com RabbitMQ.
+O MongoDB do `compose.yaml` principal permanece standalone, sem qualquer alteração nesta entrega. A feature está desativada por defeito e não funciona ativamente nesse ambiente. A atomicidade foi testada exclusivamente no replica set isolado autorizado; RabbitMQ não a substitui.
 
 ## 6. Modelo funcional
 
@@ -225,7 +227,9 @@ Disponibilidades recorrentes são definidas no fuso IANA local do profissional. 
 | Agenda Pessoal | Sobreposições próprias são permitidas com aviso | Não reutilizar regra profissional rígida nem misturar ownership |
 | Relações | Estados atuais são `pending/accepted/declined/cancelled/ended/expired` | `follow_up` deve usar exatamente `accepted`; não criar novos estados por inferência |
 
-## 12. Plano de implementação futuro
+## 12. Plano de implementação e referência da entrega
+
+Os passos seguintes eram o plano inicial. A implementação local de disponibilidade, reservas, transações, expiração, comandos, reagendamento e outbox está descrita na [API](../api/professional-agenda.md). O Gateway existente foi reutilizado; integração num Compose de demonstração ampliado, consumidores dos novos eventos e habilitação real continuam pendentes.
 
 1. Aprovar decisões pendentes e o mecanismo de exclusão de intervalos.
 2. Definir contrato de elegibilidade e autenticação serviço-serviço.
@@ -256,7 +260,11 @@ Disponibilidades recorrentes são definidas no fuso IANA local do profissional. 
 - Agenda Pessoal continua independente;
 - demo positiva isolada sem alterar elegibilidade real.
 
-## 14. Decisões ainda indispensáveis
+## 14. Decisões resolvidas e pendências
+
+Foram aprovados transações/serialização por profissional, contrato com credencial dedicada de curta validade, feature desativada por defeito e reagendamento que preserva a original. O adaptador normal não aceita fontes sintéticas. Bloqueios são globais à pessoa; disponibilidade extra é explícita; substituição afeta uma regra num dia local, sem invalidar reservas existentes. Os detalhes e limites técnicos estão no contrato executado.
+
+A lista original abaixo identifica temas de evolução. Exclusão de intervalos, autenticação interna, ausência de cache positiva, outbox transacional e reagendamento normal foram resolvidos nesta entrega; políticas excepcionais, operação de produção e integrações ainda precisam de aprovação:
 
 - Estratégia de exclusão de intervalos: slots, lock lógico ou replica set.
 - Credencial e contrato para chamadas internas.

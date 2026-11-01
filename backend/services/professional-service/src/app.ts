@@ -17,9 +17,11 @@ import { CareRelationshipService } from './services/care-relationship.service';
 import { createCareRelationshipController } from './controllers/care-relationship.controller';
 import { createCareRelationshipRoutes } from './routes/care-relationship.routes';
 import { DemoIdentityClient } from './demo/identity-client';
+import { createAgendaInternalRoutes } from './internal/agenda.routes';
 export interface CareDependencies { eligibility?: CareEligibilityProvider; now?: () => Date }
 export function createApp(settings: ProfessionalSettings, connection: Connection, models: ProfessionalModels, dependencies: CareDependencies = {}) {
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
+  if (settings.agendaServiceKeys) app.use('/internal/v1/agenda', createAgendaInternalRoutes(connection, models, settings.agendaServiceKeys));
   app.get('/health', async (_req, res) => {
     res.set('Cache-Control', 'no-store'); const healthy = await isDatabaseHealthy(connection);
     res.status(healthy ? 200 : 503).json({ service: 'professional-service', status: healthy ? 'ok' : 'unavailable',

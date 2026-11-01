@@ -1,5 +1,7 @@
 import { DemoIdentityConfig, loadDemoIdentityConfig } from '../demo/identity-client';
+import { ServiceKeys, loadServiceKeys } from '../internal/agenda-service-auth';
 export interface ProfessionalSettings {
+  agendaServiceKeys?: ServiceKeys;
   demoIdentity?: DemoIdentityConfig;
   authServiceUrl: string;
   dataMode: 'disabled' | 'synthetic';
@@ -27,5 +29,9 @@ export function loadSettings(): ProfessionalSettings {
   const ttl = process.env.CARE_INVITATION_TTL_DAYS || '7';
   if (!/^[1-9]\d*$/.test(ttl) || Number(ttl) > 365) throw new Error('CARE_INVITATION_TTL_DAYS must be an integer from 1 to 365');
   const demoIdentity = loadDemoIdentityConfig(url.origin, dataMode, reviewMode, reviewerIds);
-  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds, careInvitationTtlDays: Number(ttl), ...(demoIdentity ? { demoIdentity } : {}) };
+  const agendaFlag = process.env.PROFESSIONAL_AGENDA_CONTRACT_ENABLED || 'false';
+  if (!['false','true'].includes(agendaFlag)) throw new Error('Invalid Agenda service contract flag');
+  if (agendaFlag === 'true' && (!['test','development'].includes(process.env.NODE_ENV || '') || process.env.AGENDA_PROFESSIONAL_MODE !== 'isolated')) throw new Error('Agenda contract requires isolated local mode');
+  const agendaServiceKeys = agendaFlag === 'true' ? loadServiceKeys() : undefined;
+  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds, careInvitationTtlDays: Number(ttl), ...(demoIdentity ? { demoIdentity } : {}), ...(agendaServiceKeys ? { agendaServiceKeys } : {}) };
 }

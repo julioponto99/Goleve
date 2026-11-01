@@ -1,5 +1,7 @@
 # Plano de conclusão do backend
 
+> Leitura atual: as secções de implementação 10–15 atualizam progressivamente a auditoria original. Resumos/estimativas iniciais são históricos e não substituem os contratos executados. A Fase 5.6 mantém atendimento real bloqueado e não ativa o ambiente principal; ver [Agenda Profissional](api/professional-agenda.md).
+
 **Âmbito:** auditoria documental do código existente em 2026-11-01.
 **Restrições desta auditoria:** não foram alterados serviços, bases de dados,
 volumes, chaves ou configurações Docker; não foi executado backup, migração,
@@ -678,3 +680,55 @@ No replica set MongoDB temporário e sem volumes foram aprovados:
 Durante a validação foi corrigida a incompatibilidade entre o campo produzido
 `eventVersion` e o contrato do consumidor, que exige `contractVersion`. O
 RabbitMQ principal e o MongoDB principal não foram utilizados.
+
+## 15. Fase 5.6 implementada — Agenda Profissional local isolada
+
+Contrato completo: [API da Agenda Profissional](api/professional-agenda.md).
+Fonte de requisitos: [arquitetura profissional](architecture/professional-agenda.md).
+
+- Regras recorrentes por capacidade/fuso IANA, buffers, bloqueios globais à
+  pessoa, disponibilidade extra e substituições por regra/dia local.
+- Pedidos initial_session/one_off_session sem relação e follow_up com relação
+  accepted exata; confirmação manual, recusa, cancelamento, conclusão após fim,
+  expiração e reagendamento que preserva a original até à aceitação da nova.
+- Documento de calendário comum a todas as capacidades e transações reais
+  envolvendo reserva, histórico, auditoria, idempotência e outbox. Conflitos
+  de escrita e commit desconhecido têm retries limitados.
+- JWT validado no Auth e contrato interno autenticado de curta validade,
+  com audiência, hash do pedido e nonce persistente contra replay. O adaptador
+  normal rejeita decisões positivas sintéticas; o Professional continua a
+  negar elegibilidade real até existirem os respetivos contratos e provas.
+- Rotas no namespace /agenda já encaminhado pelo Gateway; sem ampliar o
+  Compose existente ou tocar nos serviços principais. Agenda Pessoal mantém
+  contratos e sobreposições próprias não bloqueantes.
+- Outbox com publisher confirms, leases, backoff e limite de tentativas num
+  exchange de domínio próprio. Notification não consome ainda estes eventos;
+  não foram implementados email, SMS, push ou links de reunião.
+
+`AGENDA_PROFESSIONAL_ENABLED=false` e
+`PROFESSIONAL_AGENDA_CONTRACT_ENABLED=false` são os defaults. Ativação Agenda
+exige modo local isolado, base própria e replica set confirmado antes de criar
+os novos modelos. Standalone é recusado quando ativo. Nenhuma migração,
+alteração de volumes persistentes, backups, chaves ou MongoDB principal foi
+executada; não se atribuem papéis nem se promovem profissionais por fixtures.
+
+As suites unitárias e HTTP/transacionais exercitam dados fictícios em bases
+novas de um replica set isolado autorizado, com Auth/Gateway reais e uma
+dependência de elegibilidade simulada exclusivamente no processo de teste.
+Cobrem concorrência entre capacidades da mesma pessoa, reservas simultâneas,
+buffers, expiração durante validação, reagendamentos concorrentes, aceitação
+versus cancelamento, rollback multi-coleção, privacidade e outbox RabbitMQ.
+Os resultados finais e limites da validação constam do contrato de API.
+
+Validação concluída: 377 testes dos serviços e 14 da demonstração anterior
+aprovados (391 distintos, sem falhas ou testes ignorados). Os 42 testes
+focados de Agenda integram os 377. A regressão antiga usou um terceiro
+MongoDB standalone autorizado e isolado, sem alterar os testes; esse
+contentor, a rede exclusiva e as fixtures temporárias foram removidos.
+Os 14 serviços principais permaneceram saudáveis e preservados.
+
+**Ainda bloqueado:** atendimento real, verificação/validade profissional,
+provisionamento seguro, partilha sensível, operação produtiva de credenciais
+e infraestrutura transacional, cancelamentos excepcionais, consumidores dos
+eventos, localização presencial/links online e notificações externas. Não há
+pagamentos ou consentimentos específicos de IA nesta fase.
