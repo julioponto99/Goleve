@@ -111,12 +111,22 @@ São critérios para futuras entregas, não resultados de testes desta revisão 
 | CA-A08 | Ao trocar o contexto de uma sessão planeada, revalidar compatibilidade e preservar versões/autoria; não reescrever histórico concluído. | Previsto |
 | CA-A09 | Um pedido a profissional inexistente, suspenso ou não confirmado como elegível é recusado; as funções próprias continuam independentes. | Recusa implementada; fluxos positivos reais bloqueados |
 | CA-A10 | PT e nutricionista podem ser escolhidos independentemente; nenhum recebe automaticamente os dados nem as permissões do outro. | Relações e isolamento implementados; partilha específica futura |
-| CA-A11 | Num percurso misto, a sessão autónoma não exige relationshipId; a ação profissional exige a relação/capacidade aplicável, sem classificar a conta inteira como acompanhada. | Contratos Training/Agenda previstos |
+| CA-A11 | Num percurso misto, a sessão autónoma não exige relationshipId; uma primeira consulta/sessão profissional pode usar `initial_session` sem relação prévia, enquanto o acompanhamento continuado exige relação `accepted`; a conta nunca é classificada globalmente como acompanhada. | Opção A aprovada; implementação da Agenda Profissional futura |
 | CA-A12 | Após terminação ou perda de elegibilidade, não há acesso profissional operacional novo, e a pessoa pode continuar a gerir os seus recursos próprios. Não reabrir relações automaticamente. | Regras de relação/User implementadas; novos domínios previstos |
 | CA-A13 | Um compromisso pessoal não exige profissional, capacidade, relação ou estado de pagamento; uma reserva profissional não pode usar o tipo pessoal para evitar os controlos. | Gate da Fase 4 |
 | CA-A14 | Indisponibilidade de Professional, Payment ou AI Coach não impede uma operação exclusivamente própria; indisponibilidade de Auth continua a impedir acesso autenticado. | User separado desses serviços; extensão aos domínios futuros por validar |
 | CA-A15 | Agenda pessoal considera fuso, mudanças de hora e concorrência sem reservar vagas profissionais; uma janela preferida não é um compromisso confirmado. | Gate da Fase 4; política de sobreposição pessoal pendente |
 | CA-A16 | Sem contratação ou IA configuradas, os percursos pessoais disponíveis continuam utilizáveis. Não criar cobranças, administradores, grants ou consentimentos implícitos. | Independência existente; funcionalidades futuras não ativadas |
+| CA-A17 | Uma pessoa autenticada pode solicitar uma primeira consulta de nutrição ou sessão inicial de PT sem CareRelationship, desde que o profissional/capacidade estejam elegíveis, autorizados e disponíveis. | Opção A aprovada; Agenda Profissional futura |
+| CA-A18 | Uma primeira sessão é identificada como `initial_session`, não cria automaticamente uma CareRelationship e não concede acesso a dados sensíveis. | Regra aprovada; contrato técnico pendente |
+| CA-A19 | Uma sessão/consulta pontual pode ser repetida com o mesmo profissional como `one_off_session`, sem limite geral de repetições e sem CareRelationship. | Decisão aprovada; Agenda Profissional futura |
+| CA-A20 | Uma marcação de acompanhamento continuado exige CareRelationship `accepted`; não é permitido usar `initial_session` ou `one_off_session` para contornar a relação. | Regra aprovada; gate Professional futuro |
+| CA-A21 | Todas as modalidades exigem confirmação manual: começam em `requested`, ocupam temporariamente o slot, e só passam a `accepted` por ação atómica do profissional elegível; recusas/cancelamentos/expirações libertam o slot quando possível. | Decisão aprovada; expiração definida abaixo |
+| CA-A22 | Reservas `requested` e `accepted` impedem duplicados e sobreposições no calendário operacional do profissional, sem tornar a Agenda Pessoal dependente. | Regra aprovada; implementação futura |
+| CA-A23 | Nenhuma modalidade cria CareRelationship, concede dados de saúde, ou implica contratação/pagamento automático; o histórico e a auditoria são preservados. | Regra aprovada; contratos técnicos pendentes |
+| CA-A24 | O servidor calcula `expiresAtUtc = min(createdAtUtc + 24h, startAtUtc - 1h)`; não cria pedidos fora da janela, expira `requested` atomicamente e ignora pedidos expirados nas verificações de disponibilidade, mesmo antes da limpeza. | Expiração aprovada; implementação futura |
+
+O desenho técnico consolidado e os impedimentos para a Agenda Profissional estão em [Agenda Profissional](../architecture/professional-agenda.md). Este documento mantém os critérios funcionais; o novo documento não autoriza implementação, elegibilidade positiva no ambiente principal ou alterações de infraestrutura.
 
 ## 5. Decisões que continuam pendentes
 
@@ -126,3 +136,11 @@ São critérios para futuras entregas, não resultados de testes desta revisão 
 - Provisionamento profissional/admin seguro, verificação e autorizações específicas de partilha; a regra de serviços opcionais não resolve esses bloqueios.
 - Contratação, preços, pagamentos, cancelamentos comerciais e respetivos direitos; nenhum modelo comercial foi escolhido.
 - Disponibilidade real das funções futuras e critérios de privacidade para dados reais. Não implementar consentimentos específicos de IA nesta etapa.
+- Tratamento de uma `initial_session` já aceite ou pendente quando outra solicitação temporalmente conflitante é feita.
+- Conversão ou imutabilidade entre `initial_session`, `one_off_session` e `follow_up` após aceitação de uma CareRelationship.
+- Obrigatoriedade da relação `accepted` na solicitação ou apenas na aceitação de `follow_up`.
+- Duração, antecedência mínima/máxima, cancelamento e reagendamento, incluindo conflitos com compromissos pessoais.
+- Efeito da perda de elegibilidade profissional ou terminação da relação em reservas futuras já aceites.
+- Conteúdo mínimo de sessões presenciais/online, localização, links e política de fusos/DST.
+- Contratos internos Professional/Auth, eventos RabbitMQ, outbox, notificações e reconciliação de falhas.
+- Limpeza em segundo plano, retries, métricas e alertas para expirações; a disponibilidade deve funcionar corretamente sem depender desse processo.

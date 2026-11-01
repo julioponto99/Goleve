@@ -1,0 +1,23 @@
+name: goleve-mongodb-restore-test
+
+services:
+  mongodb-restore-test:
+    image: mongo:7
+    hostname: mongodb-restore-test
+    command:
+      - mongod
+      - --bind_ip_all
+    volumes:
+      - goleve_mongodb_restore_test_data:/data/db
+    networks:
+      - goleve_mongodb_restore_test
+
+networks:
+  goleve_mongodb_restore_test:
+    name: goleve_mongodb_restore_test
+    driver: bridge
+    internal: true
+
+volumes:
+  goleve_mongodb_restore_test_data:
+    name: goleve_mongodb_restore_test_data

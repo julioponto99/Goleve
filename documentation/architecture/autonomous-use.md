@@ -95,7 +95,7 @@ A sequência anterior designa **Fase 4 = Agenda** e **Fase 5 = Treinos/Hidrataç
 | --- | --- | --- |
 | 4A — Agenda pessoal | Entregue: atividades pessoais e treinos em casa/ginásio/exterior, criação/consulta/edição, conclusão/cancelamento, filtros/paginação e controlo atómico de concorrência | JWT obrigatório; sobreposições avisadas mas permitidas; datas UTC com fuso original; sem profissional, relação, IA ou pagamento obrigatório |
 | Integração futura com Training | Referência a sessão/atividade planeada e contexto confirmado pelo Training | Training ainda não tem contratos de domínio; não copiar planos/execução para Agenda nem publicar uma integração fictícia na 4A |
-| 4B — Disponibilidade/reservas profissionais | Calendário canónico, regras/exceções, validação de capacidade/relação, idempotência e prevenção atómica de sobreposição | Elegibilidade/provisionamento seguros e autorizações mínimas de participantes pendentes; não desbloquear por fixtures no servidor real |
+| 4B — Disponibilidade/reservas profissionais | Calendário canónico, regras/exceções, primeira consulta/sessão sem relação prévia, validação de capacidade/relação, idempotência e prevenção atómica de sobreposição | Elegibilidade/provisionamento seguros e autorizações mínimas de participantes pendentes; não desbloquear por fixtures no servidor real |
 | Integrações comerciais/IA | Fora desta entrega inicial de Agenda | Sem preços, cobranças, consentimentos IA ou dependências obrigatórias nesses serviços |
 
 As frentes são proposta de divisão de trabalho, não autorização para implementar nesta tarefa. Uma tarefa pessoal de treino pode ter uma referência opcional a Training quando o contrato existir; não exige uma sessão executada nem uma reserva profissional. Uma reserva profissional deve validar as condições próprias, mesmo que uma atividade pessoal use o mesmo intervalo.
@@ -109,7 +109,85 @@ Decisões a aprovar antes do código da Fase 4:
 - **AG-05:** controlo de concorrência e consistência local; um índice único no início não impede intervalos sobrepostos. MongoDB standalone não permite prometer transações multidocumento sem outra decisão.
 - **AG-06:** identidade/contratos mínimos de participantes e gates de elegibilidade/partilha para 4B. A agenda pessoal não deve ficar dependente de resolver todo o provisionamento profissional.
 
-Saída verificável: critérios CA-A13–CA-A15 do [documento funcional](../requirements/autonomous-use.md), testes entre titulares, fuso/DST, concorrência, preservação de autoria e falhas dos opcionais. Reservas profissionais só podem ser consideradas entregues depois de validar os seus próprios gates; `/health` não basta.
+### Fase 4.2 — primeira consulta ou sessão inicial
+
+A Opção A está aprovada: uma pessoa pode solicitar uma primeira consulta de nutrição ou sessão inicial de Personal Trainer sem `CareRelationship` prévia. Também pode solicitar sessões pontuais repetidas com o mesmo profissional. Estas modalidades não alteram as regras de acompanhamento continuado.
+
+O desenho consolidado, os impedimentos técnicos, contratos, APIs e plano de implementação estão em [Agenda Profissional](./professional-agenda.md). As regras abaixo permanecem o resumo normativo desta arquitetura.
+
+| Tipo de reserva | Relação exigida | Identificação | Regras adicionais |
+| --- | --- | --- | --- |
+| Primeira consulta/sessão | Não | `initial_session` | Primeira consulta ou sessão com o profissional; elegibilidade, disponibilidade, conflitos e antecedência válidos |
+| Sessão/consulta pontual | Não | `one_off_session` | Pode repetir-se sem limite geral com o mesmo profissional; elegibilidade, disponibilidade, conflitos e antecedência válidos |
+| Acompanhamento continuado | `accepted` | `follow_up` ou equivalente | Relação verificada no momento da solicitação e, novamente, na aceitação |
+
+Regras invariantes:
+
+1. Todas as modalidades exigem confirmação manual do profissional; não existe aceitação automática.
+2. Ao solicitar, a reserva começa em `requested` e reserva temporariamente o slot operacional.
+3. Uma reserva `requested` impede pedidos concorrentes para o mesmo slot, respeitando a política de conflitos e os limites de intervalo.
+4. O profissional pode aceitar (`requested` -> `accepted`) ou recusar (`requested` -> `declined`) atomicamente.
+5. Uma reserva `accepted` mantém o horário ocupado e a confirmação fica consultável pelo utilizador.
+6. Reservas recusadas, canceladas ou expiradas libertam o horário se não existir outro bloqueio.
+7. `initial_session` e `one_off_session` não criam automaticamente uma `CareRelationship`.
+8. `one_off_session` pode repetir-se com o mesmo profissional/capacidade e não tem limite geral de repetições.
+9. O profissional deve estar atualmente elegível e autorizado para disponibilizar a capacidade escolhida, inclusive no momento da aceitação.
+10. `follow_up` exige `CareRelationship` em `accepted` tanto na solicitação como na aceitação.
+11. Nenhuma modalidade concede acesso a peso, medições, hábitos, objetivos, saúde ou outros dados sensíveis.
+12. Qualquer modalidade pode ser presencial (`gym`, `home`, `outdoor`) ou online, desde que a capacidade ofereça essa modalidade.
+13. Todas as sessões estão sujeitas a duração, antecedência, fuso, disponibilidade, conflitos e idempotência.
+14. Depois de qualquer sessão, o utilizador pode iniciar separadamente o fluxo de acompanhamento existente.
+15. Contratação, preços e pagamentos não fazem parte deste contrato.
+16. A perda de elegibilidade ou a indisponibilidade do Professional Service deve falhar fechadamente; nunca converter `follow_up` em `initial_session` ou `one_off_session` para contornar a relação.
+17. As transições devem preservar histórico e auditoria e ser resistentes a pedidos concorrentes.
+
+Modelo funcional mínimo da reserva profissional:
+
+```text
+appointmentType: initial_session | one_off_session | follow_up
+relationshipId?: string
+professionalAuthUserId
+professionalId
+capabilityId
+mode: in_person | online
+environment?: gym | home | outdoor
+startAtUtc
+endAtUtc
+timezone
+status
+createdAtUtc
+expiresAtUtc
+version
+idempotencyKey
+```
+
+`relationshipId` é proibido para `initial_session` e `one_off_session`; para `follow_up`, é obrigatório e deve apontar para uma relação `accepted` compatível com a capacidade. A reserva guarda referências e metadados mínimos, não uma cópia de dados pessoais ou de saúde.
+
+O estado `requested` ocupa temporariamente o intervalo enquanto não estiver expirado. O servidor calcula e guarda `expiresAtUtc` exclusivamente em UTC:
+
+```text
+expiresAtUtc = min(createdAtUtc + 24h, startAtUtc - 1h)
+```
+
+Um pedido só pode ser criado se `expiresAtUtc` ainda estiver no futuro no momento da criação; caso contrário, a janela de reserva já não é válida. As verificações de disponibilidade tratam um pedido como ocupante apenas quando `status=requested` e `expiresAtUtc > nowUtc`, ou quando `status=accepted`. Assim, um pedido expirado liberta imediatamente o slot do ponto de vista operacional, mesmo antes de qualquer limpeza em segundo plano.
+
+A transição de expiração é `requested` -> `expired`, feita por uma operação atómica condicionada ao estado, versão e prazo. A aceitação deve repetir a condição `status=requested AND expiresAtUtc > nowUtc`, validar a elegibilidade atual do profissional e falhar sem alteração se o pedido expirou ou foi alterado concorrentemente. Histórico e auditoria devem registar criação, aceitação/recusa, cancelamento e expiração. A regra aplica-se a `initial_session`, `one_off_session` e `follow_up`.
+
+### Decisões pendentes da Fase 4.2
+
+| ID | Decisão | Impacto |
+| --- | --- | --- |
+| AG-07 | Uma reserva `requested` deve bloquear apenas o mesmo slot ou qualquer intervalo sobreposto? | Granularidade da ocupação temporária |
+| AG-08 | Uma reserva pontual pode ser convertida em `follow_up` após aceitação de uma relação, ou permanece imutável? | Histórico, auditoria e transições |
+| AG-09 | Conflito entre uma reserva profissional e um compromisso pessoal deve bloquear ou apenas avisar o utilizador? | Integração sem tornar a agenda pessoal dependente |
+| AG-10 | Duração, antecedência mínima/máxima e política de cancelamento/reagendamento por tipo de capacidade | Contrato operacional e notificações |
+| AG-11 | Perda de elegibilidade ou terminação da relação em reservas futuras já aceites | Cancelamento, revisão ou preservação da reserva |
+| AG-12 | Conteúdo mínimo das modalidades online e presenciais, incluindo localização e ligação | Privacidade e integração futura |
+| AG-13 | Política para horas locais inexistentes/ambíguas durante DST e regras recorrentes de disponibilidade | Conversão determinística para UTC |
+| AG-14 | Eventos RabbitMQ, outbox, notificações e reconciliação de falhas entre serviços | Consistência eventual sem transação distribuída |
+| AG-15 | Política de limpeza em segundo plano, retries e observabilidade para transições `requested` -> `expired` | A disponibilidade não pode depender da limpeza |
+
+Saída verificável: critérios CA-A13–CA-A24 do [documento funcional](../requirements/autonomous-use.md), detalhados em [Agenda Profissional](./professional-agenda.md), incluindo testes entre titulares, fuso/DST, concorrência, expiração, preservação de autoria e falhas dos opcionais. Reservas profissionais só podem ser consideradas entregues depois de validar os seus próprios gates; `/health` não basta.
 
 ## 6. Conflitos e decisões anteriores
 

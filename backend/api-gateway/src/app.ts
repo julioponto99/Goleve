@@ -6,6 +6,10 @@ import { createProfessionalRoutes } from './routes/professional.routes';
 import { createManagementRoutes } from './routes/management.routes';
 import { createCareRelationshipRoutes } from './routes/care-relationship.routes';
 import { createAgendaRoutes } from './routes/agenda.routes';
+import { createTrainingRoutes } from './routes/training.routes';
+import { createHydrationRoutes } from './routes/hydration.routes';
+import { createPerformanceRoutes } from './routes/performance.routes';
+import { createNotificationRoutes } from './routes/notification.routes';
 
 export function createApp() {
   const app = express();
@@ -20,6 +24,10 @@ export function createApp() {
   app.use('/management', createManagementRoutes());
   app.use('/care-relationships', createCareRelationshipRoutes());
   app.use('/agenda', createAgendaRoutes());
+  app.use('/training', createTrainingRoutes());
+  app.use('/hydration', createHydrationRoutes());
+  app.use('/performance', createPerformanceRoutes());
+  app.use('/notifications', createNotificationRoutes());
   app.use(express.json());
   return app;
 }
