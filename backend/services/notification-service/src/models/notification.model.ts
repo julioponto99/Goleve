@@ -1,6 +1,8 @@
 import { Schema } from 'mongoose';
 
 export interface NotificationData {
+  category?: string;
+  reference?: { appointmentId?:string;paymentId?:string;relatedAppointmentId?:string;operationId?:string;version:number };
   ownerId: string;
   eventId: string;
   eventType: string;
@@ -14,6 +16,8 @@ export interface NotificationData {
 }
 
 export const notificationSchema = new Schema<NotificationData>({
+  category:{type:String,enum:['agenda','payment']},
+  reference:{type:new Schema({appointmentId:String,paymentId:String,relatedAppointmentId:String,operationId:String,version:Number},{_id:false,strict:'throw'}),default:undefined},
   ownerId: { type: String, required: true, immutable: true, match: /^[a-f0-9]{24}$/ },
   eventId: { type: String, required: true, immutable: true, maxlength: 128 },
   eventType: { type: String, required: true, immutable: true, maxlength: 100 },

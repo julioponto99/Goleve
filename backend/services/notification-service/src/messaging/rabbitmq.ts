@@ -1,4 +1,4 @@
-import amqp, { Channel, ChannelModel, ConsumeMessage } from 'amqplib';
+import amqp, { Channel, ConfirmChannel, ChannelModel, ConsumeMessage } from 'amqplib';
 import { validateEvent } from '../contracts/events';
 import { NotificationService } from '../services/notification.service';
 
@@ -11,6 +11,7 @@ export class NotificationConsumer {
   private connection?: ChannelModel;
   private channel?: Channel;
   private healthy = false;
+  private failureChannel?: ConfirmChannel;
   constructor(private readonly url: string, private readonly service: NotificationService, private readonly retryDelayMs = 1000) {}
   isHealthy() { return this.healthy; }
   async start() {
@@ -52,14 +53,21 @@ export class NotificationConsumer {
       const retries = this.retryCount(message);
       if (retries < 3) this.channel.nack(message, false, false);
       else {
-        this.channel.publish(`${notificationExchange}.failed`, 'failed', message.content, { persistent: true, contentType: 'application/json' });
-        this.channel.ack(message);
+        if(!this.failureChannel){this.failureChannel=await this.connection!.createConfirmChannel();this.failureChannel.on('error',()=>{this.healthy=false;});this.failureChannel.on('close',()=>{this.healthy=false;this.failureChannel=undefined;});}
+        const channel=this.failureChannel;
+        let returned=false;const onReturn=()=>{returned=true;};channel.on('return',onReturn);
+        try{
+          await new Promise<void>((resolve,reject)=>channel.publish(`${notificationExchange}.failed`,'failed',message.content,{persistent:true,mandatory:true,contentType:'application/json',messageId:message.properties.messageId},error=>error?reject(error):resolve()));
+          if(returned)throw new Error('DLQ publication unroutable');
+          this.channel.ack(message);
+        }finally{channel.removeListener('return',onReturn);}
       }
       console.error('notification event processing failed', { code: error instanceof Error ? error.name : 'unknown', retries });
     }
   }
   async close() {
     this.healthy = false;
+    await this.failureChannel?.close().catch(()=>undefined);this.failureChannel=undefined;
     await this.channel?.close().catch(() => undefined);
     await this.connection?.close().catch(() => undefined);
   }

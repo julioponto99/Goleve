@@ -24,7 +24,14 @@ export class AgendaBilling {
     return String(current._id);
   }
   async quote(doc:AppointmentData,actorId=doc.subjectAuthUserId,quoteId?:string){if(!doc.serviceId)throw new ApiError(409,'SERVICE_ASSOCIATION_REQUIRED','Select and associate a validated professional service before payment');return this.eligibility.quote(actorId,doc.serviceId,doc.professionalId,doc.capabilityId,(doc.endAtUtc.getTime()-doc.startAtUtc.getTime())/60000,quoteId);}
-  private async record(ledger:any,action:string,session:ClientSession){ledger.version++;await ledger.save({session});await this.Event.create([{rootId:ledger._id,version:ledger.version,action,state:ledger.state,attemptId:ledger.attemptId,occurredAt:new Date()}],{session});}
+  private async record(ledger:any,action:string,session:ClientSession){
+    const refundChanged=ledger.isModified('refundPending')&&ledger.refundPending;
+    ledger.version++;await ledger.save({session});await this.Event.create([{rootId:ledger._id,version:ledger.version,action,state:ledger.state,attemptId:ledger.attemptId,occurredAt:new Date()}],{session});
+    if(refundChanged){
+      const eventId=randomUUID(),now=new Date(),operationId='refund:'+ledger._id+':'+ledger.attemptId;
+      await this.models.Outbox.create([{eventId,type:'agenda.billing.refund-pending.v1',appointmentId:ledger.currentAppointmentId,aggregateVersion:ledger.version,occurredAt:now,status:'pending',attempts:0,nextAttemptAt:now,notifications:[{eventId:eventId+':'+ledger.ownerId,contractVersion:1,type:'agenda.billing.refund-pending.v1',source:'agenda-service',recipientUserId:ledger.ownerId,occurredAt:now.toISOString(),payload:{appointmentId:ledger.currentAppointmentId,paymentId:ledger.attemptId,operationId,version:ledger.version,simulated:true}}]}],{session});
+    }
+  }
   async context(actorId:string,id:string){
     const a=await this.models.Appointment.findOne({_id:oid(id),subjectAuthUserId:oid(actorId)});if(!a)throw new ApiError(404,'NOT_FOUND','Owned appointment not found');const rootId=await this.root(a),ledger=await this.Ledger.findById(rootId);
     return {appointmentId:String(a._id),ownerId:a.subjectAuthUserId,professionalId:a.professionalId,capabilityId:a.capabilityId,serviceId:a.serviceId,status:a.status,version:a.version,durationMinutes:(a.endAtUtc.getTime()-a.startAtUtc.getTime())/60000,rescheduleOfId:a.rescheduleOfId,rescheduledToId:a.rescheduledToId,rootId,billing:ledger?{state:ledger.state,attemptId:ledger.attemptId,bankApproved:ledger.bankApproved,free:ledger.free,refundPending:ledger.refundPending,reconciliationRequired:ledger.reconciliationRequired,currentAppointmentId:ledger.currentAppointmentId}:null};

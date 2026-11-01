@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { notificationTransition, MAX_OUTBOX_EVENTS } from '../events/outbox';
 import { ApiError } from '../config/errors';
 import { PaymentFixture, requireFixture } from '../config/fixtures';
 import { CreatePaymentInput } from '../config/validation';
@@ -63,11 +64,12 @@ export class PaymentService {
     }
     const fixture = this.fixtures.get(current.priceReference);
     if (!fixture) throw new ApiError(503, 'PRICE_NOT_AVAILABLE', 'Payment fixture is no longer available');
+    if((current.notificationOutbox?.length||0)>MAX_OUTBOX_EVENTS-3)throw new ApiError(503,'NOTIFICATION_OUTBOX_FULL','Recover retained events before authorizing a bank call');
     const result = await this.bank.authorize(current._id.toHexString(), fixture);
     const nextState = result.outcome === 'approve' ? 'approved' : 'declined';
-    const updated = await this.models.Payment.findOneAndUpdate({ _id: current._id, ownerId: ctx.identity.id, state: 'pending' },
+    const updated = await notificationTransition(this.models.Payment,{ _id: current._id, ownerId: ctx.identity.id, state: 'pending' },
       { $set: { state: nextState, transactionReference: result.transactionReference, confirmationKey: idempotencyKey },
-        $push: { history: { state: nextState, occurredAt: new Date(), reason: 'mock_bank_result' } } }, { returnDocument: 'after', runValidators: true });
+        $push: { history: { state: nextState, occurredAt: new Date(), reason: 'mock_bank_result' } } }, nextState);
     if (!updated) {
       const winner = await this.get(ctx, id);
       if (winner.state === nextState) return winner;
@@ -77,8 +79,8 @@ export class PaymentService {
   }
   async cancel(ctx: RequestContext, id: string, idempotencyKey: string) {
     if (!/^[A-Za-z0-9._-]{1,128}$/.test(idempotencyKey)) throw new ApiError(400, 'INVALID_IDEMPOTENCY_KEY', 'A valid Idempotency-Key is required');
-    const updated = await this.models.Payment.findOneAndUpdate({ _id: id, ownerId: ctx.identity.id, state: 'pending' },
-      { $set: { state: 'cancelled', confirmationKey: idempotencyKey }, $push: { history: { state: 'cancelled', occurredAt: new Date(), reason: 'owner_cancelled' } } }, { returnDocument: 'after' });
+    const updated = await notificationTransition(this.models.Payment,{ _id: id, ownerId: ctx.identity.id, state: 'pending' },
+      { $set: { state: 'cancelled', confirmationKey: idempotencyKey }, $push: { history: { state: 'cancelled', occurredAt: new Date(), reason: 'owner_cancelled' } } }, 'cancelled');
     if (!updated) {
       const current = await this.own(ctx, id);
       if (!current) throw new ApiError(404, 'NOT_FOUND', 'Payment not found');

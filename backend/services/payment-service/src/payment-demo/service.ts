@@ -4,6 +4,7 @@ import { RequestContext } from '../middlewares/auth.middleware';
 import { MockBankProvider } from '../services/mock-bank.provider';
 import { DemoClient,DemoConfig,Quote,assertDemo,oid,validQuote } from './protocol';
 import { integratedPaymentModel } from './models';
+import { notificationTransition, MAX_OUTBOX_EVENTS } from '../events/outbox';
 interface Context {appointmentId:string;ownerId:string;rootId:string;serviceId?:string;professionalId:string;capabilityId:string;status:string;version:number;durationMinutes:number;billing:null|{state:string;attemptId?:string;bankApproved:boolean;free:boolean;refundPending:boolean;reconciliationRequired:boolean;currentAppointmentId:string}}
 const event=(state:string,reason:string)=>({state,reason,occurredAt:new Date()});
 export class IntegratedPaymentService {
@@ -30,7 +31,7 @@ export class IntegratedPaymentService {
   }
   async get(ctx:RequestContext,id:string){
     let p=await this.owned(ctx,id);
-    if(p.state==='processing'&&p.processingStartedAt&&p.processingStartedAt.getTime()+60000<=Date.now())p=await this.Model.findOneAndUpdate({_id:p._id,state:'processing',version:p.version},{$set:{state:'unknown',reconciliationRequired:true},$inc:{version:1},$push:{history:event('unknown','interrupted_confirmation')}},{new:true})||await this.owned(ctx,id);
+    if(p.state==='processing'&&p.processingStartedAt&&p.processingStartedAt.getTime()+60000<=Date.now())p=await notificationTransition(this.Model,{_id:p._id,state:'processing',version:p.version},{$set:{state:'unknown',reconciliationRequired:true},$inc:{version:1},$push:{history:event('unknown','interrupted_confirmation')}},'unknown')||await this.owned(ctx,id);
     const c=await this.context(ctx,p.appointmentId),b=c.billing,requiresReconciliation=p.state==='unknown'||!!b?.reconciliationRequired;
     if(b&&b.attemptId===String(p._id)&&(p.refundPending!==b.refundPending||p.reconciliationRequired!==requiresReconciliation||p.settledAppointmentId!==b.currentAppointmentId)){
       p=await this.Model.findOneAndUpdate({_id:p._id,ownerId:ctx.identity.id,version:p.version},{$set:{refundPending:b.refundPending,reconciliationRequired:requiresReconciliation,settledAppointmentId:b.currentAppointmentId},$inc:{version:1},$push:{history:event(p.state,'agenda_billing_context_updated')}},{new:true})||await this.owned(ctx,id);
@@ -40,6 +41,7 @@ export class IntegratedPaymentService {
   async confirm(ctx:RequestContext,id:string,key:string){
     this.key(key);const before=await this.owned(ctx,id);
     if(before.state!=='pending'){if(before.confirmationKey===key)return this.get(ctx,id);throw new ApiError(409,'PAYMENT_ALREADY_RESOLVED','No repeated bank authorization is permitted');}
+    if((before.notificationOutbox?.length||0)>MAX_OUTBOX_EVENTS-3)throw new ApiError(503,'NOTIFICATION_OUTBOX_FULL','Recover retained notification events before authorizing a bank call');
     const p=await this.Model.findOneAndUpdate({_id:before._id,ownerId:ctx.identity.id,state:'pending'},{$set:{state:'processing',confirmationKey:key,processingStartedAt:new Date()},$inc:{version:1},$push:{history:event('processing','bank_claim_intent')}},{new:true});
     if(!p)throw new ApiError(409,'PAYMENT_IN_PROGRESS','Concurrent confirmation is in progress');
     let claimToken:string|undefined,state='unknown',transactionReference:string|undefined,reason='integration_outcome_unknown',bankInvoked=false;
@@ -62,17 +64,17 @@ export class IntegratedPaymentService {
       else if(!claimToken&&e instanceof ApiError&&e.status<500){state='failed';reason=e.code;}
       else{state='unknown';reason='reconciliation_required';if(claimToken)await this.client.call('agenda','settle',{actorId:ctx.identity.id,appointmentId:p.appointmentId,attemptId:id,claimToken,outcome:'unknown'}).catch(()=>undefined);}
     }
-    await this.Model.updateOne({_id:p._id,state:'processing',confirmationKey:key},{$set:{state,...(transactionReference?{transactionReference}:{}),reconciliationRequired:state==='unknown'},$inc:{version:1},$push:{history:event(state,reason)}});
+    await notificationTransition(this.Model,{_id:p._id,state:'processing',confirmationKey:key},{$set:{state,...(transactionReference?{transactionReference}:{}),reconciliationRequired:state==='unknown'},$inc:{version:1},$push:{history:event(state,reason)}},state);
     return this.get(ctx,id);
   }
   async cancel(ctx:RequestContext,id:string,key:string){
     this.key(key);const p=await this.owned(ctx,id);if(p.state==='cancelled'&&p.confirmationKey===key)return this.get(ctx,id);
-    const updated=await this.Model.findOneAndUpdate({_id:p._id,ownerId:ctx.identity.id,state:'pending'},{$set:{state:'cancelled',confirmationKey:key},$inc:{version:1},$push:{history:event('cancelled','owner_cancelled_pending_payment')}},{new:true});
+    const updated=await notificationTransition(this.Model,{_id:p._id,ownerId:ctx.identity.id,state:'pending'},{$set:{state:'cancelled',confirmationKey:key},$inc:{version:1},$push:{history:event('cancelled','owner_cancelled_pending_payment')}},'cancelled');
     if(!updated)throw new ApiError(409,'PAYMENT_NOT_CANCELLABLE','Processing or settled payments cannot be cancelled');return this.dto(updated);
   }
   async reconcile(ctx:RequestContext,id:string){
     const p=await this.owned(ctx,id),c=await this.context(ctx,p.appointmentId),b=c.billing;
     if(p.state!=='unknown'||!b||b.attemptId!==id||!['approved','declined','free'].includes(b.state))throw new ApiError(409,'BILLING_RECONCILIATION_REQUIRED','No conclusive persisted mock receipt is available; bank authorization must not be repeated');
-    await this.Model.updateOne({_id:p._id,state:'unknown'},{$set:{state:b.state,reconciliationRequired:b.reconciliationRequired,refundPending:b.refundPending},$inc:{version:1},$push:{history:event(b.state,'persisted_agenda_receipt_reconciled')}});return this.get(ctx,id);
+    await notificationTransition(this.Model,{_id:p._id,state:'unknown'},{$set:{state:b.state,reconciliationRequired:b.reconciliationRequired,refundPending:b.refundPending},$inc:{version:1},$push:{history:event(b.state,'persisted_agenda_receipt_reconciled')}},b.state);return this.get(ctx,id);
   }
 }

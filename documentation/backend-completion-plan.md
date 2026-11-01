@@ -812,3 +812,30 @@ isoladas identificadas pela instância obrigatórias. Apenas fixtures fictícias
 nos testes; sem alteração do ambiente principal, contas ou credenciais reais.
 Ficam pendentes operação produtiva, conciliação sem recibo durável, banco e
 reembolso reais e integração Notification. Limitações e configuração na API.
+
+## 18. Fase 5.9 implementada — Notificações internas da demonstração
+
+Contratos: [eventos Agenda/Payment](events/agenda-payment-notifications.md).
+API e preferências: [Notification Service](api/notification-service.md).
+
+- Eventos de reserva solicitada, aceite, recusada, cancelada, reagendamento
+  pedido/aceite e expiração, com destinatários derivados dos documentos.
+- Pagamento simulado aprovado, recusado, cancelado, gratuito ou incerto;
+  reembolso apenas pendente, emitido transacionalmente pelo ledger Agenda.
+- Outbox Agenda preservada; outbox Payment embutida e atómica, limitada a 16
+  eventos. Confirmações, leases, retry/backoff, retenção de `dead` e recuperação
+  explícita; limpeza apenas de publicados há mais de 24 horas.
+- Templates fechados, referências mínimas, deduplicação e preferências;
+  `paymentEvents` ativa por defeito sem migrar documentos antigos.
+- DLQ confirmada antes do ACK; liveness/readiness preservadas e consumidor
+  com tentativa periódica de reconexão. Training/Hydration compatíveis.
+
+Validação: **65 testes distintos aprovados**, zero falhas/ignorados, e build
+TypeScript dos três serviços afetados. MongoDB replica set e RabbitMQ
+temporários autorizados; bases separadas e dados fictícios. Sem regressão
+completa, teste global ponta a ponta ou alteração do ambiente principal.
+
+Flags demo desativadas por defeito e produção bloqueada. Continuam pendentes
+envio externo, garantias produtivas de broker/ACL/TLS, operação de DLQ e
+reembolsos reais. A integração Notification pendente na Fase 5.8.2 encontra-se
+agora implementada apenas neste âmbito local. Sem migrações, commit ou push.

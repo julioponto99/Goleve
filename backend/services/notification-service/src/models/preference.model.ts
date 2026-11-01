@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 
 export interface NotificationPreferenceData {
   ownerId: string;
+  paymentEvents: boolean;
   enabled: boolean;
   hydrationReminders: boolean;
   trainingEvents: boolean;
@@ -14,6 +15,7 @@ export interface NotificationPreferenceData {
 export const preferenceSchema = new Schema<NotificationPreferenceData>({
   ownerId: { type: String, required: true, immutable: true, match: /^[a-f0-9]{24}$/ },
   enabled: { type: Boolean, default: true },
+  paymentEvents: { type: Boolean, default: true },
   hydrationReminders: { type: Boolean, default: true },
   trainingEvents: { type: Boolean, default: true },
   agendaReminders: { type: Boolean, default: true },

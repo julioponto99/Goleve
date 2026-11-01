@@ -8,8 +8,10 @@ import { createNotificationModels, initializeModels } from './models';
 import { createNotificationRoutes } from './routes/notification.routes';
 import { NotificationService } from './services/notification.service';
 import { NotificationConsumer } from './messaging/rabbitmq';
+import { assertDemoNotifications } from './config/demo';
 
 export async function createApp(authServiceUrl: string, connection: import('mongoose').Connection, service: NotificationService, consumer?: NotificationConsumer) {
+  assertDemoNotifications(connection.name);
   const app = express();
   app.disable('x-powered-by'); app.disable('etag');
   app.get('/health', (_req, res) => {
@@ -26,12 +28,18 @@ export async function createApp(authServiceUrl: string, connection: import('mong
   return app;
 }
 if (require.main === module) void (async () => {
+  assertDemoNotifications();
   const connection = await openDatabase(process.env.MONGO_URI || '');
+  assertDemoNotifications(connection.name);
   const models = createNotificationModels(connection);
   await initializeModels(models);
   const service = new NotificationService(models);
   const consumer = new NotificationConsumer(process.env.RABBITMQ_URL || '', service);
   try { await consumer.start(); } catch (error) { console.error('notification-service RabbitMQ unavailable', error instanceof Error ? error.message : 'unknown'); }
   const app = await createApp(process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001', connection, service, consumer);
-  app.listen(Number(process.env.PORT || 3010), () => console.log(`notification-service running on ${process.env.PORT || 3010}`));
+  const server=app.listen(Number(process.env.PORT || 3010), () => console.log(`notification-service running on ${process.env.PORT || 3010}`));
+  let reconnecting:Promise<unknown>|undefined;
+  const timer=setInterval(()=>{if(consumer.isHealthy()||reconnecting)return;reconnecting=consumer.close().then(()=>consumer.start()).catch(()=>console.error('notification-service RabbitMQ reconnect unavailable')).finally(()=>{reconnecting=undefined;});},5000);
+  const close=()=>{clearInterval(timer);server.close(()=>{void Promise.resolve(reconnecting).then(()=>consumer.close()).finally(()=>connection.close());});};
+  process.once('SIGTERM',close);process.once('SIGINT',close);
 })().catch((error) => { console.error('notification-service failed to start', error); process.exitCode = 1; });

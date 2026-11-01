@@ -9,6 +9,7 @@ import { calendarTransaction } from './transaction';
 import { bookingInput, BookingInput, commandKey, exceptionInput, fail, invalid, object, objectId, period, ruleInput, ruleKeys } from './validation';
 import { intersects, localParts } from './time';
 import { AgendaBilling } from '../payment-demo/billing';
+import { appointmentNotifications } from './notification-events';
 type Session = ClientSession;
 type Appointment = HydratedDocument<AppointmentData>;
 type Resource = { id: string; version: number } & Record<string, unknown>;
@@ -66,7 +67,7 @@ export class ProfessionalAgendaService {
     const eventId=randomUUID(),now=this.now(),actorType=!ctx?'system':ctx.identity.id===doc.subjectAuthUserId?'subject':'professional';
     await this.models.History.create([{appointmentId:String(doc._id),version:doc.version,from,to:doc.status,action,actorId:ctx?.identity.id,actorType,occurredAt:now,reasonCode:doc.reasonCode||action,eventId}],{session});
     await this.models.Audit.create([{resourceId:String(doc._id),resourceType:'appointment',version:doc.version,action,actorId:ctx?.identity.id,requestId:ctx?.requestId||eventId,occurredAt:now}],{session});
-    await this.models.Outbox.create([{eventId,type:'agenda.professional.'+action+'.v1',appointmentId:String(doc._id),aggregateVersion:doc.version,occurredAt:now,status:'pending',attempts:0,nextAttemptAt:now}],{session});
+    await this.models.Outbox.create([{eventId,notifications:appointmentNotifications(doc,action,eventId,now,ctx?.identity.id),type:'agenda.professional.'+action+'.v1',appointmentId:String(doc._id),aggregateVersion:doc.version,occurredAt:now,status:'pending',attempts:0,nextAttemptAt:now}],{session});
   }
   private async change(doc:Appointment,status:AppointmentStatus,action:string,reason:string,ctx:RequestContext|undefined,session:Session,extra:Record<string,unknown>={}) {
     const query:Record<string,unknown>={_id:doc._id,status:doc.status,version:doc.version};

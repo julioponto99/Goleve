@@ -1,8 +1,10 @@
 import { HydratedDocument, Schema } from 'mongoose';
+import { outboxFields } from '../events/outbox';
 
 export const PAYMENT_STATES = ['pending', 'approved', 'declined', 'cancelled'] as const;
 export interface PaymentHistory { state: typeof PAYMENT_STATES[number]; occurredAt: Date; reason?: string }
 export interface PaymentData {
+  notificationVersion?: number; notificationOutbox?: unknown[];
   ownerId: string; priceReference: string; serviceReference: string; amountCents: number; currency: 'EUR'; state: typeof PAYMENT_STATES[number];
   method: 'mock'; transactionReference?: string; idempotencyKey: string; confirmationKey?: string;
   history: PaymentHistory[]; createdAt: Date; updatedAt: Date;
@@ -21,6 +23,8 @@ export const paymentSchema = new Schema<PaymentData>({
   confirmationKey: { type: String, maxlength: 128 },
   history: { type: [historySchema], required: true, default: [] },
 }, { timestamps: true, versionKey: false, strict: 'throw', collection: 'payments' });
+paymentSchema.add(outboxFields);
+paymentSchema.index({'notificationOutbox.status':1,'notificationOutbox.nextAttemptAt':1});
 paymentSchema.index({ ownerId: 1, idempotencyKey: 1 }, { unique: true });
 paymentSchema.index({ ownerId: 1, createdAt: -1, _id: -1 });
 paymentSchema.index({ ownerId: 1, confirmationKey: 1 }, { unique: true, sparse: true });

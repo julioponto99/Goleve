@@ -21,8 +21,10 @@ async function start() {
   if(professionalModels&&settings.paymentDemo)await new AgendaBilling(connection,professionalModels,settings.paymentDemo).initialize();
   const server = createApp(process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001', connection, models, professionalModels ? { settings, models: professionalModels } : undefined).listen(Number(process.env.PORT || 3004), () => console.log('agenda-service running'));
   const timers: ReturnType<typeof setInterval>[] = [];
-  if (professionalModels && settings.keys) {
-    const service = new ProfessionalAgendaService(connection, professionalModels, models, new ProfessionalEligibilityClient(settings.professionalServiceUrl, settings.keys));
+  if (professionalModels && (settings.keys || settings.paymentDemo)) {
+    const billing=settings.paymentDemo?new AgendaBilling(connection!,professionalModels,settings.paymentDemo):undefined;
+    const eligibility=billing?.eligibility||new ProfessionalEligibilityClient(settings.professionalServiceUrl,settings.keys!);
+    const service = new ProfessionalAgendaService(connection, professionalModels, models, eligibility,undefined,billing);
     let expiring = false, publishing = false;
     timers.push(setInterval(() => { if (expiring) return; expiring = true; service.expireDue().catch(() => console.error('Agenda expiration batch failed')).finally(() => { expiring = false; }); }, 15000));
     if (settings.publishEvents && settings.rabbitUrl) timers.push(setInterval(() => { if (publishing) return; publishing = true; publishProfessionalOutbox(professionalModels, settings.rabbitUrl!).catch(() => console.error('Agenda outbox batch failed')).finally(() => { publishing = false; }); }, 5000));

@@ -25,7 +25,7 @@ export interface AppointmentData {
   acceptedAt?: Date; closedAt?: Date; reasonCode?: string; createdAt: Date; updatedAt: Date;
 }
 export interface HistoryData { appointmentId: string; version: number; from?: string; to: string; action: string; actorId?: string; actorType: string; occurredAt: Date; reasonCode: string; eventId: string }
-export interface OutboxData { eventId: string; type: string; appointmentId: string; aggregateVersion: number; occurredAt: Date;
+export interface OutboxData { notifications?: Record<string,unknown>[]; eventId: string; type: string; appointmentId: string; aggregateVersion: number; occurredAt: Date;
   status: string; attempts: number; nextAttemptAt: Date; leaseId?: string; lockedUntil?: Date; publishedAt?: Date; lastErrorCode?: string; createdAt: Date; updatedAt: Date }
 const id = { type: String, required: true, match: /^[a-f0-9]{24}$/ };
 const owner = { professionalAuthUserId: { ...id, immutable: true }, professionalId: { ...id, immutable: true }, capabilityId: { ...id, immutable: true } };
@@ -78,7 +78,7 @@ const auditSchema = new Schema({ resourceId:id,resourceType:{type:String,require
   action:{type:String,required:true},actorId:{type:String,match:/^[a-f0-9]{24}$/},requestId:{type:String,required:true},occurredAt:{type:Date,required:true} },
   {strict:'throw',versionKey:false,bufferCommands:false,collection:'agenda_professional_audit'});
 auditSchema.index({resourceType:1,resourceId:1,version:1});
-const outboxSchema = new Schema<OutboxData>({ eventId: { type: String, required: true, immutable: true }, type: { type: String, required: true, immutable: true }, appointmentId: { ...id, immutable: true }, aggregateVersion: version,
+const outboxSchema = new Schema<OutboxData>({ notifications:{type:[Schema.Types.Mixed],default:undefined,immutable:true}, eventId: { type: String, required: true, immutable: true }, type: { type: String, required: true, immutable: true }, appointmentId: { ...id, immutable: true }, aggregateVersion: version,
   occurredAt: { type: Date, required: true, immutable: true }, status: { type: String, required: true, enum: ['pending','publishing','published','dead'] }, attempts: { type: Number, required: true, min: 0 },
   nextAttemptAt: { type: Date, required: true }, leaseId: String, lockedUntil: Date, publishedAt: Date, lastErrorCode: String }, { ...options, collection: 'agenda_professional_outbox' });
 outboxSchema.index({ eventId: 1 }, { unique: true }); outboxSchema.index({ status: 1, nextAttemptAt: 1, lockedUntil: 1 });
