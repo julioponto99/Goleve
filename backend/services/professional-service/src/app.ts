@@ -16,6 +16,7 @@ import { CareEligibilityProvider, ProfessionalCareEligibility } from './services
 import { CareRelationshipService } from './services/care-relationship.service';
 import { createCareRelationshipController } from './controllers/care-relationship.controller';
 import { createCareRelationshipRoutes } from './routes/care-relationship.routes';
+import { DemoIdentityClient } from './demo/identity-client';
 export interface CareDependencies { eligibility?: CareEligibilityProvider; now?: () => Date }
 export function createApp(settings: ProfessionalSettings, connection: Connection, models: ProfessionalModels, dependencies: CareDependencies = {}) {
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
@@ -25,7 +26,8 @@ export function createApp(settings: ProfessionalSettings, connection: Connection
       database: healthy ? 'connected' : 'unavailable', dataMode: settings.dataMode });
   });
   const applications = new ApplicationService(models, settings);
-  const relationships = new CareRelationshipService(models, dependencies.eligibility || new ProfessionalCareEligibility(models, settings), settings.careInvitationTtlDays ?? 7, dependencies.now);
+  const identity = settings.demoIdentity ? new DemoIdentityClient(settings.authServiceUrl, settings.demoIdentity) : undefined;
+  const relationships = new CareRelationshipService(models, dependencies.eligibility || new ProfessionalCareEligibility(models, settings, identity), settings.careInvitationTtlDays ?? 7, dependencies.now);
   const careController = createCareRelationshipController(relationships);
   app.use(['/professionals', '/professional-applications', '/care-relationships'], (_req, res, next) => {
     res.set('Cache-Control', 'no-store'); res.set('X-Professional-Data-Mode', settings.dataMode); next();

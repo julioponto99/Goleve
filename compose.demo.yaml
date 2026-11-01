@@ -1,0 +1,87 @@
+# Always use scripts/demo.cjs: independent project, generated secrets and fictional data only.
+name: goleve-demo-${DEMO_INSTANCE_ID:?Use node scripts/demo.cjs init}
+x-app: &app
+  init: true
+  networks: [demo]
+  healthcheck:
+    test: [CMD, node, -e, "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+    interval: 5s
+    timeout: 5s
+    retries: 12
+    start_period: 15s
+services:
+  mongodb:
+    image: mongo:7
+    networks: [demo]
+    tmpfs: [/data/db, /data/configdb]
+    healthcheck:
+      test: [CMD, mongosh, --quiet, --eval, "quit(db.adminCommand({ping:1}).ok?0:1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  auth-service:
+    <<: *app
+    build: {context: ./backend, dockerfile: services/auth-service/Dockerfile}
+    env_file: ["${DEMO_ROOT:?Use the demo CLI}/auth.env"]
+    environment:
+      NODE_ENV: development
+      PORT: "3001"
+      GOLEVE_DEMO_MODE: isolated
+      DEMO_INSTANCE_ID: "${DEMO_INSTANCE_ID}"
+      DEMO_SERVICE_KEY_FILE: /run/secrets/demo_service_key
+      DEMO_FIXTURES_FILE: /run/secrets/demo_fixtures
+      MONGO_URI: "mongodb://mongodb:27017/goleve_demo_${DEMO_INSTANCE_ID}_auth"
+    secrets: [demo_service_key, demo_fixtures]
+    depends_on: {mongodb: {condition: service_healthy}}
+  user-service:
+    <<: *app
+    build: {context: ./backend, dockerfile: services/user-service/Dockerfile}
+    environment:
+      NODE_ENV: development
+      PORT: "3002"
+      MONGO_URI: "mongodb://mongodb:27017/goleve_demo_${DEMO_INSTANCE_ID}_user"
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_DATA_MODE: synthetic
+      USER_DATA_KEY_FILE: /run/secrets/demo_user_key
+    secrets: [demo_user_key]
+    depends_on: {auth-service: {condition: service_healthy}}
+  professional-service:
+    <<: *app
+    build: {context: ./backend, dockerfile: services/professional-service/Dockerfile}
+    environment:
+      NODE_ENV: development
+      PORT: "3007"
+      GOLEVE_DEMO_MODE: isolated
+      DEMO_INSTANCE_ID: "${DEMO_INSTANCE_ID}"
+      DEMO_SERVICE_KEY_FILE: /run/secrets/demo_service_key
+      MONGO_URI: "mongodb://mongodb:27017/goleve_demo_${DEMO_INSTANCE_ID}_professional"
+      AUTH_SERVICE_URL: http://auth-service:3001
+      PROFESSIONAL_DATA_MODE: synthetic
+      PROFESSIONAL_REVIEW_MODE: disabled
+      PROFESSIONAL_REVIEWER_IDS: ""
+      CARE_INVITATION_TTL_DAYS: "7"
+    secrets: [demo_service_key]
+    depends_on: {auth-service: {condition: service_healthy}}
+  api-gateway:
+    <<: *app
+    # Docker requires a non-internal network for the loopback port publication.
+    networks: [demo, gateway]
+    build: {context: ./backend, dockerfile: api-gateway/Dockerfile}
+    environment:
+      NODE_ENV: development
+      PORT: "3000"
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PROFESSIONAL_SERVICE_URL: http://professional-service:3007
+    ports: ["127.0.0.1:${DEMO_PORT:?Use the demo CLI}:3000"]
+    depends_on:
+      auth-service: {condition: service_healthy}
+      user-service: {condition: service_healthy}
+      professional-service: {condition: service_healthy}
+networks:
+  demo: {internal: true}
+  gateway: {}
+secrets:
+  demo_service_key: {file: "${DEMO_ROOT}/service.key"}
+  demo_user_key: {file: "${DEMO_ROOT}/user.key"}
+  demo_fixtures: {file: "${DEMO_ROOT}/fixtures.json"}

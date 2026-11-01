@@ -10,6 +10,7 @@ export interface AuthUserData {
   userType: UserType;
   createdAt: Date;
   updatedAt: Date;
+  demoInstanceId?: string;
 }
 
 const schema = new Schema<AuthUserData>({
@@ -17,6 +18,7 @@ const schema = new Schema<AuthUserData>({
   email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254, unique: true },
   passwordHash: { type: String, required: true, select: false },
   userType: { type: String, required: true, enum: USER_TYPES, default: 'utilizador' },
+  demoInstanceId: { type: String, match: /^[a-f0-9]{16}$/, select: false, immutable: true },
 }, {
   timestamps: true,
   collection: 'auth_users',
@@ -24,6 +26,7 @@ const schema = new Schema<AuthUserData>({
   toJSON: {
     transform: (_document, result) => {
       delete (result as Partial<AuthUserData>).passwordHash;
+      delete (result as Partial<AuthUserData>).demoInstanceId;
       return result;
     },
   },

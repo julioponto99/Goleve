@@ -4,11 +4,18 @@ import { getJwtSecret } from './config/token';
 import { ApiError } from './config/errors';
 import authRoutes from './routes/auth.routes';
 import { errorHandler } from './middlewares/error.middleware';
+import { loadDemoConfig } from './demo/config';
+import { createDemoIdentityRoutes } from './demo/routes';
 
 export function createApp() {
   getJwtSecret();
+  const demo = loadDemoConfig();
   const app = express();
   app.disable('x-powered-by');
+  if (demo) {
+    app.use('/internal/demo', createDemoIdentityRoutes(demo));
+    app.post('/auth/register', (_req, _res, next) => next(new ApiError(403, 'DEMO_FIXTURES_ONLY', 'Use explicit fictional fixture preparation in this isolated demo')));
+  }
   app.use(express.json({ limit: '16kb' }));
   app.get('/health', async (_req, res) => {
     const healthy = await isDatabaseHealthy();

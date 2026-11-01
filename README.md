@@ -1,5 +1,7 @@
 # GoLeve
 
+A [demonstração local isolada](documentation/api/isolated-demo.md) usa cinco componentes reais e dados fictícios em MongoDB temporário. Arranque explícito com `node scripts/demo.cjs init`, `up` e `prepare`; a aprovação profissional permanece bloqueada no servidor real.
+
 Monorepo local com API Gateway, 11 microserviços TypeScript/Express, MongoDB e RabbitMQ.
 Pagamentos: apenas simulados, nunca reais.
 

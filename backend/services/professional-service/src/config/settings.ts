@@ -1,4 +1,6 @@
+import { DemoIdentityConfig, loadDemoIdentityConfig } from '../demo/identity-client';
 export interface ProfessionalSettings {
+  demoIdentity?: DemoIdentityConfig;
   authServiceUrl: string;
   dataMode: 'disabled' | 'synthetic';
   reviewMode?: 'disabled' | 'synthetic';
@@ -24,5 +26,6 @@ export function loadSettings(): ProfessionalSettings {
   }
   const ttl = process.env.CARE_INVITATION_TTL_DAYS || '7';
   if (!/^[1-9]\d*$/.test(ttl) || Number(ttl) > 365) throw new Error('CARE_INVITATION_TTL_DAYS must be an integer from 1 to 365');
-  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds, careInvitationTtlDays: Number(ttl) };
+  const demoIdentity = loadDemoIdentityConfig(url.origin, dataMode, reviewMode, reviewerIds);
+  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds, careInvitationTtlDays: Number(ttl), ...(demoIdentity ? { demoIdentity } : {}) };
 }
