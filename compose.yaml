@@ -189,6 +189,7 @@ services:
       PROFESSIONAL_DATA_MODE: "${PROFESSIONAL_DATA_MODE:-disabled}"
       PROFESSIONAL_REVIEW_MODE: "${PROFESSIONAL_REVIEW_MODE:-disabled}"
       PROFESSIONAL_REVIEWER_IDS: "${PROFESSIONAL_REVIEWER_IDS:-}"
+      CARE_INVITATION_TTL_DAYS: "${CARE_INVITATION_TTL_DAYS:-7}"
     depends_on:
       mongodb:
         condition: service_healthy

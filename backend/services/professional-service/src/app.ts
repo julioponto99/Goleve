@@ -12,7 +12,12 @@ import { ApplicationService, requireReviewer } from './services/application.serv
 import { createApplicationController } from './controllers/application.controller';
 import { createApplicationRoutes } from './routes/application.routes';
 import { NextFunction, Request, Response } from 'express';
-export function createApp(settings: ProfessionalSettings, connection: Connection, models: ProfessionalModels) {
+import { CareEligibilityProvider, ProfessionalCareEligibility } from './services/care-eligibility.service';
+import { CareRelationshipService } from './services/care-relationship.service';
+import { createCareRelationshipController } from './controllers/care-relationship.controller';
+import { createCareRelationshipRoutes } from './routes/care-relationship.routes';
+export interface CareDependencies { eligibility?: CareEligibilityProvider; now?: () => Date }
+export function createApp(settings: ProfessionalSettings, connection: Connection, models: ProfessionalModels, dependencies: CareDependencies = {}) {
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
   app.get('/health', async (_req, res) => {
     res.set('Cache-Control', 'no-store'); const healthy = await isDatabaseHealthy(connection);
@@ -20,7 +25,9 @@ export function createApp(settings: ProfessionalSettings, connection: Connection
       database: healthy ? 'connected' : 'unavailable', dataMode: settings.dataMode });
   });
   const applications = new ApplicationService(models, settings);
-  app.use(['/professionals', '/professional-applications'], (_req, res, next) => {
+  const relationships = new CareRelationshipService(models, dependencies.eligibility || new ProfessionalCareEligibility(models, settings), settings.careInvitationTtlDays ?? 7, dependencies.now);
+  const careController = createCareRelationshipController(relationships);
+  app.use(['/professionals', '/professional-applications', '/care-relationships'], (_req, res, next) => {
     res.set('Cache-Control', 'no-store'); res.set('X-Professional-Data-Mode', settings.dataMode); next();
   });
   const available = async (_req: Request, _res: Response, next: NextFunction) => {
@@ -29,10 +36,13 @@ export function createApp(settings: ProfessionalSettings, connection: Connection
     next();
   };
   app.get('/professionals/catalog', available, createApplicationController(applications).catalog);
-  app.use(['/professionals', '/professional-applications'], authenticate(settings.authServiceUrl));
+  app.use(['/professionals', '/professional-applications', '/care-relationships'], authenticate(settings.authServiceUrl));
   app.use('/professional-applications', (_req, res, next) => {
     try { requireReviewer(res.locals.context, settings); next(); } catch (error) { next(error); }
   }, express.json({ limit: '16kb' }), available, createApplicationRoutes(applications));
+  app.get('/professionals/eligible-capabilities', available, careController.eligible);
+  app.get('/professionals/me/care-relationships', available, careController.inbox);
+  app.use('/care-relationships', express.json({ limit: '16kb' }), available, createCareRelationshipRoutes(relationships));
   app.use('/professionals', express.json({ limit: '16kb' }), available, createProfessionalRoutes(new ProfessionalService(models), applications));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'Endpoint not found')));
   app.use(errorHandler); return app;

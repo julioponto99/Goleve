@@ -82,6 +82,8 @@ O gateway encaminha `/professionals/*` para o Professional Service. A fase 1 per
 
 A fase 2 permite submeter candidaturas e simular aprovação, rejeição e suspensão através de `/management/professional-applications/*`. A revisão fica desativada por defeito; exige papel atual de administrador no Auth e ID explicitamente autorizado no servidor Professional. Não cria contas nem atribui papéis. `/professionals/catalog` mostra apenas resumos aprovados com publicação autorizada; os códigos fictícios estão em `/professionals/specializations`. Consultar [configuração, estados, segurança e testes da aprovação simulada](documentation/api/professional-applications.md).
 
+A fase 3 acrescenta `/care-relationships/*` no Professional, com histórico atómico, idempotência e expiração passiva de pedidos (7 dias por defeito). Não ativa elegibilidade profissional, aprovação ou acesso a dados sensíveis: os fluxos positivos são testados com dependências simuladas isoladas. O ambiente normal continua sem profissionais elegíveis confirmados. Consultar [relações, autorização, expiração e testes](documentation/api/care-relationships.md).
+
 Os outros sete microserviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
 
 O gateway limita os pedidos de registo e login. Consultar o [relatório da revisão de segurança e ficheiros para commit](documentation/api/authentication-security-review.md).

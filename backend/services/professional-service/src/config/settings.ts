@@ -3,6 +3,7 @@ export interface ProfessionalSettings {
   dataMode: 'disabled' | 'synthetic';
   reviewMode?: 'disabled' | 'synthetic';
   reviewerIds?: readonly string[];
+  careInvitationTtlDays?: number;
 }
 export function loadSettings(): ProfessionalSettings {
   const url = new URL(process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001');
@@ -21,5 +22,7 @@ export function loadSettings(): ProfessionalSettings {
     || (reviewMode === 'synthetic' && (dataMode !== 'synthetic' || !reviewerIds.length))) {
     throw new Error('Invalid professional review configuration; administrative review is unavailable');
   }
-  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds };
+  const ttl = process.env.CARE_INVITATION_TTL_DAYS || '7';
+  if (!/^[1-9]\d*$/.test(ttl) || Number(ttl) > 365) throw new Error('CARE_INVITATION_TTL_DAYS must be an integer from 1 to 365');
+  return { authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds, careInvitationTtlDays: Number(ttl) };
 }

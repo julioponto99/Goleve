@@ -4,6 +4,7 @@ import { createAuthRateLimiter } from './middlewares/auth-rate-limit.middleware'
 import { createUserRoutes } from './routes/user.routes';
 import { createProfessionalRoutes } from './routes/professional.routes';
 import { createManagementRoutes } from './routes/management.routes';
+import { createCareRelationshipRoutes } from './routes/care-relationship.routes';
 
 export function createApp() {
   const app = express();
@@ -16,6 +17,7 @@ export function createApp() {
   app.use('/users', createUserRoutes());
   app.use('/professionals', createProfessionalRoutes());
   app.use('/management', createManagementRoutes());
+  app.use('/care-relationships', createCareRelationshipRoutes());
   app.use(express.json());
   return app;
 }
