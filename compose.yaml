@@ -182,9 +182,16 @@ services:
       context: ./backend
       dockerfile: services/professional-service/Dockerfile
     environment:
-      <<: *node-environment
+      NODE_ENV: production
       PORT: "3007"
       MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_professional"
+      AUTH_SERVICE_URL: "http://auth-service:3001"
+      PROFESSIONAL_DATA_MODE: "${PROFESSIONAL_DATA_MODE:-disabled}"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
 
   management-service:
     <<: *node-service

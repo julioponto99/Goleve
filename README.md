@@ -76,7 +76,11 @@ O gateway encaminha `/auth/*` para o auth-service, que já estabelece a ligaçã
 
 O gateway encaminha `/users/*` para o User Service, que valida cada Bearer JWT através do `/auth/me` existente, sem receber a chave JWT. Disponibiliza perfil pessoal, preferências, hábitos, medições, histórico de peso e objetivos do próprio titular. O `/health` verifica o MongoDB. Consultar [contratos, configuração, testes e decisões pendentes do User Service](documentation/api/user-service.md).
 
-A fase 1 do User Service está autorizada apenas para desenvolvimento local com dados fictícios. O valor por defeito `USER_DATA_MODE=disabled` bloqueia os endpoints de dados. Para o desenvolvimento aprovado, definir `USER_DATA_MODE=synthetic` no `.env` local e recriar o User Service. Não existe modo de recolha de dados reais nesta fase. Os outros nove microserviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
+A fase 1 do User Service está autorizada apenas para desenvolvimento local com dados fictícios. O valor por defeito `USER_DATA_MODE=disabled` bloqueia os endpoints de dados. Para o desenvolvimento aprovado, definir `USER_DATA_MODE=synthetic` no `.env` local e recriar o User Service. Não existe modo de recolha de dados reais nesta fase.
+
+O gateway encaminha `/professionals/*` para o Professional Service. A fase 1 permite candidaturas privadas de PT/Nutricionista, qualificações declaradas e horários preferidos privados, sem conceder papéis ou privilégios profissionais. `PROFESSIONAL_DATA_MODE=disabled` é o valor seguro por defeito; `synthetic` permite exclusivamente dados fictícios no desenvolvimento local. A disponibilidade operacional e os agendamentos continuam a pertencer ao Agenda Service. Consultar [endpoints, decisões e testes do Professional Service](documentation/api/professional-service.md).
+
+Os outros oito microserviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
 
 O gateway limita os pedidos de registo e login. Consultar o [relatório da revisão de segurança e ficheiros para commit](documentation/api/authentication-security-review.md).
 
