@@ -11,6 +11,7 @@ import { createHydrationRoutes } from './routes/hydration.routes';
 import { createPerformanceRoutes } from './routes/performance.routes';
 import { createNotificationRoutes } from './routes/notification.routes';
 import { createAiCoachRoutes } from './routes/ai-coach.routes';
+import { createPaymentRoutes } from './routes/payment.routes';
 
 export function createApp() {
   const app = express();
@@ -30,6 +31,7 @@ export function createApp() {
   app.use('/performance', createPerformanceRoutes());
   app.use('/notifications', createNotificationRoutes());
   app.use('/ai-coach', createAiCoachRoutes());
+  app.use('/payments', createPaymentRoutes());
   app.use(express.json());
   return app;
 }
