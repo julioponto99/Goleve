@@ -14,10 +14,14 @@ import { ProfessionalAgendaService } from './professional/service';
 import { createProfessionalAgendaRoutes } from './routes/professional-agenda.routes';
 import { AgendaBilling } from './payment-demo/billing';
 import { internalBillingRoutes,publicBillingRoutes } from './payment-demo/routes';
+import { loadContract } from './management-contract';
+import { createManagementRoutes } from './professional/management.routes';
+import { createProfessionalAgendaModels } from './professional/models';
 export interface ProfessionalAgendaRuntime { settings: ProfessionalAgendaSettings; models: ProfessionalAgendaModels; eligibilityForTests?: AppointmentEligibility; nowForTests?: () => Date }
 
 export function createApp(authServiceUrl: string, connection: Connection, models: AgendaModels, professional?: ProfessionalAgendaRuntime) {
   const app = express();
+  const management=loadContract('agenda');if(management)app.use('/internal/v1/management',createManagementRoutes(connection,professional?.models||createProfessionalAgendaModels(connection),management));
   const billing=professional?.settings.paymentDemo?new AgendaBilling(connection,professional.models,professional.settings.paymentDemo):undefined;
   if(billing)app.use('/internal/v1/payment-demo',internalBillingRoutes(connection,billing));
   app.disable('x-powered-by'); app.disable('etag');

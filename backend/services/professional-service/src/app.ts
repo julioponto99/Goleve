@@ -21,9 +21,12 @@ import { createAgendaInternalRoutes } from './internal/agenda.routes';
 import { createProfessionalOfferingController } from './controllers/professional-offering.controller';
 import { ProfessionalOfferingService } from './services/professional-offering.service';
 import { createPaymentDemoRoutes } from './payment-demo/routes';
+import { loadContract } from './management-contract';
+import { createManagementRoutes } from './internal/management.routes';
 export interface CareDependencies { eligibility?: CareEligibilityProvider; now?: () => Date }
 export function createApp(settings: ProfessionalSettings, connection: Connection, models: ProfessionalModels, dependencies: CareDependencies = {}) {
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
+  const management=loadContract('professional');if(management)app.use('/internal/v1/management',(_req,_res,next)=>{if(settings.dataMode!=='synthetic'){next(new ApiError(503,'PROFESSIONAL_DATA_DISABLED','Owner data policy is disabled'));return;}next();},createManagementRoutes(connection,models,management));
   if(settings.paymentDemo){if(settings.dataMode!=='synthetic'||settings.reviewMode!=='synthetic')throw new Error('Synthetic Professional review required');app.use('/internal/v1/payment-demo',createPaymentDemoRoutes(connection,models,settings.paymentDemo));}
   if (settings.agendaServiceKeys) app.use('/internal/v1/agenda', createAgendaInternalRoutes(connection, models, settings.agendaServiceKeys, settings.demoEligibilityEnabled));
   app.get('/health', async (_req, res) => {

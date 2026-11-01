@@ -839,3 +839,30 @@ Flags demo desativadas por defeito e produção bloqueada. Continuam pendentes
 envio externo, garantias produtivas de broker/ACL/TLS, operação de DLQ e
 reembolsos reais. A integração Notification pendente na Fase 5.8.2 encontra-se
 agora implementada apenas neste âmbito local. Sem migrações, commit ou push.
+
+## 19. Fase 5.10 — Management / Gestor V1
+
+Implementação permanente em `feat/management-v1`, sem condição de demonstração
+no Management. [Arquitetura](architecture/management-v1.md),
+[API](api/management-v1.md) e [OpenAPI 3.1](api/management-v1.openapi.json).
+
+- Auth: convites administrativos para novas identidades Gestor, token com hash,
+  prazo de 24 horas, consumo/revogação atómicos e password do convidado.
+- Management: perfil persistente, âmbito de serviços canónicos, atribuições
+  com prazo/aprovação independente, RBAC + âmbito, revogação efetiva, casos e
+  auditoria transacional. Sem grants implícitos pelo papel.
+- Proprietários: contratos internos autenticados por destino, autorização
+  atual revalidada, DTO mínimo e suspensão de serviço com versão/motivo.
+  Sem consulta direta às bases alheias ou cancelamento/reembolso automático.
+- Indicadores reais dos registos persistidos por dia UTC, até 31 dias,
+  supressão/intervalos conservadores e falhas explícitas, não zeros inventados.
+  Fontes sintéticas permanecem identificadas como tal.
+
+**Dependências:** provisionamento inicial e reforço administrativo na Fase
+5.11; autoridade real de elegibilidade no Professional. A reativação normal
+fica negada até existir essa autoridade; só o ramo de teste isolado usa prova
+simulada de autoridade real. Payment mantém o seu bloqueio em produção.
+Não se declara a V1 pronta para produção ou a reativação real concluída.
+
+Testes direcionados e resultados concretos constam da API. Não houve
+alteração da infraestrutura principal, migração, commit, push ou merge.

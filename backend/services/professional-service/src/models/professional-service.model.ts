@@ -4,6 +4,9 @@ import { OwnedData, ownedFields, schemaOptions } from './common';
 
 export const SERVICE_DURATIONS = [30, 45, 60, 90] as const;
 export interface ProfessionalServiceData extends OwnedData {
+  managementSuspended?: boolean;
+  managementWasActive?: boolean;
+  managementHistory?: {actorId:string;action:string;reasonCode:string;occurredAt:Date;version:number}[];
   professionalId: Types.ObjectId;
   capabilityId: Types.ObjectId;
   category: typeof CAPABILITY_KINDS[number];
@@ -17,6 +20,9 @@ export interface ProfessionalServiceData extends OwnedData {
 }
 
 export const professionalServiceSchema = new Schema<ProfessionalServiceData>({
+  managementSuspended:{type:Boolean,default:false},
+  managementWasActive:{type:Boolean,default:false},
+  managementHistory:{type:[new Schema({actorId:String,action:String,reasonCode:String,occurredAt:Date,version:Number},{_id:false,strict:'throw'})],default:[],validate:(a:unknown[])=>a.length<=128},
   ...ownedFields,
   professionalId: { type: Schema.Types.ObjectId, required: true, immutable: true },
   capabilityId: { type: Schema.Types.ObjectId, required: true, immutable: true },

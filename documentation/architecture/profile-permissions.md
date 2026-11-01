@@ -4,6 +4,15 @@
 
 ## 1. Factos atuais e lacunas
 
+**Atualização Fase 5.10:** o [Management V1](management-v1.md) implementa
+perfis operacionais, âmbitos canónicos de serviços, atribuições com aprovação
+independente e prazo finito, casos, auditoria e contratos internos por
+proprietário. Auth tem convites para novas contas Gestor, sem promoção de
+contas existentes. O provisionamento inicial de administradores, autoridade
+real de elegibilidade e prontidão produtiva continuam pendentes. A API atual
+está em [Management V1](../api/management-v1.md); referências abaixo a estas
+funcionalidades como futuras pertencem à proposta original.
+
 O Auth valida JWT e consulta o próprio utilizador em MongoDB; o papel atual é lido da conta. O User aplica titularidade, validação, cifra e auditoria aos dados próprios; o Professional aplica controlos às candidaturas, revisão simulada e metadados de relações. Não estão implementados grants por dataset, acesso sensível delegado, endpoint administrativo de atribuição de papel ou estado de conta/sessão revogável.
 
 O gateway encaminha Auth, User, Professional, Management e relações; cada proprietário aplica os seus controlos. Training, Agenda, Hydration, Payment e AI Coach ainda só têm saúde. O contrato técnico Auth–Professional é limitado a fixtures da demonstração, com credencial própria e bloqueio em produção; não é uma identidade técnica ou introspeção genérica para produção. Ver [demonstração](../api/isolated-demo.md). Bases lógicas distintas não provam credenciais isoladas ou TLS/ACLs de produção; a cifra de payloads sensíveis do User já existe no âmbito fictício, sem provar implementação integral desta política.

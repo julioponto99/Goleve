@@ -210,6 +210,12 @@ São P2 e exigem autorização, mesmo quando o conteúdo é apenas uma duração
 
 ## 9. ManagementOperatorProfile — `management_operator_profiles`
 
+O contrato implementado na Fase 5.10 está em [Management V1](management-v1.md).
+A proposta alargada abaixo não habilita regiões, organizações, plataforma,
+verificação profissional ou outros privilégios não entregues. Nesta V1,
+âmbitos são de serviços canónicos, e revogação tem um estado intermédio
+`revocation_pending` que já nega acesso antes da conclusão independente.
+
 Proprietário Management. Não é uma segunda conta de login.
 
 | Campo | Tipo | Req. | Sens. | Regra |

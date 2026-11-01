@@ -12,10 +12,13 @@ import { IntegratedPaymentService } from './payment-demo/service';
 import { integratedPaymentRoutes } from './payment-demo/routes';
 import { assertNotificationDemo, publishPaymentOutbox } from './events/outbox';
 import { integratedPaymentModel } from './payment-demo/models';
+import { loadContract } from './management-contract';
+import { createManagementRoutes } from './payment-demo/management.routes';
 
 export async function createApp(authServiceUrl: string, connection: import('mongoose').Connection, models: ReturnType<typeof createPaymentModels>,demo?:DemoConfig,bank?:import('./services/mock-bank.provider').MockBankProvider) {
   if (process.env.NODE_ENV === 'production' || process.env.PAYMENT_DEMO_ENABLED !== 'true') throw new Error('Payment Service is available only in explicitly enabled local demonstration mode');
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
+  const management=loadContract('payment');if(management)app.use('/internal/v1/management',createManagementRoutes(connection,management));
   app.get('/health', async (_req, res) => { const healthy = await isDatabaseHealthy(connection); res.status(healthy ? 200 : 503).json({ service: 'payment-service', status: healthy ? 'ok' : 'unavailable', database: healthy ? 'connected' : 'unavailable', mode: 'demo' }); });
   if(bank&&(process.env.NODE_ENV!=='test'||!demo))throw new Error('Bank override requires an isolated integration test');
   if(demo){const service=new IntegratedPaymentService(connection,demo,bank);await service.Model.init();app.use('/payments',authenticate(authServiceUrl),express.json({limit:'16kb'}),integratedPaymentRoutes(service));}
