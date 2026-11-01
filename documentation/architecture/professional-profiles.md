@@ -1,11 +1,13 @@
 # Perfis profissionais e de gestão
 
-**Estado: proposta para validação, sem código, alterações no Auth ou acesso às bases de dados.**
+**Estado: desenho evolutivo; candidaturas e revisão simulada parcialmente implementadas. Esta revisão é apenas documental.**
 Usa tipos, campos comuns, sensibilidade P0/P1/P2/S e obrigatoriedade O/F/C de [user-profiles.md](user-profiles.md). Complementa [relações](profile-relationships.md) e [permissões](profile-permissions.md).
 
 ## 1. Fronteiras e compatibilidade
 
-O Professional e o Management existem como workspaces MVC com Express e `/health`, sem Mongoose, modelos, agenda ou revisão profissional. Só o Auth tem atualmente um modelo persistente.
+O Professional já tem Mongoose, perfis/capacidades/qualificações declaradas, horários preferidos privados, candidatura/revisão simulada e relações com histórico. O Management encaminha revisão para o proprietário. Os contratos atuais estão em [fase 1](../api/professional-service.md), [fase 2](../api/professional-applications.md) e [relações](../api/care-relationships.md). Credenciais oficiais, verificação real, disponibilidade operacional, consultas e planos descritos abaixo continuam futuros. A revisão mantém-se desativada por defeito e a aprovação simulada não prova elegibilidade real.
+
+O acompanhamento é opcional: nenhum, PT, nutricionista ou ambos. A ausência, recusa ou terminação de uma relação não bloqueia o núcleo pessoal. Treinos em ginásio, casa ou exterior não exigem PT nem inscrição; modalidades profissionais `online/in_person/home_visit` não são os ambientes de treino do utilizador. Ver [requisitos](../requirements/autonomous-use.md) e [implicações por serviço](autonomous-use.md).
 
 Proposta: **ProfessionalProfile comum + ProfessionalCapability por atividade + credenciais e verificações separadas**. A mesma identidade pode ser nutricionista e PT, mantendo a verificação independente de cada atividade/país. Não criar dois modelos de login nem duplicar a pessoa em duas contas.
 
@@ -198,13 +200,13 @@ Notas de trabalho não são visíveis no diretório ou a outros profissionais po
 
 | Entidade canónica | Proprietário / contrato mínimo proposto |
 |---|---|
-| TrainingPlan / TrainingPlanVersion | Training: ID, autor AuthId, capacidade PT, versão, formato, conteúdo de treino limitado e estado; versões emitidas imutáveis |
+| TrainingPlan / TrainingPlanVersion | Training: ID, autor AuthId, versão, formato, conteúdo limitado e estado; capacidade PT para autoria profissional e relação quando houver acompanhamento de um titular, sem as inventar em planos próprios; versões emitidas imutáveis |
 | TrainingAssignment | Training: subjectAuthUserId, planVersionId, professionalId/capabilityId/relationshipId se profissional, startsOn/endsOn e estado de aceitação/execução |
 | TrainingSession | Training: subjectAuthUserId, assignmentId F, performedAt, durationSeconds F, source e appointmentId F; uma sessão por documento |
 | PhysicalAssessment | Performance: subjectAuthUserId, professionalId/capabilityId/relationshipId, assessedAt, instrumentCode, formatVersion, payload encriptado e proveniência |
-| Agendamento de sessão | Agenda: IDs dos participantes, relação, atividade e intervalo; sem métricas físicas ou notas |
+| Agendamento de sessão | Agenda: compromisso próprio sem profissional/relação; reserva profissional exige participantes, capacidade/relação, atividade e intervalo; sem métricas físicas ou notas |
 
-São P2 e exigem autorização, mesmo quando o conteúdo é apenas uma duração ou uma avaliação derivada. O Professional não persiste cópias dos planos de treino, avaliações ou histórico de sessões: apresenta vistas autorizadas. Contratos completos de execução e métricas pertencem à futura fase 5, sem alterar esta propriedade.
+São P2 e exigem autorização, mesmo quando o conteúdo é apenas uma duração ou uma avaliação derivada. Em recursos próprios, titularidade e política local não exigem relação; em ações profissionais aplicam-se os controlos adicionais. O Professional não persiste cópias dos planos de treino, avaliações ou histórico de sessões: apresenta vistas autorizadas. Ambientes/equipamento e duração por sessão pertencem ao Training; preferências duráveis ao User. Contratos completos de execução e métricas pertencem à futura fase 5, sem alterar esta propriedade.
 
 ## 9. ManagementOperatorProfile — `management_operator_profiles`
 
@@ -305,4 +307,4 @@ Usar versão otimista nos perfis, comandos de estado no workflow e registos imut
 - Definir armazenamento de documentos, limites de upload, antivírus, chaves e retenção. Não recolher documentos de identificação civil completos por defeito.
 - Aprovar organização/tenant e revisão de indicadores antes de ativar gestão multiorganização.
 
-As fases 2–5 de [user-profiles.md](user-profiles.md) utilizam este desenho. A implementação só deve começar após validação dos modelos, políticas e dependências.
+As fases 2–5 de [user-profiles.md](user-profiles.md) utilizam este desenho, com entregas parciais identificadas no início. Novas extensões só devem começar após validação dos contratos, políticas e dependências. Contratação, preços e pagamentos ficam para fase futura, sem tornar o Professional obrigatório nem ativar serviços comerciais nesta revisão.

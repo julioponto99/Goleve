@@ -1,14 +1,14 @@
 # Permissões, segurança e privacidade dos perfis
 
-**Estado: política técnica proposta para validação.** Não é uma conclusão jurídica sobre todos os tratamentos do GoLeve e não autoriza recolha de dados reais nesta fase. Complementa [utilizadores](user-profiles.md), [profissionais/gestão](professional-profiles.md) e [relações](profile-relationships.md).
+**Estado: política alvo com controlos próprios e de relações parcialmente implementados.** Não é uma conclusão jurídica sobre todos os tratamentos do GoLeve e não autoriza recolha de dados reais nesta fase. Complementa [utilizadores](user-profiles.md), [profissionais/gestão](professional-profiles.md), [relações](profile-relationships.md) e a decisão de [utilização autónoma](autonomous-use.md). As permissões futuras na matriz não equivalem a endpoints já disponíveis.
 
 ## 1. Factos atuais e lacunas
 
-O Auth já valida JWT e consulta o próprio utilizador em MongoDB; o papel atual é lido da conta. Não existem permissões por relação/dataset, endpoint administrativo de atribuição de papel, estado de conta/sessão revogável, contas técnicas de serviço ou política de acesso a saúde implementados.
+O Auth valida JWT e consulta o próprio utilizador em MongoDB; o papel atual é lido da conta. O User aplica titularidade, validação, cifra e auditoria aos dados próprios; o Professional aplica controlos às candidaturas, revisão simulada e metadados de relações. Não estão implementados grants por dataset, acesso sensível delegado, endpoint administrativo de atribuição de papel ou estado de conta/sessão revogável.
 
-O gateway só encaminha autenticação; não implementa autorização dos novos domínios. User, Professional, Management e restantes serviços ainda não aplicam este documento. Configuração com bases lógicas distintas no mesmo MongoDB e URLs RabbitMQ não equivale a separação de credenciais, TLS, encriptação de aplicação ou ACLs já ativadas.
+O gateway encaminha Auth, User, Professional, Management e relações; cada proprietário aplica os seus controlos. Training, Agenda, Hydration, Payment e AI Coach ainda só têm saúde. O contrato técnico Auth–Professional é limitado a fixtures da demonstração, com credencial própria e bloqueio em produção; não é uma identidade técnica ou introspeção genérica para produção. Ver [demonstração](../api/isolated-demo.md). Bases lógicas distintas não provam credenciais isoladas ou TLS/ACLs de produção; a cifra de payloads sensíveis do User já existe no âmbito fictício, sem provar implementação integral desta política.
 
-Nenhum papel novo, claim JWT, secret partilhado ou campo no Auth é criado nesta etapa. O modelo escalar userType permanece inalterado.
+Nenhum papel, claim JWT, segredo ou campo é criado nesta revisão documental. O modelo escalar userType permanece inalterado; percursos autónomo/acompanhado/misto e ambientes de treino não são papéis.
 
 ## 2. Regra de decisão
 
@@ -25,6 +25,8 @@ Nenhum papel novo, claim JWT, secret partilhado ou campo no Auth é criado nesta
 9. Auditoria e DTO mínimo da resposta; operações sensíveis não prosseguem sem os controlos obrigatórios.
 
 Identidade não implica papel privilegiado; papel não implica capacidade profissional; capacidade não implica relação; relação não implica grant; grant não determina, por si, uma base legal.
+
+As condições 4–6 são condicionais ao contexto profissional/delegado. Gerir recursos próprios não exige ginásio, relação, capacidade profissional, contratação, pagamento ou IA. Aplica-se autenticação, titularidade, política local e demais condições pertinentes; não um grant ao próprio. Um profissional a atuar sobre dados alheios não pode invocar o percurso autónomo para evitar os controlos. Indisponibilidade dos opcionais não deve bloquear operações exclusivamente próprias.
 
 O `GET /auth/me` atual pode validar identidade dos pedidos humanos nas primeiras fases sem dar o segredo HS256 a todos os serviços. Descartar campos de identidade desnecessários e não guardar o Bearer. A futura identidade de serviços/background jobs requer contrato próprio; não usar um JWT inventado em nome do titular.
 
@@ -62,6 +64,9 @@ Legenda:
 | Ler diretório profissional público aprovado | Sim | Sim | Sim | Sim | Sim | — por defeito |
 | Ler identidade de autenticação | Próprio | Próprio | Próprio | Próprio | A para gestão de conta, sem hashes | — |
 | Atualizar perfil pessoal/preferências | Próprio | Próprio | Próprio | Próprio | Próprio | — |
+| Gerir objetivos, hábitos e medições próprios | Próprio | Próprio | Próprio | Próprio | Próprio | — |
+| Gerir treino autodirigido e hidratação próprios (futuros) | Próprio | Próprio | Próprio | Próprio | Próprio | — |
+| Gerir agenda pessoal sem profissional (futura) | Próprio | Próprio | Próprio | Próprio | Próprio | — |
 | Ler contactos de outro titular | — | G, mínimo necessário | G, mínimo necessário | M apenas para tarefa operacional aprovada | — por função | — |
 | Ler medições físicas de outro titular | — | G | G | — | — | T, se aprovado para a tarefa |
 | Acrescentar medição de outro titular | — | G e autoria registada | G e autoria registada | — | — | — |
@@ -265,4 +270,4 @@ Uma recomendação IA é um resultado inferido com proveniência e versão do mo
 
 A sequência de seis fases está em [user-profiles.md](user-profiles.md). Cada fase exige testes de matriz/IDOR, minimização, revogação e erros em dependências; o detalhe de integração está em [profile-relationships.md](profile-relationships.md).
 
-**Critério de validação do desenho:** aprovar explicitamente ownership, os quatro modelos de perfil/papel, as relações e grants separados, a matriz e as decisões bloqueantes. Só depois criar schemas, endpoints, eventos, migrações ou alterações no Auth numa tarefa de implementação autorizada.
+**Critério de validação de extensões:** preservar os controlos já implementados e aprovar ownership, distinção de contextos próprios/profissionais, grants separados e decisões bloqueantes antes de criar novos contratos, schemas, endpoints, eventos, migrações ou alterações no Auth. A opcionalidade de IA não cria consentimentos nem autoriza processamento; a Fase 4 distingue agenda pessoal de reserva profissional conforme [autonomous-use.md](autonomous-use.md#5-implicações-para-a-fase-4-agenda).

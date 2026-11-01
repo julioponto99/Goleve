@@ -1,25 +1,25 @@
 # Perfis de utilizadores: arquitetura e modelo de dados
 
-**Estado: proposta para validação; nenhuma implementação autorizada nesta etapa.**
-Análise do repositório no commit `923a8e7`. Este documento, [perfis profissionais](professional-profiles.md), [relações](profile-relationships.md) e [permissões](profile-permissions.md) formam uma única proposta. Não alteram o Auth, os schemas atuais, o Compose ou as bases de dados.
+**Estado: desenho evolutivo com subconjunto implementado; revisão exclusivamente documental.**
+O desenho inicial foi analisado em `923a8e7`; o resumo de implementação foi revisto em `954afa7`. Este documento, [perfis profissionais](professional-profiles.md), [relações](profile-relationships.md) e [permissões](profile-permissions.md) definem a arquitetura alvo. As tabelas de entidades não declaram todas as extensões implementadas. Os contratos executados constam dos documentos de API. A nova decisão de [utilização autónoma](autonomous-use.md) complementa o desenho sem alterar código, schemas, Compose ou bases de dados.
 
 ## 1. O que existe e o que falta
 
 | Área | Estado observado no código | Falta implementar |
 |---|---|---|
-| Monorepo | npm workspaces `api-gateway` e `services/*`; MVC com config, models, controllers, routes, services e middlewares | Contratos de domínio e testes dos novos serviços |
-| Auth Service | Único schema Mongoose: `AuthUser` em `auth_users`; ObjectId, name, email único, passwordHash, userType e timestamps | Não há gestão administrativa de papéis, account status, introspeção dedicada nem eventos de identidade |
+| Monorepo | npm workspaces `api-gateway` e `services/*`; MVC nos serviços de domínio implementados | Contratos e testes dos restantes domínios |
+| Auth Service | `AuthUser` em `auth_users`; ObjectId, name, email único, passwordHash, userType e timestamps; preparação/consulta mínima de fixtures apenas na demonstração isolada | Sem gestão administrativa de papéis, account status, introspeção genérica de terceiros ou eventos de identidade |
 | Autenticação | Registo, login, `/auth/me`; bcrypt 12; JWT HS256 com subject, issuer, audience e expiração; registo apenas `utilizador` | Autorização por recurso, finalidade e relação profissional |
-| User Service | Express em 3002, `/health` e pastas MVC vazias; depende de express/dotenv | Todos os modelos e endpoints deste domínio; ligação Mongoose |
-| Professional Service | Express em 3007, `/health` e pastas MVC vazias | Perfis, credenciais, verificação, acompanhamento e registos profissionais |
-| Management Service | Express em 3008, `/health` e pastas MVC vazias | Atribuições de gestão, revisão operacional e auditoria administrativa |
-| API Gateway | Só encaminha `/auth/*`; limita registo/login; não é um motor de permissões de perfis | Rotas dos novos domínios e composição de respostas públicas/privadas |
-| Outros serviços | Training, Agenda, Performance, Hydration, AI Coach, Notification e Payment são estruturas iniciais com `/health` | Modelos de cada domínio e integração; pagamentos continuam simulados |
-| MongoDB | Uma instância mongo:7; URIs com bases lógicas distintas; só o Auth estabelece a ligação no código | Contas MongoDB por serviço, proteção de transporte e política de chaves; separação lógica não é isolamento de acesso já implementado |
+| User Service | Mongoose, perfil próprio, preferências, hábitos, medições/peso, objetivos, auditoria e cifra de payloads sensíveis | Declarações de saúde completas, grants e novas preferências de ambientes/equipamento/experiência |
+| Professional Service | Perfis/capacidades/qualificações declaradas, horários preferidos privados, revisão simulada, catálogo condicionado e relações com histórico | Habilitação e elegibilidade reais, registos profissionais, consultas e partilha sensível; revisão desativada por defeito |
+| Management Service | Fachada HTTP para revisão Professional e `/health` | Atribuições reais de gestão e provisionamento seguro; não cria administradores |
+| API Gateway | Encaminha `/auth`, `/users`, `/professionals`, `/management` e `/care-relationships`; limita registo/login | Rotas de negócio dos domínios ainda não implementados; cada proprietário aplica autorização |
+| Outros serviços | Training, Agenda, Performance, Hydration, AI Coach, Notification e Payment são estruturas iniciais com `/health` | Modelos e integração; Payment ainda não executa transações simuladas ou reais |
+| MongoDB | Auth, User e Professional ligam às próprias bases lógicas; demonstração separada em tmpfs | Contas MongoDB por serviço e controlos de produção; separação lógica no ambiente principal não é isolamento de credenciais já implementado |
 | RabbitMQ | Broker no Compose e URLs nos ambientes | Não existem clientes AMQP, outbox, consumidores nem eventos implementados |
-| Documentação | READMEs curtos de arquitetura, requisitos e eventos; documentação detalhada da autenticação | O presente desenho e a aprovação das decisões pendentes |
+| Documentação | Contratos de Auth/User/Professional/relações, demonstração isolada e regras de utilização autónoma | Especificação dos novos domínios e decisões pendentes |
 
-Os 85 testes e 14 contentores saudáveis pertencem à etapa anterior. Nesta análise não foram executados testes de aplicações nem operações Docker; um `/health` de estrutura inicial não comprova funcionamento de um domínio ainda inexistente.
+Os 311 testes e os estados Docker registados em [isolated-demo.md](../api/isolated-demo.md) pertencem à entrega anterior. Nesta revisão documental não foram executados testes de aplicações nem operações Docker; um `/health` de estrutura inicial não comprova funcionamento de um domínio ainda inexistente.
 
 ### Compatibilidade com o Auth existente
 
@@ -32,19 +32,21 @@ Os 85 testes e 14 contentores saudáveis pertencem à etapa anterior. Nesta aná
 
 ## 2. Propriedade dos dados
 
+Propriedade alvo; a matriz acima identifica o subconjunto já entregue. O utilizador pode ter zero relações e nenhum ginásio. Objetivos, hábitos, medições, hidratação, treinos e agenda próprios não dependem de capacidades profissionais, pagamentos ou IA. Contexto pessoal durável e contexto de cada sessão estão separados em [autonomous-use.md](autonomous-use.md#3-responsabilidades-e-dados-de-contexto).
+
 | Proprietário exclusivo | Dados canónicos | Referências ou vistas, sem duplicação autoritativa |
 |---|---|---|
 | Auth | Identidade, email de login, credenciais, autenticação e papel global atual | Outros serviços usam apenas o identificador e uma decisão de identidade autorizada |
 | User | Perfil privado, preferências, hábitos declarados, medições básicas, declarações de saúde, objetivos e autorizações pessoais | Peso atual derivado; identidade lida do Auth |
 | Professional | Perfil profissional, capacidades verificadas, credenciais, relações de acompanhamento, registos profissionais e acompanhamento nutricional | Consulta agenda/treinos por identificadores |
 | Management | Perfil de operador, atribuições de âmbito, processos operacionais e configuração não secreta | Não substitui a autoridade de papéis globais do Auth |
-| Agenda | Disponibilidade real, exceções, reservas, agendamentos e estado de presença | O perfil profissional só publica um resumo de disponibilidade |
+| Agenda | Compromissos pessoais independentes; disponibilidade real, exceções, reservas profissionais e estado de presença | Horários preferidos do Professional são uma declaração privada, não disponibilidade operacional |
 | Training | Catálogo/versões de planos de treino, atribuições e sessões executadas | User e Professional não mantêm listas duplicadas de planos ou sessões |
 | Hydration | Ingestões de água, lembretes e totais diários derivados | O objetivo pessoal de hidratação vive em UserGoal; a execução vive aqui |
 | Performance | Avaliações físicas profissionais e séries derivadas de progresso | Não cria um segundo registo canónico do peso autodeclarado |
 | AI Coach | Sessões, mensagens separadas, tarefas e recomendações geradas | Recebe apenas dados aprovados para a tarefa; preferências e autorizações continuam no User |
 | Notification | Preferências efetivas de entrega, tentativas e comprovativos de envio | Preferências do utilizador são lidas/versionadas a partir do User |
-| Payment | Operações e estados de pagamento simulado | Sem informação clínica em referências de pagamento |
+| Payment | Futuras operações financeiras, com contratação, preços e pagamentos por definir | Nenhuma transação funcional implementada; sem informação clínica ou dependência do núcleo pessoal |
 
 Não há acesso SQL/MongoDB direto à base de outro serviço, `populate` entre serviços, credenciais partilhadas de base de dados ou joins MongoDB entre domínios. Vistas compostas usam APIs autorizadas; projeções assíncronas são identificadas como cópias com origem, versão e prazo de validade.
 
@@ -139,6 +141,8 @@ A vista `UserIdentityView` acrescenta `identity.id, identity.name, identity.emai
 Guardar binários num object store privado; o User Service é proprietário do namespace e do metadado, sem exigir um novo microserviço de media. URLs temporárias são emitidas após autorização. Remover EXIF/geolocalização; não fazer reconhecimento facial. Índice `authUserId, createdAt, _id`; limpeza de uploads incompletos separada de dados finais.
 
 ## 5. UserPreferences e CoachPreferences
+
+As preferências de treino futuras devem admitir ginásio, casa e exterior em simultâneo, experiência declarada e equipamento disponível por contexto. Não pressupõem inscrição, material ou uma preferência obrigatória no registo. Ainda não pertencem às allowlists implementadas; o desenho exato será aprovado numa etapa própria. Uma escolha diferente por sessão pertence ao Training, não reescreve as preferências nem o histórico. [Regras e critérios de aceitação](../requirements/autonomous-use.md).
 
 `user_preferences`: um documento por `authUserId`, índice único. Todas as preferências podem ser omitidas pelo cliente; os valores iniciais são defaults de apresentação, não autorização de tratamentos.
 
@@ -262,7 +266,7 @@ Peso pretendido é o target do objetivo de peso ativo, não um segundo campo edi
 | Profissionais associados | CareRelationship no Professional, paginação por titular |
 | Planos de treino ativos e histórico | TrainingAssignment e TrainingPlanVersion no Training |
 | Acompanhamento e planos alimentares | NutritionFollowUp/NutritionPlanVersion no Professional |
-| Agenda e consultas | Appointment no Agenda; conteúdo profissional fica no seu domínio |
+| Agenda pessoal e consultas opcionais | Compromissos próprios no Agenda, sem relação; Appointment profissional quando aplicável; conteúdo profissional fica no seu domínio |
 | Objetivos ativos | UserGoal no User |
 | Evolução física | BodyMeasurement no User e PhysicalAssessment/projeções no Performance |
 | Água ingerida | HydrationEntry no Hydration |
@@ -278,6 +282,7 @@ Falha de um serviço resulta em secção indisponível explicitamente identifica
 - Medições preservam proveniência e correções. Declarações sensíveis só mantêm revisões de conteúdo quando houver finalidade e retenção aprovadas; não perpetuar toda informação apagada num log.
 - Paginação por cursor, ID e instante; limite proposto de 100 documentos por resposta, menor para registos sensíveis.
 - Listas crescentes de pesos, avaliações, relações, sessões, mensagens e planos são coleções separadas. O limite de um documento BSON é 16 MiB; a separação também evita contenção e permissões demasiado amplas. [MongoDB: limites](https://www.mongodb.com/docs/manual/reference/limits/).
+- Exceção limitada já aprovada na Fase 3: até 8 eventos de transição no documento de cada relação, com estado/versão/histórico atómicos. Não confundir essa história limitada com arrays ilimitados ou reintroduzir a coleção separada da proposta inicial sem nova decisão.
 - Propor índices a partir dos acessos acima; não adicionar índices de dados sensíveis por conveniência. Sharding só após métricas reais, não nesta fase.
 - Não criar índices únicos/TTL ou migrar documentos agora. Política de retenção, exportação e eliminação: [permissões e privacidade](profile-permissions.md).
 
@@ -285,14 +290,14 @@ Falha de um serviço resulta em secção indisponível explicitamente identifica
 
 | Fase | Entrega recomendada | Dependências e saída verificável |
 |---|---|---|
-| 1 — User | Ligação MongoDB do User; perfil/preferências/hábitos; medições, objetivos e declarações apenas após aprovação de privacidade; autorizações e auditoria mínimas | Validar identidade através do `GET /auth/me` existente, sem copiar o segredo HS256; teste entre titulares, índices, versões, DTOs e prevenção de IDOR |
-| 2 — Professional | Perfil comum, capacidades nutricionista/PT, credenciais e workflow de verificação; Management com revisão limitada | Fluxo de atribuição controlada do papel profissional ainda não existe no Auth; aprovação separada antes de ativar atendimento, nunca registo público privilegiado |
-| 3 — Relações | Convites, aceitação, scopes, grants, revogação e histórico | Relação não concede acesso; testes de expiração, múltiplos profissionais, revogação e falha fechada |
-| 4 — Agenda | Disponibilidade canónica, exceções e reservas/consultas por IDs | Relações e capacidades; fuso/DST, idempotência e prevenção real de reservas sobrepostas |
-| 5 — Treinos e Hidratação | Planos versionados, atribuições, sessões, registos de água e Performance | Contratos de propriedade, grants e eventos; correções fora de ordem e projeções reconstruíveis |
+| 1 — User | Perfil/preferências/hábitos, medições, objetivos e auditoria entregues apenas para dados fictícios | Autorizações específicas, declarações completas e novas preferências continuam futuras; núcleo próprio sem profissional |
+| 2 — Professional | Candidaturas e revisão simulada entregues, sem habilitação real | Atribuição controlada de papel, verificação/validade e provisionamento administrativo continuam gates de atendimento |
+| 3 — Relações | Pedidos, aceitação/recusa, cancelamento/terminação, expiração e histórico entregues; positivo apenas com elegibilidade simulada em testes | Grants/scopes de partilha e acesso sensível não foram implementados; contrato atual em [care-relationships.md](../api/care-relationships.md) |
+| 4 — Agenda | Proposta: agenda pessoal independente; disponibilidade e reservas profissionais em frente separada | Próprios: Auth/política local. Profissionais: capacidade/relação/autorização; fuso/DST, concorrência e prevenção real de sobreposição conforme tipo. [Decisões Fase 4](autonomous-use.md#5-implicações-para-a-fase-4-agenda) |
+| 5 — Treinos e Hidratação | Planos próprios/profissionais versionados, atribuições, sessões por ambiente, registos de água e Performance | Titularidade para atividades próprias; grants só quando existir delegação aplicável. Equipamento, experiência, tempo livre/duração e integrações por especificar; correções e projeções reconstruíveis |
 | 6 — Coach IA | Tarefas mínimas por finalidade, contexto aprovado, histórico opt-in e auditoria | Bases legais, fornecedores, transferência/retenção e AIPD validadas; bloquear IA se grant expirar ou for revogado |
 
-Dependências transversais: transporte autenticado entre serviços, credenciais por DB/fila, ACLs, outbox/inbox e topology MongoDB apropriada **antes** de prometer atomicidade de eventos. As fases são ordem de implementação futura; nenhuma começa com este documento.
+Dependências transversais: transporte autenticado entre serviços, credenciais por DB/fila, ACLs, outbox/inbox e topology MongoDB apropriada **antes** de prometer atomicidade de eventos. As fases identificam entregas parciais e evolução futura; nenhuma implementação começa com esta revisão documental.
 
 Riscos prioritários: sobreposição de propriedade do nome/email; confundir perfil profissional com papel; duplicação de histórico; acesso sensível por JWT válido mas sem grant; projeções antigas após revogação; introdução de IA antes da avaliação de privacidade.
 
@@ -304,7 +309,7 @@ Riscos prioritários: sobreposição de propriedade do nome/email; confundir per
 | D02 | Obrigatoriedade real de nascimento, género, telefone, localização e fotografias | Contratos do perfil e onboarding |
 | D03 | Autoridade de cada finalidade e bases legais, retenção e direitos | Campos P2 e partilha |
 | D04 | Processo administrativo de papéis e separação de funções; eventual evolução do userType escalar | Profissional/gestor/administrador ativos |
-| D05 | Validar ownership proposto de relações no Professional e grants pessoais no User | Fase 3 e serviços consumidores |
+| D05 | Relações no Professional confirmadas pela Fase 3; ownership de grants pessoais no User continua proposto, com contrato por aprovar | Partilha futura e serviços consumidores; não bloqueia funções próprias |
 | D06 | Limites de dados/objetivos e regras de confirmação por profissionais habilitados | Medições, treino, nutrição |
 | D07 | AIPD, fornecedores IA, object store, gestão de chaves e operação de exclusão | Saúde, documentos e IA |
 | D08 | Estratégia MongoDB transacional, eventos e identidade técnica dos serviços | Atomicidade e integrações fiáveis |

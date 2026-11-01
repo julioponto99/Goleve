@@ -1,6 +1,6 @@
 # Relações, integração e ciclo de vida dos perfis
 
-**Estado: desenho proposto, a aguardar validação.** Não existem atualmente relações, grants, eventos AMQP ou schemas destes domínios implementados. Tipos e classificação: [user-profiles.md](user-profiles.md). Perfis/capacidades: [professional-profiles.md](professional-profiles.md). Decisão de acesso: [profile-permissions.md](profile-permissions.md).
+**Estado: relações implementadas parcialmente; grants, Agenda, Training e eventos AMQP continuam futuros.** O contrato atual é [care-relationships.md](../api/care-relationships.md); a integração isolada está em [isolated-demo.md](../api/isolated-demo.md). Tipos/classificação: [user-profiles.md](user-profiles.md). Perfis/capacidades: [professional-profiles.md](professional-profiles.md). Acesso: [profile-permissions.md](profile-permissions.md). A revisão de [utilização autónoma](autonomous-use.md) explicita atividades próprias sem relação, sem alterar os modelos executáveis.
 
 ## 1. Decisões de arquitetura
 
@@ -10,6 +10,7 @@
 4. **Aceitar uma relação não concede acesso a saúde.** O registo do vínculo e a decisão de partilhar campos são ações separadas, mesmo que apresentadas no mesmo ecrã.
 5. Agenda, Training, Hydration, Performance e AI Coach têm entidades próprias; guardam identificadores de contexto, não duplicam o perfil ou os históricos de outro domínio.
 6. Não há transações entre microserviços. Comandos idempotentes, estados explícitos e reconciliação substituem a ilusão de uma escrita distribuída instantânea.
+7. Zero relações é um percurso válido. Ginásio, PT, nutricionista, pagamento e IA não são pré-requisitos de perfil, objetivos, hábitos, medições, treino, hidratação ou agenda próprios. Domínios ainda sem implementação continuam identificados como previstos.
 
 Um grant é uma autorização técnica no produto, não uma conclusão sobre base legal RGPD, propriedade jurídica de registos profissionais ou consentimento. A base legal e o controlo de acesso são condições diferentes.
 
@@ -22,9 +23,10 @@ Um grant é uma autorização técnica no produto, não uma conclusão sobre bas
 | ProfessionalProfile → ProfessionalCapability | 1 → N | Uma por atividade e jurisdição |
 | Utilizador ↔ profissional/capacidade | N ↔ N | CareRelationship por vínculo; não limitar automaticamente a um nutricionista/PT |
 | CareRelationship → DataAccessGrant | 1 → 0..N | Zero grants é válido, mesmo com relação aceite |
-| Profissional → agenda | 1 → N regras/reservas | Agenda gere todos os compromissos da pessoa, inclusive duas capacidades do mesmo profissional |
-| Utilizador → planos | 1 → N atribuições | Referência à versão exata; nunca um array ilimitado no perfil |
-| Utilizador → AI Coach | 1 → N sessões/tarefas | Não é uma relação profissional nem autorização genérica de saúde |
+| Profissional → agenda | 1 → 0..N regras/reservas | Agenda gere os compromissos da pessoa, inclusive duas capacidades do mesmo profissional; perfil não obriga a criar disponibilidade |
+| Utilizador → planos | 1 → 0..N atribuições | Referência à versão exata; autoria própria válida sem relação; nunca um array ilimitado no perfil |
+| Utilizador → compromissos pessoais | 1 → 0..N | Agenda própria sem profissional/capacidade/relação; contrato futuro separado de reservas profissionais |
+| Utilizador → AI Coach | 1 → 0..N sessões/tarefas | Opcional e futuro; não é uma relação profissional nem autorização genérica de saúde |
 
 IDs locais podem ter referências Mongoose dentro da base do mesmo serviço; IDs externos são strings validadas, sem `populate` remoto. Existência, estado e autorização são verificados através de API/contrato do proprietário. Eventos não criam foreign keys automáticas.
 
@@ -40,15 +42,33 @@ erDiagram
     CARE_RELATIONSHIP ||--o{ APPOINTMENT : schedules
     CARE_RELATIONSHIP ||--o{ NUTRITION_PLAN : contextualizes
     USER_PROFILE ||--o{ TRAINING_ASSIGNMENT : receives
+    USER_PROFILE ||--o{ PERSONAL_COMMITMENT : organizes
     TRAINING_PLAN_VERSION ||--o{ TRAINING_ASSIGNMENT : pins
     USER_PROFILE ||--o{ HYDRATION_ENTRY : records
     USER_PROFILE ||--o{ PHYSICAL_ASSESSMENT : assessed
     USER_PROFILE ||--o{ AI_PROCESSING_JOB : requests
 ```
 
-As linhas são ligações por ID/vistas entre serviços, não joins diretos. Nem todo treino precisa de profissional: plano autodirigido usa autoria própria, sem inventar uma CareRelationship.
+As linhas são ligações por ID/vistas entre serviços, não joins diretos. Incluem entidades conceptuais futuras, como PERSONAL_COMMITMENT, não modelos já criados. Nem todo treino precisa de profissional: plano autodirigido usa autoria própria, sem inventar uma CareRelationship. Compromissos pessoais também não criam relações. Ambientes/equipamento por sessão são contexto do Training, não filiação num ginásio ou permissão profissional.
 
 ## 3. CareRelationship — `care_relationships`
+
+### Contrato atual aprovado na Fase 3
+
+| Tema | Implementação atual |
+| --- | --- |
+| Estados | `pending, accepted, declined, cancelled, ended, expired`; sem suspensão/revogação como novos estados |
+| Transições | `pending` para accepted/declined/cancelled/expired; `accepted` para ended; estados finais não reabrem |
+| História e concorrência | Até 8 eventos, incluindo criação, no documento; estado/versão/histórico atualizados atomicamente por CAS, sem apagar eventos |
+| Duplicados | Unicidade aberta por utilizador + profissional + tipo de acompanhamento, mesmo entre jurisdições; N:N global preservada |
+| Expiração | `expiresAt` guardado; 7 dias por defeito, configurável; processamento passivo, sem TTL destrutivo |
+| Elegibilidade perdida | Bloqueia novas ações que a exigem; não altera automaticamente estado/histórico. Mantém metadados próprios e terminação de relação aceite |
+| Acesso sensível | Nenhum grant criado; `sensitiveDataAuthorized=false`; aceitação não dá acesso a dados do User |
+| Fluxo positivo | Apenas testes automatizados com elegibilidade simulada; servidor real continua sem decisões positivas de elegibilidade |
+
+### Desenho alargado anterior, ainda não ativo
+
+As tabelas e o diagrama alargados abaixo são a proposta original para evolução, **não o contrato atual**. Estados suspended/revoked, histórico em coleção separada, scopes/grants e unicidade por capacidade divergem da entrega aprovada. Não aplicar esses estados, índices ou armazenamento por inferência; qualquer evolução exige decisão e consistência próprias. O quadro acima e o documento de API prevalecem para a versão implementada.
 
 Proprietário Professional; classificação P2 porque o contexto pode revelar acompanhamento de saúde.
 
@@ -200,13 +220,17 @@ Os seguintes são schemas de fronteira propostos, não implementação completa 
 
 ### Agenda
 
+**Agenda pessoal e reserva profissional são contextos distintos.** O utilizador deve poder organizar compromissos próprios sem profissional, capacidade, relação, ginásio ou pagamento. O contrato pessoal ainda será especificado; a tabela seguinte descreve disponibilidade e `Appointment` profissionais futuros. Não tornar referências profissionais facultativas num agendamento profissional para o fazer passar por compromisso pessoal.
+
+Uma entrada pessoal de treino pode referenciar planeamento no Training quando o contrato existir, sem duplicar planos ou métricas de execução. Janelas habituais do User e horários preferidos privados do Professional não são compromissos, regras operacionais ou vagas. Política de sobreposição pessoal, recorrência, fuso/DST e concorrência são decisões pendentes da [Fase 4](autonomous-use.md#5-implicações-para-a-fase-4-agenda); a frente pessoal não depende de desbloquear aprovação profissional.
+
 | Entidade / campos | Tipos e obrigatoriedade | Integridade e sensibilidade |
 |---|---|---|
 | AvailabilityRule | `professionalId, resourceCalendarId, timeZone, weekday, startMinute, endMinute, validFrom, version` O; `capabilityId, validUntil` F | P1; horários 0–1439, sem confundir recorrência local com UTC |
 | AvailabilityException | `resourceCalendarId, startsAt, endsAt, availability` O; `reasonCode` F | P1; intervalo positivo, não expor razões privadas no diretório |
 | Appointment | `subjectAuthUserId, professionalId, capabilityId, relationshipId, resourceCalendarId, startsAt, endsAt, timeZone, status, bookedBy, idempotencyKey` O; `serviceLocationId, cancellationReasonCode` F | P2; `requested, confirmed, cancelled, completed, no_show`; sem anamnese, condição clínica ou tokens de videoconferência em eventos |
 
-Agenda é a fonte da disponibilidade e da agenda. Um calendário de recurso comum impede que a mesma pessoa, com duas capacidades, receba reservas simultâneas. Índices de consulta por profissional/intervalo, titular/intervalo e idempotencyKey no contexto do pedido.
+Agenda é a fonte da disponibilidade operacional e dos compromissos pessoais/profissionais. Na frente profissional, um calendário de recurso comum deve impedir que a mesma pessoa, com duas capacidades, receba reservas simultâneas. Isso não determina automaticamente a política de sobreposição pessoal. Índices de consulta por profissional/intervalo, titular/intervalo e idempotencyKey são propostas no contexto de cada pedido.
 
 Um índice único no instante inicial **não impede intervalos sobrepostos**. A confirmação precisa de coordenação atómica de reservas/slots ou locks limitados e teste de concorrência. A estratégia concreta, fusos, DST e cancelamentos são gate da fase 4; não declarar o problema resolvido pelo schema.
 
@@ -221,6 +245,10 @@ Um índice único no instante inicial **não impede intervalos sobrepostos**. A 
 | ProgressProjection | subjectAuthUserId, metricCode, periodStart, periodEnd, value, sourceVersion, computedAt O | Performance; P2, derivada/reconstruível; sem duplicar autoridade da observação original |
 
 Planos alimentares pertencem ao Professional, planos de treino ao Training, objetivos pessoais ao User, execução ao respetivo serviço. Nunca atualizar um plano já aceite apenas porque o template mudou.
+
+No treino autónomo, professionalId/capabilityId/relationshipId não são pré-condições. O contexto por sessão deve distinguir ambiente (ginásio, casa ou exterior), equipamento confirmado e duração pretendida/planeada/efetiva; preferências duráveis e experiência declarada ficam no User, catálogo de material/exercícios no Training. Aceitar vários ambientes preferidos não fixa um ambiente para todas as sessões. Não inferir material de um local nem sobrescrever sessões concluídas por mudar preferências. Os contratos exatos continuam futuros; ver [regras de sessão](../requirements/autonomous-use.md#2-ambientes-e-contexto-de-cada-sessão).
+
+Registar hidratação é uma atividade própria independente; objetivo no User não é ingestão no Hydration nem recomendação clínica. Contratação, preços e pagamentos ficam por definir e não são dependência destes fluxos pessoais.
 
 ### Coach IA
 
@@ -262,18 +290,18 @@ Gate D08: aprovar replica set/topologia adequada e testes de falha antes de usar
 
 Para criação do perfil inicial, não é necessário alterar já o Auth: primeiro onboarding autenticado e idempotente no User. O registo Auth pode existir sem perfil; `GET /users/me` pode informar onboarding necessário. Não introduzir uma dependência síncrona que faça falhar o login por o User Service estar indisponível.
 
-## 8. APIs futuras e contratos de erro
+## 8. APIs implementadas e contratos futuros
 
-| Proprietário | Operações propostas, ainda não existentes |
+| Proprietário | Estado dos contratos |
 |---|---|
-| User | `GET/PUT/PATCH /users/me`; preferências/hábitos; recursos paginados de medições, declarações e objetivos; grants próprios |
-| Professional | Candidatura/perfil próprio; diretório público aprovado; capacidades e provas; casos de verificação por revisor; relações, consultas e planos nutricionais autorizados |
-| Management | Operadores/âmbitos e fila de processos; orquestração administrativa sem escrever na DB dos proprietários |
-| Agenda | Disponibilidade, exceções e ciclo de vida de agendamentos |
-| Training/Hydration/Performance | Atribuições, execução, ingestões e avaliações através de contratos próprios |
-| AI Coach | Criar/cancelar tarefas e sessões autorizadas, sem endpoint de exportação livre do perfil |
+| User | Perfil próprio, preferências/hábitos, medições e objetivos implementados: [User Service](../api/user-service.md); declarações completas, grants e novo contexto durável de treino continuam futuros |
+| Professional | Candidaturas, catálogo condicionado, revisão simulada e relações implementados; provas oficiais, elegibilidade real, consultas e planos nutricionais continuam futuros |
+| Management | Fachada de revisão simulada implementada; operadores/âmbitos e processos completos futuros, sem escrita nas DBs dos proprietários |
+| Agenda | Agenda pessoal independente e disponibilidade/reservas profissionais por especificar, sem endpoints de negócio atuais |
+| Training/Hydration/Performance | Futuros: atribuições, execução, ingestões e avaliações através de contratos próprios; atualmente apenas saúde |
+| AI Coach | Futuro: criar/cancelar tarefas e sessões autorizadas; atualmente apenas saúde, sem exportação livre de perfil |
 
-Manter `/auth/*` inalterado. Adicionar rotas no gateway só na fase aprovada de cada domínio. Os proprietários verificam a identidade mesmo para chamadas internas; não expor um endpoint interno de autorização sem autenticar o serviço chamador.
+Esta revisão não altera `/auth/*` nem as rotas do gateway. Adicionar integrações só numa fase de implementação autorizada. Os proprietários verificam a identidade mesmo para chamadas internas; o contrato existente de fixtures é autenticado e exclusivo da demonstração, não uma introspeção geral de produção.
 
 Erros propostos: `400` validação; `401` identidade ausente/inválida; `403` ação proibida; `404` recurso inexistente ou cuja existência não pode ser revelada; `409/412` conflito/versão; `429` quota; `503` dependência de autorização indisponível. Sem detalhes de saúde, existência de utentes ou dados de outros profissionais em mensagens.
 
@@ -285,10 +313,12 @@ Erros propostos: `400` validação; `401` identidade ausente/inválida; `403` a�
 - Convites não podem ser autoaceites; expiração e aceitação concorrentes respeitam versionamento.
 - Revogar um grant/relação impede decisões novas mesmo com JWT válido ou eventos atrasados; caches não reabrem acesso.
 - Atualizações fora de ordem não alteram o peso atual incorretamente; retries não duplicam observações, planos ou reservas.
-- Indisponibilidade de Auth/User/Professional bloqueia leituras sensíveis, sem fallback permissivo.
+- Indisponibilidade de um proprietário ou dependência necessária à decisão bloqueia a leitura correspondente, sem fallback permissivo; Professional não bloqueia por si leituras exclusivamente próprias no User.
 - Suspensão/expiração de credencial bloqueia novas operações; retorno ao estado válido não repõe grants revogados.
 - Eventos repetidos, fora de ordem ou perdidos são reconciliáveis; provar a atomicidade real da opção outbox escolhida.
 - Agenda testa sobreposição de intervalos, duas capacidades do mesmo profissional, fusos e DST.
+- Agenda própria testa ausência de profissional/relação/ginásio/pagamento e indisponibilidade de serviços opcionais; a regra de conflitos pessoais ainda precisa de aprovação.
+- Training testa múltiplos ambientes preferidos, escolha por sessão, ausência de equipamento, experiência desconhecida, tempo livre/duração e preservação de autoria/histórico, conforme [critérios funcionais](../requirements/autonomous-use.md#4-critérios-de-aceitação).
 - IA testa minimização do contexto, injeção de prompt, revogação entre enqueue e execução e proibição de treinar com dados por defeito.
 
 Estes testes são critérios do plano, não resultados obtidos nesta fase documental.
