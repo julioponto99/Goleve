@@ -122,9 +122,19 @@ services:
       context: ./backend
       dockerfile: services/user-service/Dockerfile
     environment:
-      <<: *node-environment
+      NODE_ENV: production
       PORT: "3002"
       MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_user"
+      AUTH_SERVICE_URL: "http://auth-service:3001"
+      USER_DATA_MODE: "${USER_DATA_MODE:-disabled}"
+      USER_DATA_KEY_FILE: "/run/secrets/user_data_key"
+    secrets:
+      - user_data_key
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
 
   training-service:
     <<: *node-service
@@ -223,3 +233,7 @@ networks:
 volumes:
   mongo_data:
   rabbitmq_data:
+
+secrets:
+  user_data_key:
+    file: "${USER_DATA_KEY_PATH:-./.secrets/user-data-key.key}"

@@ -12,14 +12,20 @@ Antes do primeiro arranque, definir `JWT_SECRET` no `.env` local. Se o ficheiro 
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ~~~
 
-Guardar o valor apenas no `.env`, que está ignorado pelo Git. Depois, na raiz do projeto:
+Guardar o valor apenas no `.env`, que está ignorado pelo Git. Inicializar também a chave local do User Service, a partir da raiz (Node.js 22; não instala dependências):
+
+~~~sh
+node backend/services/user-service/scripts/init-local-key.cjs
+~~~
+
+O script preserva uma chave existente e nunca apresenta o seu valor. A pasta `.secrets/` está ignorada pelo Git; o Compose monta o ficheiro apenas no User Service, em modo de leitura. É necessário preservar esta chave para ler os dados fictícios já cifrados. Depois, na raiz do projeto:
 
 ~~~sh
 docker compose up -d --build
 docker compose ps
 ~~~
 
-O build instala as dependências com `npm ci` a partir do lockfile central e compila cada workspace com `npm run build --workspace=<caminho>`. Não requer Node.js nem dependências instaladas no anfitrião. Os 12 Dockerfiles usam `backend/` como contexto de build, respeitam os workspaces e criam imagens Node.js 22 sem dependências de desenvolvimento, executadas pelo utilizador `node`.
+O build instala as dependências com `npm ci` a partir do lockfile central e compila cada workspace com `npm run build --workspace=<caminho>`. A geração inicial das chaves acima usa Node.js no anfitrião; os builds não requerem dependências instaladas no anfitrião. Os 12 Dockerfiles usam `backend/` como contexto de build, respeitam os workspaces e criam imagens Node.js 22 sem dependências de desenvolvimento, executadas pelo utilizador `node`.
 
 Os microserviços aguardam MongoDB e RabbitMQ saudáveis; o gateway aguarda os 11 microserviços. O arranque em segundo plano pode terminar antes do health check final do gateway. Para aguardar por todos:
 
@@ -66,7 +72,11 @@ Os valores `MONGO_URI` e `RABBITMQ_URL` da raiz podem continuar a servir para ex
 
 RabbitMQ Management usa `goleve / goleve-local` por defeito. As variáveis de criação do utilizador só se aplicam à primeira inicialização do volume. Num broker já inicializado, gerir as alterações de credenciais no próprio RabbitMQ.
 
-O gateway encaminha `/auth/*` para o auth-service, que já estabelece a ligação MongoDB e disponibiliza registo, login e consulta do utilizador autenticado. Consultar [endpoints, validação e testes de autenticação](documentation/api/authentication.md). O `/health` do auth-service verifica também o MongoDB. Os restantes serviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
+O gateway encaminha `/auth/*` para o auth-service, que já estabelece a ligação MongoDB e disponibiliza registo, login e consulta do utilizador autenticado. Consultar [endpoints, validação e testes de autenticação](documentation/api/authentication.md). O `/health` do auth-service verifica também o MongoDB.
+
+O gateway encaminha `/users/*` para o User Service, que valida cada Bearer JWT através do `/auth/me` existente, sem receber a chave JWT. Disponibiliza perfil pessoal, preferências, hábitos, medições, histórico de peso e objetivos do próprio titular. O `/health` verifica o MongoDB. Consultar [contratos, configuração, testes e decisões pendentes do User Service](documentation/api/user-service.md).
+
+A fase 1 do User Service está autorizada apenas para desenvolvimento local com dados fictícios. O valor por defeito `USER_DATA_MODE=disabled` bloqueia os endpoints de dados. Para o desenvolvimento aprovado, definir `USER_DATA_MODE=synthetic` no `.env` local e recriar o User Service. Não existe modo de recolha de dados reais nesta fase. Os outros nove microserviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
 
 O gateway limita os pedidos de registo e login. Consultar o [relatório da revisão de segurança e ficheiros para commit](documentation/api/authentication-security-review.md).
 

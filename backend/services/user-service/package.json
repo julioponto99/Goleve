@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "init:local": "node scripts/init-local-key.cjs",
+    "test": "npm run build && npm run build --workspace=@goleve/api-gateway && npm run build --workspace=@goleve/auth-service && node --test tests/*.test.cjs"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^4.21.2",
-    "dotenv": "^16.4.5"
+    "mongoose": "^9.11.4"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
