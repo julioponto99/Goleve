@@ -926,3 +926,34 @@ Validar HTTP, isolamento Mongo, eventos/DLQ, sessões/MFA e recuperação apenas
 nos recursos novos. Testes administrativos usam base/credencial separadas.
 Sem pagamentos reais, migrações, backups, commit, push ou merge. Preparação de
 produção continua dependente de revisão de segurança e validação de implantação.
+
+## 22. Fase 5.13 — Validação E2E e encerramento técnico
+
+[Relatório consolidado](api/backend-e2e-v1-closeout.md),
+[histórico completo](api/backend-e2e-v1-validation.md) e
+[reconciliação operacional de pagamentos](operations/payment-reconciliation.md).
+
+A regressão global final, com validadores inalterados e sem reinícios, registou
+**80 casos aprovados, zero falhas e 12 bloqueados**. Dez são bloqueios históricos
+de autoridade/elegibilidade, configuração financeira, identidades/âmbitos e
+inventário; os outros dois são testes disruptivos sem autorização nesta etapa.
+O relatório identifica individualmente a condição segura para desbloquear cada caso.
+
+A falha de concorrência do Payment autónomo foi corrigida na etapa anterior,
+testada com persistência e instalada exclusivamente no Payment paralelo por
+autorização: claim durável anterior ao banco, replay, resultado incerto sem
+retry de cobrança e outbox coerente. Dez verificações HTTP/componentes na imagem
+passaram; a regressão global voltou a confirmar uma chamada ao banco na sonda.
+O histórico inicial 81/1/10 e os incidentes intermédios foram preservados.
+
+Nesta etapa de encerramento foram alterados apenas documentos e metadados locais
+de evidência. O baseline operacional reconciliou seis paragens antigas já
+autorizadas, mantendo arquivo original com hashes e as cinco ausências externas.
+Nenhum controlo do validador foi alterado, nem houve provisionamento real ou
+alteração de infraestrutura. Os 14 principais e 14 paralelos continuam saudáveis.
+
+**Pendente:** reconciliação financeira efetiva/fornecedor real, autoridade de
+verificação profissional, fluxo privilegiado integrado, configuração financeira
+isolada compatível, convergência de medições/preferências e validação operacional
+de recuperação/artefactos. Coach permanece desativado. Não se declara prontidão
+para produção. Sem migrações, commit, push ou merge.
