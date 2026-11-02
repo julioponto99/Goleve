@@ -1,0 +1,31 @@
+{
+  "name": "goleve-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "web",
+    "mobile",
+    "shared"
+  ],
+  "engines": {
+    "node": ">=22.13.0 <23"
+  },
+  "scripts": {
+    "contracts:generate": "node scripts/generate-contracts.mjs --write",
+    "contracts:check": "node scripts/generate-contracts.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p tests/tsconfig.json",
+    "build:web": "npm run build --workspace=@goleve/web",
+    "check:mobile": "npm run export:check --workspace=@goleve/mobile",
+    "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts tests/*.test.cjs",
+    "test:web": "playwright test",
+    "dev:web": "npm run dev --workspace=@goleve/web",
+    "dev:mobile": "npm run start --workspace=@goleve/mobile"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "22.14.1",
+    "openapi-typescript": "7.13.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

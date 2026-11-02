@@ -1,0 +1,41 @@
+import homeDark from '@goleve/shared/assets/figma/web/home-dark.svg';
+import brandDark from '@goleve/shared/assets/branding/icone-dark-512.png';
+import brandLime from '@goleve/shared/assets/branding/icone-lime-512.png';
+import homeActiveDark from '@goleve/shared/assets/figma/web/home-active-dark.svg';
+import trainingActiveDark from '@goleve/shared/assets/figma/web/training-active-dark.svg';
+import measurementsActiveDark from '@goleve/shared/assets/figma/web/measurements-active-dark.svg';
+import hydrationActiveDark from '@goleve/shared/assets/figma/web/hydration-active-dark.svg';
+import coachActiveDark from '@goleve/shared/assets/figma/web/coach-active-dark.svg';
+import historyActiveDark from '@goleve/shared/assets/figma/web/history-active-dark.svg';
+import profileActiveDark from '@goleve/shared/assets/figma/web/profile-active-dark.svg';
+import trainingActiveLight from '@goleve/shared/assets/figma/web/training-active-light.svg';
+import measurementsActiveLight from '@goleve/shared/assets/figma/web/measurements-active-light.svg';
+import hydrationActiveLight from '@goleve/shared/assets/figma/web/hydration-active-light.svg';
+import coachActiveLight from '@goleve/shared/assets/figma/web/coach-active-light.svg';
+import historyActiveLight from '@goleve/shared/assets/figma/web/history-active-light.svg';
+import profileActiveLight from '@goleve/shared/assets/figma/web/profile-active-light.svg';
+import homeLight from '@goleve/shared/assets/figma/web/home-light.svg';
+import trainingDark from '@goleve/shared/assets/figma/web/training-dark.svg';
+import trainingLight from '@goleve/shared/assets/figma/web/training-light.svg';
+import measurementsDark from '@goleve/shared/assets/figma/web/measurements-dark.svg';
+import measurementsLight from '@goleve/shared/assets/figma/web/measurements-light.svg';
+import hydrationDark from '@goleve/shared/assets/figma/web/hydration-dark.svg';
+import hydrationLight from '@goleve/shared/assets/figma/web/hydration-light.svg';
+import coachDark from '@goleve/shared/assets/figma/web/coach-dark.svg';
+import coachLight from '@goleve/shared/assets/figma/web/coach-light.svg';
+import historyDark from '@goleve/shared/assets/figma/web/history-dark.svg';
+import historyLight from '@goleve/shared/assets/figma/web/history-light.svg';
+import profileDark from '@goleve/shared/assets/figma/web/profile-dark.svg';
+import profileLight from '@goleve/shared/assets/figma/web/profile-light.svg';
+import logoutDark from '@goleve/shared/assets/figma/web/logout-dark.svg';
+import logoutLight from '@goleve/shared/assets/figma/web/logout-light.svg';
+import themeDark from '@goleve/shared/assets/figma/web/theme-dark.svg';
+import themeLight from '@goleve/shared/assets/figma/web/theme-light.svg';
+export const icons={dark:{home:homeDark,training:trainingDark,measurements:measurementsDark,hydration:hydrationDark,coach:coachDark,history:historyDark,profile:profileDark},light:{home:homeLight,training:trainingLight,measurements:measurementsLight,hydration:hydrationLight,coach:coachLight,history:historyLight,profile:profileLight}};
+export const logoutIcons={dark:logoutDark,light:logoutLight};
+export const themeIcons={dark:themeDark,light:themeLight};
+export const activeIcons={
+ dark:{home:homeActiveDark,training:trainingActiveDark,measurements:measurementsActiveDark,hydration:hydrationActiveDark,coach:coachActiveDark,history:historyActiveDark,profile:profileActiveDark},
+ light:{home:homeLight,training:trainingActiveLight,measurements:measurementsActiveLight,hydration:hydrationActiveLight,coach:coachActiveLight,history:historyActiveLight,profile:profileActiveLight},
+} as const;
+export const brandIcons={dark:brandDark,light:brandLime} as const;

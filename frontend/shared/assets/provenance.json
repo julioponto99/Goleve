@@ -1,0 +1,200 @@
+{
+  "fileKey": "dseqmbo4hzK6sFcOQl5hld",
+  "exportedAt": "2026-11-02",
+  "source": "Official Figma MCP exports. SVG contents and PNGs preserved. No temporary download URLs in runtime.",
+  "webSources": [
+    {
+      "frame": "2023:38728",
+      "variant": "dark neutral navigation"
+    },
+    {
+      "frame": "2031:640",
+      "variant": "light neutral navigation/profile active"
+    },
+    {
+      "frame": "193:2",
+      "variant": "dark home active/theme/profile neutral"
+    },
+    {
+      "name": "home-active-dark",
+      "nodeId": "4026:19",
+      "file": "assets/figma/web/home-active-dark.svg"
+    },
+    {
+      "name": "training-active-dark",
+      "nodeId": "2023:38871",
+      "file": "assets/figma/web/training-active-dark.svg"
+    },
+    {
+      "name": "training-active-light",
+      "nodeId": "2031:2893",
+      "file": "assets/figma/web/training-active-light.svg"
+    },
+    {
+      "name": "measurements-active-dark",
+      "nodeId": "2023:39243",
+      "file": "assets/figma/web/measurements-active-dark.svg"
+    },
+    {
+      "name": "measurements-active-light",
+      "nodeId": "2031:1362",
+      "file": "assets/figma/web/measurements-active-light.svg"
+    },
+    {
+      "name": "hydration-active-dark",
+      "nodeId": "2023:39309",
+      "file": "assets/figma/web/hydration-active-dark.svg"
+    },
+    {
+      "name": "hydration-active-light",
+      "nodeId": "2031:1021",
+      "file": "assets/figma/web/hydration-active-light.svg"
+    },
+    {
+      "name": "coach-active-dark",
+      "nodeId": "2023:39342",
+      "file": "assets/figma/web/coach-active-dark.svg"
+    },
+    {
+      "name": "coach-active-light",
+      "nodeId": "2031:914",
+      "file": "assets/figma/web/coach-active-light.svg"
+    },
+    {
+      "name": "history-active-dark",
+      "nodeId": "2023:39000",
+      "file": "assets/figma/web/history-active-dark.svg"
+    },
+    {
+      "name": "history-active-light",
+      "nodeId": "2031:2426",
+      "file": "assets/figma/web/history-active-light.svg"
+    },
+    {
+      "name": "profile-light",
+      "nodeId": "2031:2916",
+      "file": "assets/figma/web/profile-light.svg"
+    },
+    {
+      "name": "profile-dark",
+      "nodeId": "193:2",
+      "file": "assets/figma/web/profile-dark.svg"
+    }
+  ],
+  "mobileSources": [
+    {
+      "file": "assets/figma/mobile/home-active-dark.png",
+      "nodeId": "178:44"
+    },
+    {
+      "file": "assets/figma/mobile/home-dark.png",
+      "nodeId": "178:54"
+    },
+    {
+      "file": "assets/figma/mobile/training-active-dark.png",
+      "nodeId": "178:56"
+    },
+    {
+      "file": "assets/figma/mobile/training-dark.png",
+      "nodeId": "178:46"
+    },
+    {
+      "file": "assets/figma/mobile/measurements-active-dark.png",
+      "nodeId": "178:68"
+    },
+    {
+      "file": "assets/figma/mobile/measurements-dark.png",
+      "nodeId": "178:48"
+    },
+    {
+      "file": "assets/figma/mobile/coach-active-dark.png",
+      "nodeId": "178:80"
+    },
+    {
+      "file": "assets/figma/mobile/coach-dark.png",
+      "nodeId": "178:50"
+    },
+    {
+      "file": "assets/figma/mobile/home-active-light.png",
+      "nodeId": "178:85"
+    },
+    {
+      "file": "assets/figma/mobile/home-light.png",
+      "nodeId": "178:95"
+    },
+    {
+      "file": "assets/figma/mobile/training-active-light.png",
+      "nodeId": "178:97"
+    },
+    {
+      "file": "assets/figma/mobile/training-light.png",
+      "nodeId": "178:87"
+    },
+    {
+      "file": "assets/figma/mobile/measurements-active-light.png",
+      "nodeId": "178:109"
+    },
+    {
+      "file": "assets/figma/mobile/measurements-light.png",
+      "nodeId": "178:89"
+    },
+    {
+      "file": "assets/figma/mobile/coach-active-light.png",
+      "nodeId": "178:121"
+    },
+    {
+      "file": "assets/figma/mobile/coach-light.png",
+      "nodeId": "178:91"
+    }
+  ],
+  "identity": {
+    "status": "owner-originals-verified",
+    "sourceDirectory": "frontend/branding",
+    "format": "PNG",
+    "width": 512,
+    "height": 512,
+    "originalsPreserved": true,
+    "files": [
+      {
+        "name": "icone-dark-512.png",
+        "theme": "dark",
+        "sha256": "f323043a49c674be4389ccd5dceb47d3a5d71449a5447e7efeabb3de129d7121"
+      },
+      {
+        "name": "icone-lime-512.png",
+        "theme": "light",
+        "sha256": "f9379ba85ee9e5f1c47240f6fc8997b3dcd122d8bd3fc3adeeefb00fc9032aab"
+      }
+    ],
+    "copies": [
+      "frontend/shared/assets/branding",
+      "frontend/web/public/branding"
+    ]
+  },
+  "mobileNavigationRefinement": {
+    "phase": "6.1.1",
+    "source": "Font Awesome 6 Free Solid, verified through Figma MCP; original bitmap exports retained but no longer imported",
+    "package": "@fortawesome/fontawesome-free@6.7.2",
+    "font": "webfonts/fa-solid-900.ttf",
+    "glyphs": {
+      "home": {
+        "nodeId": "178:44",
+        "unicode": "f015"
+      },
+      "training": {
+        "nodeId": "178:46",
+        "unicode": "f44b"
+      },
+      "measurements": {
+        "nodeId": "178:48",
+        "unicode": "e473"
+      },
+      "coach": {
+        "nodeId": "178:50",
+        "unicode": "f544"
+      }
+    },
+    "license": "assets/licenses/fontawesome-free-6.7.2.txt",
+    "sourcePngsModified": false
+  }
+}

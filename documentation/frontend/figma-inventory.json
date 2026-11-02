@@ -1,0 +1,1405 @@
+{
+  "reviewedAt": "2026-11-02",
+  "branch": "integration/frontend-v1",
+  "codeCommit": "0426760",
+  "fileKey": "dseqmbo4hzK6sFcOQl5hld",
+  "pages": [
+    {
+      "id": "0:1",
+      "name": "Web"
+    },
+    {
+      "id": "16:42",
+      "name": "Mobile"
+    }
+  ],
+  "source": "Read-only Figma MCP: metadata, design context, Plugin API, screenshots; no assets exported or nodes modified.",
+  "counts": {
+    "webFrames": 44,
+    "mobileFrames": 48,
+    "screenFamilies": 24,
+    "frames": 92
+  },
+  "screens": [
+    {
+      "group": "E01",
+      "id": "2023:36498",
+      "name": "WEB • Entrada • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 1,
+      "prototypeDestinations": [
+        "2023:36509"
+      ]
+    },
+    {
+      "group": "E01",
+      "id": "2031:3164",
+      "name": "WEB • Entrada • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E01",
+      "id": "90:42",
+      "name": "Splash Screen - GoLeve - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 1,
+      "prototypeDestinations": [
+        "90:51"
+      ]
+    },
+    {
+      "group": "E01",
+      "id": "88:42",
+      "name": "Splash Screen - GoLeve",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 1,
+      "prototypeDestinations": [
+        "89:42"
+      ]
+    },
+    {
+      "group": "E02",
+      "id": "2023:36509",
+      "name": "WEB • Login • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "2023:36588",
+        "193:2",
+        "2023:36545"
+      ]
+    },
+    {
+      "group": "E02",
+      "id": "2031:3128",
+      "name": "WEB • Login • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E02",
+      "id": "90:51",
+      "name": "Login - GoLeve - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "120:64",
+        "19:270",
+        "120:42"
+      ]
+    },
+    {
+      "group": "E02",
+      "id": "89:42",
+      "name": "Login - GoLeve",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "118:64",
+        "19:602",
+        "118:42"
+      ]
+    },
+    {
+      "group": "E03",
+      "id": "2023:36545",
+      "name": "WEB • Registo • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "193:2",
+        "2023:36509"
+      ]
+    },
+    {
+      "group": "E03",
+      "id": "2031:3085",
+      "name": "WEB • Registo • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E03",
+      "id": "120:42",
+      "name": "Registo - GoLeve - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "90:51",
+        "19:270"
+      ]
+    },
+    {
+      "group": "E03",
+      "id": "118:42",
+      "name": "Registo - GoLeve",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "89:42",
+        "19:602"
+      ]
+    },
+    {
+      "group": "E04",
+      "id": "2023:36588",
+      "name": "WEB • Recuperar palavra-passe • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 2,
+      "prototypeDestinations": [
+        "2023:36509"
+      ]
+    },
+    {
+      "group": "E04",
+      "id": "2031:3052",
+      "name": "WEB • Recuperar palavra-passe • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E04",
+      "id": "120:64",
+      "name": "Recuperar palavra-passe - GoLeve - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "90:51"
+      ]
+    },
+    {
+      "group": "E04",
+      "id": "118:64",
+      "name": "Recuperar palavra-passe - GoLeve",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "89:42"
+      ]
+    },
+    {
+      "group": "E05",
+      "id": "193:2",
+      "name": "WEB • GoLeve Dashboard • Código de referência • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 10,
+      "prototypeDestinations": [
+        "2031:3174",
+        "2023:36968",
+        "2023:36620",
+        "2023:38100",
+        "2023:38350",
+        "2023:38533",
+        "2023:37096",
+        "2023:38629",
+        "2023:36509"
+      ]
+    },
+    {
+      "group": "E05",
+      "id": "2031:3174",
+      "name": "WEB • GoLeve Dashboard • Código de referência • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1100,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E05",
+      "id": "19:270",
+      "name": "dashboard dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 25,
+      "prototypeDestinations": [
+        "244:401",
+        "19:602",
+        "138:50",
+        "2017:1600",
+        "136:42",
+        "2017:1466",
+        "2017:1213",
+        "19:270",
+        "87:653",
+        "87:715",
+        "87:42"
+      ]
+    },
+    {
+      "group": "E05",
+      "id": "19:602",
+      "name": "dashbord light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 25,
+      "prototypeDestinations": [
+        "244:646",
+        "19:270",
+        "138:109",
+        "2017:1516",
+        "136:122",
+        "2017:1416",
+        "2017:1164",
+        "87:653",
+        "87:715",
+        "87:621",
+        "87:684",
+        "87:739"
+      ]
+    },
+    {
+      "group": "E06",
+      "id": "2023:36620",
+      "name": "WEB • Treinos • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 18,
+      "prototypeDestinations": [
+        "193:2",
+        "2023:38100",
+        "2023:38350",
+        "2023:38533",
+        "2023:37096",
+        "2023:38629",
+        "2023:36509",
+        "2031:3174",
+        "2023:36968",
+        "2023:37230",
+        "2023:37356",
+        "2023:36780",
+        "2023:37604",
+        "2023:37725",
+        "2023:37846",
+        "2023:37973"
+      ]
+    },
+    {
+      "group": "E06",
+      "id": "2031:2879",
+      "name": "WEB • Treinos • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E06",
+      "id": "87:42",
+      "name": "Treinos - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 29,
+      "prototypeDestinations": [
+        "2017:1109",
+        "2017:1466",
+        "2017:1005",
+        "2017:907",
+        "2017:803",
+        "2017:693",
+        "136:80",
+        "19:270",
+        "87:653",
+        "87:715"
+      ]
+    },
+    {
+      "group": "E06",
+      "id": "87:621",
+      "name": "Treinos - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 29,
+      "prototypeDestinations": [
+        "2017:1054",
+        "2017:1416",
+        "2017:956",
+        "2017:858",
+        "2017:748",
+        "2017:638",
+        "136:160",
+        "19:270",
+        "87:653",
+        "87:715",
+        "19:602",
+        "87:684",
+        "87:739"
+      ]
+    },
+    {
+      "group": "E07",
+      "id": "2023:36780",
+      "name": "WEB • Agenda · Marcar treino • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 2,
+      "prototypeDestinations": [
+        "2023:36620"
+      ]
+    },
+    {
+      "group": "E07",
+      "id": "2031:2677",
+      "name": "WEB • Agenda · Marcar treino • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E07",
+      "id": "2017:1600",
+      "name": "Agenda · Marcar treino - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "19:270"
+      ]
+    },
+    {
+      "group": "E07",
+      "id": "2017:1516",
+      "name": "Agenda · Marcar treino - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "19:602"
+      ]
+    },
+    {
+      "group": "E08",
+      "id": "2023:36968",
+      "name": "WEB • Sessão · Treino em curso • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 8,
+      "prototypeDestinations": [
+        "193:2",
+        "2023:38100",
+        "2023:38350",
+        "2023:38533",
+        "2023:37096",
+        "2023:38629",
+        "2023:36509",
+        "2031:2540"
+      ]
+    },
+    {
+      "group": "E08",
+      "id": "2031:2540",
+      "name": "WEB • Sessão · Treino em curso • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E08",
+      "id": "2017:1466",
+      "name": "Sessão · Treino em curso - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 2,
+      "prototypeDestinations": [
+        "87:42",
+        "136:80"
+      ]
+    },
+    {
+      "group": "E08",
+      "id": "2017:1416",
+      "name": "Sessão · Treino em curso - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 2,
+      "prototypeDestinations": [
+        "87:621",
+        "136:160"
+      ]
+    },
+    {
+      "group": "E09",
+      "id": "2023:37096",
+      "name": "WEB • Histórico de treinos • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E09",
+      "id": "2031:2393",
+      "name": "WEB • Histórico de treinos • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E09",
+      "id": "136:80",
+      "name": "Histórico de Treinos - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 35,
+      "prototypeDestinations": [
+        "136:42",
+        "87:42",
+        "19:270",
+        "87:653",
+        "87:715"
+      ]
+    },
+    {
+      "group": "E09",
+      "id": "136:160",
+      "name": "Histórico de Treinos - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 35,
+      "prototypeDestinations": [
+        "136:122",
+        "87:621",
+        "19:270",
+        "87:653",
+        "87:715",
+        "19:602",
+        "87:684",
+        "87:739"
+      ]
+    },
+    {
+      "group": "E10",
+      "id": "2023:37230",
+      "name": "WEB • Treino A · Supino & Tríceps • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E10",
+      "id": "2031:2258",
+      "name": "WEB • Treino A · Supino & Tríceps • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E10",
+      "id": "136:42",
+      "name": "Detalhe do Treino - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 1,
+      "prototypeDestinations": [
+        "87:42"
+      ]
+    },
+    {
+      "group": "E10",
+      "id": "136:122",
+      "name": "Detalhe do Treino - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 1,
+      "prototypeDestinations": [
+        "87:621"
+      ]
+    },
+    {
+      "group": "E11",
+      "id": "2023:37356",
+      "name": "WEB • Treino B · Inferiores • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E11",
+      "id": "2031:2128",
+      "name": "WEB • Treino B · Inferiores • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E11",
+      "id": "2017:1213",
+      "name": "Detalhe · Treino B • Inferiores - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:42",
+        "2017:1466",
+        "4011:642"
+      ]
+    },
+    {
+      "group": "E11",
+      "id": "2017:1164",
+      "name": "Detalhe · Treino B • Inferiores - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:621",
+        "2017:1416",
+        "4011:682"
+      ]
+    },
+    {
+      "group": "E12",
+      "id": "2023:37477",
+      "name": "WEB • Força · Corpo inteiro · Hoje • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1035,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E12",
+      "id": "2031:1992",
+      "name": "WEB • Força · Corpo inteiro · Hoje • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1035,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E12",
+      "id": "2017:1109",
+      "name": "Detalhe · Força • Corpo inteiro · Hoje - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:42",
+        "2017:1466",
+        "4011:642"
+      ]
+    },
+    {
+      "group": "E12",
+      "id": "2017:1054",
+      "name": "Detalhe · Força • Corpo inteiro · Hoje - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:621",
+        "2017:1416",
+        "4011:682"
+      ]
+    },
+    {
+      "group": "E13",
+      "id": "2023:37604",
+      "name": "WEB • Pernas e glúteos • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E13",
+      "id": "2031:1862",
+      "name": "WEB • Pernas e glúteos • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E13",
+      "id": "2017:1005",
+      "name": "Detalhe · Pernas e glúteos - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:42",
+        "2017:1466",
+        "4011:642"
+      ]
+    },
+    {
+      "group": "E13",
+      "id": "2017:956",
+      "name": "Detalhe · Pernas e glúteos - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:621",
+        "2017:1416",
+        "4011:682"
+      ]
+    },
+    {
+      "group": "E14",
+      "id": "2023:37725",
+      "name": "WEB • Peito e costas • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E14",
+      "id": "2031:1732",
+      "name": "WEB • Peito e costas • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E14",
+      "id": "2017:907",
+      "name": "Detalhe · Peito e costas - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:42",
+        "2017:1466",
+        "4011:642"
+      ]
+    },
+    {
+      "group": "E14",
+      "id": "2017:858",
+      "name": "Detalhe · Peito e costas - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:621",
+        "2017:1416",
+        "4011:682"
+      ]
+    },
+    {
+      "group": "E15",
+      "id": "2023:37846",
+      "name": "WEB • Cardio e mobilidade • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1035,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E15",
+      "id": "2031:1596",
+      "name": "WEB • Cardio e mobilidade • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1035,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E15",
+      "id": "2017:803",
+      "name": "Detalhe · Cardio e mobilidade - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:42",
+        "2017:1466",
+        "4011:642"
+      ]
+    },
+    {
+      "group": "E15",
+      "id": "2017:748",
+      "name": "Detalhe · Cardio e mobilidade - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:621",
+        "2017:1416",
+        "4011:682"
+      ]
+    },
+    {
+      "group": "E16",
+      "id": "2023:37973",
+      "name": "WEB • Corpo inteiro · QUI • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1035,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E16",
+      "id": "2031:1460",
+      "name": "WEB • Corpo inteiro · QUI • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1035,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E16",
+      "id": "2017:693",
+      "name": "Detalhe · Corpo inteiro · QUI - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:42",
+        "2017:1466",
+        "4011:642"
+      ]
+    },
+    {
+      "group": "E16",
+      "id": "2017:638",
+      "name": "Detalhe · Corpo inteiro · QUI - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:621",
+        "2017:1416",
+        "4011:682"
+      ]
+    },
+    {
+      "group": "E17",
+      "id": "2023:38100",
+      "name": "WEB • Medidas e evolução • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E17",
+      "id": "2031:1344",
+      "name": "WEB • Medidas e evolução • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E17",
+      "id": "87:653",
+      "name": "Medidas - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 11,
+      "prototypeDestinations": [
+        "2017:1339",
+        "19:270",
+        "87:653",
+        "87:715",
+        "87:42"
+      ]
+    },
+    {
+      "group": "E17",
+      "id": "87:684",
+      "name": "Medidas - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 11,
+      "prototypeDestinations": [
+        "2017:1262",
+        "19:270",
+        "87:653",
+        "87:715",
+        "19:602",
+        "87:621",
+        "87:739"
+      ]
+    },
+    {
+      "group": "E18",
+      "id": "2023:38207",
+      "name": "WEB • Registar medidas • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E18",
+      "id": "2031:1191",
+      "name": "WEB • Registar medidas • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E18",
+      "id": "2017:1339",
+      "name": "Registar medidas - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:653"
+      ]
+    },
+    {
+      "group": "E18",
+      "id": "2017:1262",
+      "name": "Registar medidas - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": [
+        "87:684"
+      ]
+    },
+    {
+      "group": "E19",
+      "id": "2023:38350",
+      "name": "WEB • Gestão de hidratação • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1009,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E19",
+      "id": "2031:999",
+      "name": "WEB • Gestão de hidratação • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1009,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E19",
+      "id": "138:50",
+      "name": "Gestão de Hidratação - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 1,
+      "prototypeDestinations": [
+        "19:270"
+      ]
+    },
+    {
+      "group": "E19",
+      "id": "138:109",
+      "name": "Gestão de Hidratação - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 1,
+      "prototypeDestinations": [
+        "19:602"
+      ]
+    },
+    {
+      "group": "E20",
+      "id": "2023:38533",
+      "name": "WEB • Coach IA • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E20",
+      "id": "2031:888",
+      "name": "WEB • Coach IA • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E20",
+      "id": "87:715",
+      "name": "Coach IA - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 11,
+      "prototypeDestinations": [
+        "136:42",
+        "138:50",
+        "19:270",
+        "87:653",
+        "87:715",
+        "87:42"
+      ]
+    },
+    {
+      "group": "E20",
+      "id": "87:739",
+      "name": "Coach IA - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 11,
+      "prototypeDestinations": [
+        "136:122",
+        "138:109",
+        "19:270",
+        "87:653",
+        "87:715",
+        "19:602",
+        "87:621",
+        "87:684"
+      ]
+    },
+    {
+      "group": "E21",
+      "id": "2023:38629",
+      "name": "WEB • Perfil pessoal • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E21",
+      "id": "2031:780",
+      "name": "WEB • Perfil pessoal • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E21",
+      "id": "244:360",
+      "name": "Perfil pessoal - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "19:270",
+        "2017:1752",
+        "90:51"
+      ]
+    },
+    {
+      "group": "E21",
+      "id": "244:605",
+      "name": "Perfil pessoal - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "19:602",
+        "2017:1684",
+        "89:42"
+      ]
+    },
+    {
+      "group": "E22",
+      "id": "2023:38727",
+      "name": "WEB • Editar perfil • Dark",
+      "platform": "web",
+      "theme": "dark",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E22",
+      "id": "2031:640",
+      "name": "WEB • Editar perfil • Light",
+      "platform": "web",
+      "theme": "light",
+      "width": 1440,
+      "height": 1000,
+      "linkedNodeCount": 0,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E22",
+      "id": "2017:1752",
+      "name": "Editar perfil - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "244:360"
+      ]
+    },
+    {
+      "group": "E22",
+      "id": "2017:1684",
+      "name": "Editar perfil - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 4,
+      "prototypeDestinations": [
+        "244:605"
+      ]
+    },
+    {
+      "group": "E23",
+      "id": "244:401",
+      "name": "Menu lateral - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 20,
+      "prototypeDestinations": [
+        "19:602",
+        "138:50",
+        "136:42",
+        "19:270",
+        "87:653",
+        "87:715",
+        "87:42",
+        "244:360",
+        "90:51"
+      ]
+    },
+    {
+      "group": "E23",
+      "id": "244:646",
+      "name": "Menu lateral - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 20,
+      "prototypeDestinations": [
+        "19:270",
+        "138:109",
+        "136:122",
+        "87:653",
+        "87:715",
+        "87:621",
+        "87:684",
+        "87:739",
+        "19:602",
+        "244:605",
+        "89:42"
+      ]
+    },
+    {
+      "group": "E24",
+      "id": "4011:642",
+      "name": "Adicionar exercício - Dark",
+      "platform": "mobile",
+      "theme": "dark",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": []
+    },
+    {
+      "group": "E24",
+      "id": "4011:682",
+      "name": "Adicionar exercício - Light",
+      "platform": "mobile",
+      "theme": "light",
+      "width": 402,
+      "height": 874,
+      "linkedNodeCount": 3,
+      "prototypeDestinations": []
+    }
+  ],
+  "components": [
+    {
+      "id": "178:82",
+      "name": "Barra de navegação — Escuro",
+      "type": "COMPONENT_SET",
+      "childCount": 4
+    },
+    {
+      "id": "178:42",
+      "name": "Ativo=Início",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "178:52",
+      "name": "Ativo=Treinos",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "178:62",
+      "name": "Ativo=Medidas",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "178:72",
+      "name": "Ativo=Coach IA",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "178:123",
+      "name": "Barra de navegação — Claro",
+      "type": "COMPONENT_SET",
+      "childCount": 4
+    },
+    {
+      "id": "178:83",
+      "name": "Ativo=Início",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "178:93",
+      "name": "Ativo=Treinos",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "178:103",
+      "name": "Ativo=Medidas",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "178:113",
+      "name": "Ativo=Coach IA",
+      "type": "COMPONENT",
+      "childCount": 13
+    },
+    {
+      "id": "226:140",
+      "name": "Barra de estado — Escuro",
+      "type": "COMPONENT",
+      "childCount": 9
+    },
+    {
+      "id": "226:151",
+      "name": "Barra de estado — Claro",
+      "type": "COMPONENT",
+      "childCount": 9
+    }
+  ],
+  "variableCollections": [
+    {
+      "id": "VariableCollectionId:8:707",
+      "name": "goleve.netlify.app",
+      "count": 1,
+      "modes": [
+        {
+          "id": "8:0",
+          "name": "Mode 1"
+        }
+      ]
+    },
+    {
+      "id": "VariableCollectionId:10:2",
+      "name": "html.to.design",
+      "count": 90,
+      "modes": [
+        {
+          "id": "10:0",
+          "name": "Mode 1"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "GoLeve",
+    "slug": "goleve-v1-development",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "icon": "../shared/assets/branding/icone-lime-512.png",
+    "ios": {
+      "supportsTablet": true,
+      "icon": {
+        "light": "../shared/assets/branding/icone-lime-512.png",
+        "dark": "../shared/assets/branding/icone-dark-512.png"
+      }
+    },
+    "android": {
+      "package": "app.goleve.development",
+      "icon": "../shared/assets/branding/icone-lime-512.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "updates": {
+      "enabled": false
+    }
+  }
+}
