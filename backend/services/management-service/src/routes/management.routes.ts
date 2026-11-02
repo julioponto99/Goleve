@@ -9,12 +9,14 @@ const ctx=(res:Response)=>res.locals.context as Context;
 export function managementRoutes(service:ManagementService){
  const r=Router(),send=(res:Response,result:any,status=200)=>{if(result?.id&&result.version)res.set('ETag','"'+result.id+':'+result.version+'"');res.status(status).json({data:result});};
  r.get('/me',work(async(req,res)=>send(res,await service.me(ctx(res)))));
+ r.get('/operators',work(async(req,res)=>send(res,await service.listOperators(ctx(res),req.query))));
+ r.get('/assignments/:id/history',work(async(req,res)=>send(res,await service.assignmentHistory(ctx(res),req.params.id,req.query))));
  r.post('/operators',work(async(req,res)=>send(res,await service.createOperator(ctx(res),req.body),201)));
  r.post('/scopes',work(async(req,res)=>send(res,await service.createScope(ctx(res),req.body),201)));
  r.get('/scopes',work(async(req,res)=>send(res,await service.scopes(ctx(res),req.query))));
  r.post('/assignments',work(async(req,res)=>send(res,await service.requestAssignment(ctx(res),req.body),201)));
  r.get('/assignments',work(async(req,res)=>send(res,await service.listAssignments(ctx(res),req.query))));
- for(const action of ['approve','request-revocation','approve-revocation'] as const)r.post('/assignments/:id/'+action,work(async(req,res)=>send(res,await service.assignmentAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body))));
+ for(const action of ['approve','reject','request-revocation','approve-revocation'] as const)r.post('/assignments/:id/'+action,work(async(req,res)=>send(res,await service.assignmentAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body))));
  for(const [route,owner,action,permission] of [['professionals','professional','professionals','professionals.read'],['services','professional','services','services.read'],['appointments','agenda','appointments','appointments.read'],['payments','payment','payments','payments.read']] as const)r.get('/'+route,work(async(req,res)=>send(res,await service.readOwner(ctx(res),owner,action,permission,req.query))));
  for(const action of ['suspend','reactivate'] as const)r.post('/services/:id/'+action,work(async(req,res)=>send(res,await service.serviceAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body))));
  r.post('/cases',work(async(req,res)=>send(res,await service.createCase(ctx(res),req.body),201)));

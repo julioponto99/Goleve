@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { OwnedData, ownedFields, schemaOptions } from './common';
 export interface ProfileData extends OwnedData {
+  administrativelySuspended?:boolean;
   professionalName: string; biography?: string; privateContactEmail?: string;
   publicContacts?: { email?: string; phoneE164?: string };
   countryCode: string; languages: string[]; profileStatus: string;
@@ -10,6 +11,7 @@ export interface ProfileData extends OwnedData {
 const contacts = new Schema({ email: { type: String, maxlength: 254 }, phoneE164: { type: String, match: /^\+[1-9]\d{6,14}$/ } },
   { _id: false, strict: 'throw' });
 export const profileSchema = new Schema<ProfileData>({
+  administrativelySuspended:{type:Boolean,default:false},
   ...ownedFields,
   professionalName: { type: String, required: true, trim: true, minlength: 2, maxlength: 150 },
   biography: { type: String, maxlength: 2000 }, privateContactEmail: { type: String, maxlength: 254 },

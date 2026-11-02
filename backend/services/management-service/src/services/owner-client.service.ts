@@ -4,7 +4,8 @@ import { OwnerPorts } from './management.service';
 import { ApiError } from '../config/errors';
 export class OwnerClient implements OwnerPorts {
  constructor(readonly client:ContractClient){}
- identity(ctx:Context,authUserId:string){return this.client.call<{id:string;userType:string}>('auth','identity',{authUserId},ctx.bearer);}
+ identity(ctx:Context,authUserId:string){return this.client.call<{id:string;userType:string;roleVersion?:number;accountStatus?:string}>('auth','identity',{authUserId},ctx.bearer);}
+ async adminCheck(ctx:Context,action:string,targetId:string,parameters:unknown,stepUpToken?:string){const r=await this.client.call<any>('auth','admin-check',{action,targetId,parameters,...(stepUpToken!==undefined?{stepUpToken}:{})},ctx.bearer);if(!r||r.authorized!==true||r.actorId!==ctx.identity.id||r.action!==action||r.targetId!==targetId)throw new ApiError(503,'ADMIN_AUTHORIZATION_UNAVAILABLE','Current reinforced authorization could not be confirmed');}
  async validateServices(ctx:Context,serviceIds:string[]){const r=await this.client.call<{serviceIds:string[]}>('professional','validate',{serviceIds,permission:'scope.validate'},ctx.bearer);if(!r||JSON.stringify([...r.serviceIds].sort())!==JSON.stringify([...serviceIds].sort()))throw new Error('Canonical service validation failed');}
  async query(ctx:Context,owner:'professional'|'agenda'|'payment',action:string,input:Record<string,unknown>){
   const result=await this.client.call<any>(owner,action,input,ctx.bearer),fail=():never=>{throw new ApiError(503,'INVALID_OWNER_RESPONSE','Owner response violates the operational contract');},pick=(value:any,keys:string[])=>Object.fromEntries(keys.filter(k=>value[k]!==undefined).map(k=>[k,value[k]])),scope=input.serviceIds as string[];

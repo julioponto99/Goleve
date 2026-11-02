@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { ApiError } from '../config/errors';
 import { verifyAccessToken } from '../config/token';
+import { SecurityService } from '../administration/security.service';
 
 export function authenticate(req: Request, res: Response, next: NextFunction): void {
   const authorization = req.get('authorization');
@@ -13,10 +14,5 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
     return;
   }
 
-  try {
-    res.locals.userId = verifyAccessToken(match[1]);
-    next();
-  } catch {
-    next(new ApiError(401, 'INVALID_TOKEN', 'Invalid or expired access token'));
-  }
+  void (res.app.locals.security as SecurityService||new SecurityService()).context(authorization!).then(context=>{res.locals.userId=String(context.user._id);res.locals.security=context;next();}).catch(next);
 }

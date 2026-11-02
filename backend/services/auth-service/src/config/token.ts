@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { isObjectIdOrHexString } from 'mongoose';
+import { randomBytes } from 'node:crypto';
 
 export const TOKEN_LIFETIME_SECONDS = 3600;
 const issuer = 'goleve-auth';
@@ -20,8 +21,8 @@ export function getJwtSecret(): string {
   return secret;
 }
 
-export function signAccessToken(userId: string): string {
-  return jwt.sign({}, getJwtSecret(), {
+export function signAccessToken(userId: string,sessionId=randomBytes(32).toString('hex'),securityVersion=0): string {
+  return jwt.sign({sid:sessionId,sv:securityVersion}, getJwtSecret(), {
     algorithm: 'HS256',
     subject: userId,
     issuer,
@@ -31,6 +32,9 @@ export function signAccessToken(userId: string): string {
 }
 
 export function verifyAccessToken(token: string): string {
+  return verifyTokenClaims(token).userId;
+}
+export function verifyTokenClaims(token:string):{userId:string;sessionId:string;securityVersion:number}{
   const payload = jwt.verify(token, getJwtSecret(), {
     algorithms: ['HS256'],
     issuer,
@@ -38,8 +42,8 @@ export function verifyAccessToken(token: string): string {
   });
 
   if (typeof payload === 'string' || !isObjectIdOrHexString(payload.sub)
-    || typeof payload.exp !== 'number') {
+    || typeof payload.exp !== 'number'||typeof payload.sid!=='string'||!/^[a-f0-9]{64}$/.test(payload.sid)||!Number.isSafeInteger(payload.sv)||Number(payload.sv)<0) {
     throw new Error('Invalid token claims');
   }
-  return payload.sub as string;
+  return{userId:payload.sub as string,sessionId:payload.sid,securityVersion:payload.sv as number};
 }

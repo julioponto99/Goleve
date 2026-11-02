@@ -24,7 +24,7 @@ export function createAgendaInternalRoutes(connection: Connection, models: Profe
       const capability = await models.Capability.findOne({ _id: body.capabilityId, status: { $nin: ['suspended', 'expired', 'rejected'] },
         ...(body.professionalId ? {professionalId:body.professionalId} : {}) });
       if (!capability) throw new ApiError(404,'NOT_FOUND','Professional capability not found');
-      const profile = await models.Profile.findOne({ _id: capability.professionalId, authUserId: capability.authUserId });
+      const profile = await models.Profile.findOne({ _id: capability.professionalId, authUserId: capability.authUserId, profileStatus: { $nin: ['suspended', 'archived'] }, administrativelySuspended: { $ne: true } });
       if (!profile) throw new ApiError(404,'NOT_FOUND','Professional capability not found');
       let relationshipAccepted = false;
       if (body.relationshipId) relationshipAccepted = !!await models.Relationship.exists({ _id:body.relationshipId, subjectAuthUserId:body.subjectAuthUserId,

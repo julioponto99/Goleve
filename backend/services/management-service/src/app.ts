@@ -5,6 +5,8 @@ import { authenticate } from './middlewares/auth.middleware';
 import { managementRoutes,authorizationRoutes } from './routes/management.routes';
 import { ContractConfig } from './management-contract';
 import { ApiError } from './config/errors';
+import { administrativeAuthorization } from './middlewares/administration.middleware';
+import { administrationOwnerAuthorization,administrationPublicRoutes } from './routes/administration.routes';
 export function createApp(runtime?:{service:ManagementService;config:ContractConfig;authOrigin:string}) {
   const app = express(); app.disable('x-powered-by');
   app.get('/health', (_req, res) => res.json({ service: 'management-service', status: 'ok' }));
@@ -13,7 +15,9 @@ export function createApp(runtime?:{service:ManagementService;config:ContractCon
   if(runtime){
     app.get('/ready',async(_req,res)=>{try{await runtime.service.connection.db!.admin().ping();res.json({status:'ok'});}catch{res.status(503).json({status:'unavailable'});}});
     app.use('/internal/v1/management',authorizationRoutes(runtime.service,runtime.config,runtime.authOrigin));
-    app.use('/management',authenticate(runtime.authOrigin),express.json({limit:'16kb'}),(_req,res,next)=>{res.set('Cache-Control','no-store');next();},managementRoutes(runtime.service));
+    app.use('/internal/v1/management',administrationOwnerAuthorization(runtime.service,runtime.config,runtime.authOrigin));
+    app.use('/management/administration',authenticate(runtime.authOrigin),express.json({limit:'16kb'}),administrativeAuthorization(runtime.service),administrationPublicRoutes(runtime.service));
+    app.use('/management',authenticate(runtime.authOrigin),express.json({limit:'16kb'}),administrativeAuthorization(runtime.service),(_req,res,next)=>{res.set('Cache-Control','no-store');next();},managementRoutes(runtime.service));
   }else app.use('/management',(_req,res)=>res.status(503).json({error:{code:'MANAGEMENT_UNAVAILABLE',message:'Persistent Management runtime required'}}));
   app.use((error:unknown,req:express.Request,res:express.Response,_next:express.NextFunction)=>{void(async()=>{
     const e=error instanceof ApiError?error:undefined,context=res.locals.context;

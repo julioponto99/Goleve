@@ -12,7 +12,7 @@ test('issued tokens expire in one hour and contain no user credentials', () => {
   assert.equal(verifyAccessToken(token), subject);
   const payload = jwt.decode(token);
   assert.equal(payload.exp - payload.iat, 3600);
-  assert.deepEqual(Object.keys(payload).sort(), ['aud', 'exp', 'iat', 'iss', 'sub']);
+  assert.deepEqual(Object.keys(payload).sort(), ['aud', 'exp', 'iat', 'iss', 'sid', 'sub', 'sv']);
 });
 
 for (const [label, overrides, secret] of [
@@ -24,14 +24,14 @@ for (const [label, overrides, secret] of [
   ['wrong signature', {}, 'another-signing-key'],
 ]) {
   test('JWT verification rejects ' + label, () => {
-    const token = jwt.sign({}, secret || process.env.JWT_SECRET, { ...options, ...overrides });
+    const token = jwt.sign({sid:'a'.repeat(64),sv:0}, secret || process.env.JWT_SECRET, { ...options, ...overrides });
     assert.throws(() => verifyAccessToken(token));
   });
 }
 
 test('JWT verification rejects tokens without expiration', () => {
   const { expiresIn, ...withoutExpiry } = options;
-  assert.throws(() => verifyAccessToken(jwt.sign({}, process.env.JWT_SECRET, withoutExpiry)));
+  assert.throws(() => verifyAccessToken(jwt.sign({sid:'a'.repeat(64),sv:0}, process.env.JWT_SECRET, withoutExpiry)));
 });
 
 test('JWT configuration refuses an empty signing secret', () => {

@@ -64,7 +64,8 @@ export class ProfessionalOfferingService {
   }
   async publicCatalog(query: PublicServiceQuery) {
     const applications = await this.models.Application.find({ status: 'approved', publicationEnabled: true }).select('professionalId');
-    const professionalIds = applications.map((application) => application.professionalId);
+    const visible=await this.models.Profile.find({_id:{$in:applications.map(a=>a.professionalId)},profileStatus:{$nin:['suspended','archived']},administrativelySuspended:{$ne:true}}).select('_id');
+    const professionalIds = visible.map(p=>p._id);
     if (!professionalIds.length) return { items: [], nextBefore: null };
     const filter: Record<string, unknown> = { professionalId: { $in: professionalIds }, active: true };
     if (query.category) filter.category = query.category;

@@ -1,5 +1,15 @@
 # API Gestor V1
 
+Atualização Fase 5.11: a [API de Administração](administration-v1.md) e a sua
+[OpenAPI](administration-v1.openapi.json) complementam este contrato. Operações
+administrativas passam a exigir sessão persistida, MFA real, quórum formado e
+`X-Admin-Step-Up` nas mutações sensíveis. JWT antigos exigem novo login.
+Acrescentam-se `GET /management/operators`,
+`GET /management/assignments/:id/history` e
+`POST /management/assignments/:id/reject` (recusa independente com motivo,
+versão e prova reforçada). Os endpoints operacionais de Gestor conservam os
+seus âmbitos e permissões; não conferem privilégios administrativos.
+
 [OpenAPI 3.1](management-v1.openapi.json) define corpos, respostas, estados,
 paginação, erros e autenticação para web/mobile.
 

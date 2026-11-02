@@ -3,7 +3,7 @@
   "info": {
     "title": "GoLeve V1 — Management/Gestor",
     "version": "1.0.0",
-    "description": "Contratos públicos. Identidade no Auth; permissões e âmbitos persistidos no Management, revalidados nos proprietários. Convite não concede atribuições. Reativação normal indisponível até existir autoridade real de elegibilidade. Não declara prontidão produtiva."
+    "description": "Contratos públicos. Identidade no Auth; permissões e âmbitos persistidos no Management, revalidados nos proprietários. Convite não concede atribuições. Reativação normal indisponível até existir autoridade real de elegibilidade. Não declara prontidão produtiva. Phase 5.11: administrative mutations additionally require current persisted MFA session, closed quorum and a one-use X-Admin-Step-Up bound to the exact operation. See administration-v1.openapi.json and administration-v1.md. Existing manager operations still require active scope grants."
   },
   "servers": [
     {
@@ -171,7 +171,17 @@
             "Bearer": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Operação concluída.",
@@ -314,6 +324,165 @@
             }
           }
         }
+      },
+      "get": {
+        "summary": "List manager profiles and current Auth role/account state",
+        "description": "Items include currentRole and accountStatus confirmed through Auth. Administrator MFA and quorum required.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "invited",
+                "active",
+                "suspended",
+                "archived"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{data:{items,nextBefore}}",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/OperatorCurrentPage"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/management/scopes": {
@@ -328,7 +497,17 @@
             "Bearer": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Operação concluída.",
@@ -652,7 +831,17 @@
             "Bearer": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Operação concluída.",
@@ -834,7 +1023,8 @@
                 "pending",
                 "active",
                 "revocation_pending",
-                "revoked"
+                "revoked",
+                "rejected"
               ]
             }
           }
@@ -1006,6 +1196,15 @@
               "type": "string"
             },
             "description": "ETag recebido: \"<id>:<version>\"."
+          },
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
           }
         ],
         "responses": {
@@ -1182,6 +1381,15 @@
               "type": "string"
             },
             "description": "ETag recebido: \"<id>:<version>\"."
+          },
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
           }
         ],
         "responses": {
@@ -1358,6 +1566,15 @@
               "type": "string"
             },
             "description": "ETag recebido: \"<id>:<version>\"."
+          },
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
           }
         ],
         "responses": {
@@ -3597,7 +3814,17 @@
             "Bearer": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Operação concluída.",
@@ -3762,6 +3989,15 @@
             "schema": {
               "type": "string",
               "pattern": "^[a-f0-9]{24}$"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
             }
           }
         ],
@@ -4045,6 +4281,351 @@
           }
         }
       }
+    },
+    "/management/assignments/{id}/history": {
+      "get": {
+        "summary": "Administrative history of an assignment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated administrative audit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AuditPage"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/management/assignments/{id}/reject": {
+      "post": {
+        "operationId": "rejectScopeAssignment",
+        "summary": "Reject a pending scope assignment independently",
+        "tags": [
+          "Administração"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{24}$"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ETag recebido: \"<id>:<version>\"."
+          },
+          {
+            "in": "header",
+            "name": "X-Admin-Step-Up",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Assignment"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Pedido recusado ou dependência indisponível.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Pedido recusado ou dependência indisponível.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Administrative authorization, validation or dependency failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-authorized-role": "administrador",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "reasonCode": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{2,63}$"
+                  }
+                },
+                "required": [
+                  "reasonCode"
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4053,6 +4634,11 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "AdminStepUp": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Admin-Step-Up"
       }
     },
     "schemas": {
@@ -4240,7 +4826,8 @@
               "pending",
               "active",
               "revocation_pending",
-              "revoked"
+              "revoked",
+              "rejected"
             ]
           },
           "requestedBy": {
@@ -4281,6 +4868,14 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "authRoleVersion": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "requesterRoleVersion": {
+            "type": "integer",
+            "minimum": 0
           }
         },
         "required": [
@@ -5286,6 +5881,101 @@
           "identityId",
           "operator",
           "assignments"
+        ]
+      },
+      "OperatorCurrent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{24}$"
+          },
+          "authUserId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{24}$"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "operatorStatus": {
+            "type": "string",
+            "enum": [
+              "invited",
+              "active",
+              "suspended",
+              "archived"
+            ]
+          },
+          "onboardingApprovedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentRole": {
+            "enum": [
+              "utilizador",
+              "profissional",
+              "gestor",
+              "administrador"
+            ]
+          },
+          "accountStatus": {
+            "enum": [
+              "active",
+              "suspended"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "authUserId",
+          "displayName",
+          "operatorStatus",
+          "onboardingApprovedAt",
+          "version",
+          "createdAt",
+          "updatedAt",
+          "currentRole",
+          "accountStatus"
+        ]
+      },
+      "OperatorCurrentPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperatorCurrent"
+            }
+          },
+          "nextBefore": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{24}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextBefore"
         ]
       }
     }

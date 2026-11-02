@@ -4,7 +4,7 @@ import * as authService from '../services/auth.service';
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.status(201).json(await authService.register(validateRegister(req.body)));
+    res.status(201).json(await authService.register(validateRegister(req.body),res.app.locals.security));
   } catch (error) {
     next(error);
   }
@@ -12,7 +12,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
 
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.json(await authService.login(validateLogin(req.body)));
+    res.json(await authService.login(validateLogin(req.body),res.app.locals.security));
   } catch (error) {
     next(error);
   }

@@ -4,6 +4,11 @@ export const USER_TYPES = ['utilizador', 'profissional', 'gestor', 'administrado
 export type UserType = typeof USER_TYPES[number];
 
 export interface AuthUserData {
+  accountStatus?: 'active'|'suspended';
+  securityVersion?: number;
+  roleVersion?: number;
+  adminVersion?: number;
+  mfaEnabled?: boolean;
   name: string;
   email: string;
   passwordHash: string;
@@ -14,6 +19,8 @@ export interface AuthUserData {
 }
 
 const schema = new Schema<AuthUserData>({
+  accountStatus:{type:String,enum:['active','suspended'],default:'active'},
+  securityVersion:{type:Number,default:0,min:0},roleVersion:{type:Number,default:0,min:0},adminVersion:{type:Number,default:1,min:1},mfaEnabled:{type:Boolean,default:false},
   name: { type: String, required: true, trim: true, minlength: 2, maxlength: 100 },
   email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254, unique: true },
   passwordHash: { type: String, required: true, select: false },
@@ -40,6 +47,7 @@ export function publicUser(user: HydratedDocument<AuthUserData>) {
     name: user.name,
     email: user.email,
     userType: user.userType,
+    accountStatus:user.accountStatus||'active',roleVersion:user.roleVersion||0,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

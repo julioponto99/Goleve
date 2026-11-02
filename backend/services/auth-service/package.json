@@ -6,7 +6,9 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "npm run build && npm run build --workspace=@goleve/api-gateway && node --test tests/*.test.cjs"
+    "test": "npm run build && npm run build --workspace=@goleve/api-gateway && node --test tests/*.test.cjs",
+    "admin:install": "node dist/administration/cli.js",
+    "test:administration": "npm run build && npm run build --workspace=@goleve/management-service --workspace=@goleve/professional-service --workspace=@goleve/api-gateway && node --test --test-concurrency=1 tests/administration.unit.test.cjs tests/administration.integration.test.cjs"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

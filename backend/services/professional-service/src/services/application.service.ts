@@ -180,7 +180,8 @@ export class ApplicationService {
     }, id);
   }
   async catalog(page: PageOptions) {
-    const docs = await this.models.Application.find({ status: 'approved', publicationEnabled: true, dataMode: 'synthetic',
+    const visible=await this.models.Profile.find({profileStatus:{$nin:['suspended','archived']},administrativelySuspended:{$ne:true}}).select('_id');
+    const docs = await this.models.Application.find({ professionalId:{$in:visible.map(p=>p._id)}, status: 'approved', publicationEnabled: true, dataMode: 'synthetic',
       ...(page.before ? { _id: { $lt: new Types.ObjectId(page.before) } } : {}) }).select('+snapshot').sort({ _id: -1 }).limit(page.limit + 1);
     const selected = docs.slice(0, page.limit);
     return { items: selected.map((doc) => ({ id: doc.professionalId.toHexString(), professionalName: doc.snapshot.profile.professionalName,

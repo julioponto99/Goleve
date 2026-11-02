@@ -866,3 +866,40 @@ Não se declara a V1 pronta para produção ou a reativação real concluída.
 
 Testes direcionados e resultados concretos constam da API. Não houve
 alteração da infraestrutura principal, migração, commit, push ou merge.
+
+## 20. Fase 5.11 — Administração da plataforma V1
+
+Implementação permanente na branch `feat/administration-v1`.
+[Arquitetura/matriz](architecture/administration-v1.md),
+[transição Auth](architecture/administration-v1-transition.md),
+[instalação e recuperação](architecture/administration-v1-installation.md),
+[API](api/administration-v1.md), [OpenAPI](api/administration-v1.openapi.json)
+e [validação](api/administration-v1-validation.md).
+
+- Bootstrap por CLI, transacional, explícito e irreutilizável; cerimónia única
+  de segundo Administrador; quórum só após MFA real de ambos. Não executado
+  sobre contas ou bases reais.
+- TOTP cifrado, códigos de recuperação com hash/consumo único, sessões
+  persistidas e revogáveis, step-up de cinco minutos vinculado à operação.
+  JWT anteriores sem sessão deixam de funcionar numa implantação futura.
+- Consulta administrativa mínima de identidades e histórico; suspensão,
+  reativação, revogação global e mudanças de papel com decisão independente,
+  controlo de versão e proteção transacional do último Administrador ativo.
+- Convites Gestor e âmbitos existentes reforçados; recusa/histórico de
+  atribuições e consulta dos estados atuais dos Gestores. Revogação de conta
+  também invalida épocas de atribuição, sem restaurar acessos antigos.
+- Supervisão profissional mínima e suspensão auditada no proprietário;
+  catálogos/elegibilidade respeitam suspensão. Sem aprovação real, reativação
+  administrativa, cancelamento de reservas ou reembolso automático.
+- Contratos internos existentes por destino, nova confirmação de autorização
+  atual no Auth e gateway público sem rotas internas. Coach IA não alterado.
+
+Testes direcionados com contas fictícias e bases separadas num replica set
+temporário autorizado. Resultados, comandos e limites estão no relatório de
+validação. Sem regressão global, alteração dos 14 componentes principais,
+migrações, provisionamento real, commit, push ou merge.
+
+Dependências V1: implantação controlada de replica set/chaves/contratos, revisão
+de segurança integrada, autoridade profissional real, política operacional de
+recuperação completa e rotação de fatores/chaves. Não se declara prontidão para
+produção nem se ativa qualquer funcionalidade sintética nesse ambiente.

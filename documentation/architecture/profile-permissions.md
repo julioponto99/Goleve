@@ -280,3 +280,26 @@ Uma recomendação IA é um resultado inferido com proveniência e versão do mo
 A sequência de seis fases está em [user-profiles.md](user-profiles.md). Cada fase exige testes de matriz/IDOR, minimização, revogação e erros em dependências; o detalhe de integração está em [profile-relationships.md](profile-relationships.md).
 
 **Critério de validação de extensões:** preservar os controlos já implementados e aprovar ownership, distinção de contextos próprios/profissionais, grants separados e decisões bloqueantes antes de criar novos contratos, schemas, endpoints, eventos, migrações ou alterações no Auth. A opcionalidade de IA não cria consentimentos nem autoriza processamento; a Fase 4 distingue agenda pessoal de reserva profissional conforme [autonomous-use.md](autonomous-use.md#5-implicações-para-a-fase-4-agenda).
+
+## 11. Decisões aprovadas e implementadas na Fase 5.11
+
+A [matriz administrativa V1](administration-v1.md) concretiza a política de
+papéis, bootstrap, MFA, step-up e segregação de funções que o quadro anterior
+deixava pendente. A aprovação desta fase não resolve requisitos jurídicos,
+retenção institucional, verificação de credenciais reais ou recuperação offline.
+
+Papel global único, sem registo público privilegiado. Mudanças de papel exigem
+pedido e aprovação independente, nenhum ator pode ser o alvo. Privilégios de
+Administrador exigem sessão persistida e MFA real; operações normais exigem
+quórum formado e mutações sensíveis exigem prova exata de utilização única.
+O último Administrador ativo com MFA é protegido transacionalmente.
+
+Gestor mantém RBAC + âmbitos canónicos e aprovação independente da Fase 5.10.
+Revogação global, suspensão ou perda de papel invalidam acessos e a época das
+atribuições anteriores. Reativação/novo papel não restauram essas permissões.
+Expiração é efetiva na autorização mesmo antes de uma atualização física do
+documento. Administrador não ganha acesso operacional de Gestor implicitamente.
+
+Supervisão profissional acrescenta consulta mínima e suspensão administrativa,
+sem aprovação real de credenciais ou reativação. Nenhum destes papéis concede
+acesso a saúde, conversas IA ou operações financeiras não autorizadas.
