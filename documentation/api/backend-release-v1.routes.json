@@ -1,0 +1,4181 @@
+{
+  "baseCommit": "000cc43ee2a47af9de5b0f8ace7fb09e8a5d5dd6",
+  "operations": [
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/activities",
+      "file": "backend/services/agenda-service/src/routes/agenda.routes.ts",
+      "line": 6,
+      "handler": "controller.list",
+      "sourceRoute": "/activities",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to",
+        "status",
+        "kind",
+        "environment"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/activities",
+      "file": "backend/services/agenda-service/src/routes/agenda.routes.ts",
+      "line": 7,
+      "handler": "controller.create",
+      "sourceRoute": "/activities",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Activity"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/activities/{activityId}",
+      "file": "backend/services/agenda-service/src/routes/agenda.routes.ts",
+      "line": 8,
+      "handler": "controller.get",
+      "sourceRoute": "/activities/:activityId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "patch",
+      "path": "/agenda/activities/{activityId}",
+      "file": "backend/services/agenda-service/src/routes/agenda.routes.ts",
+      "line": 9,
+      "handler": "controller.update",
+      "sourceRoute": "/activities/:activityId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ActivityPatch"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/activities/{activityId}/cancel",
+      "file": "backend/services/agenda-service/src/routes/agenda.routes.ts",
+      "line": 11,
+      "handler": "controller.cancel",
+      "sourceRoute": "/activities/:activityId/cancel",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/activities/{activityId}/complete",
+      "file": "backend/services/agenda-service/src/routes/agenda.routes.ts",
+      "line": 10,
+      "handler": "controller.complete",
+      "sourceRoute": "/activities/:activityId/complete",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/professional-appointments",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 21,
+      "handler": "c.own",
+      "sourceRoute": "/professional-appointments",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "from",
+        "to",
+        "limit",
+        "before",
+        "status",
+        "capabilityId"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional-appointments",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 20,
+      "handler": "c.request",
+      "sourceRoute": "/professional-appointments",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Booking"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/professional-appointments/{id}",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 24,
+      "handler": "c.get",
+      "sourceRoute": "/professional-appointments/:id",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional-appointments/{id}/cancel",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 26,
+      "handler": "c.resolve('cancel')",
+      "sourceRoute": "/professional-appointments/:id/cancel",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/professional-appointments/{id}/history",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 23,
+      "handler": "c.history",
+      "sourceRoute": "/professional-appointments/:id/history",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional-appointments/{id}/reschedule",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 27,
+      "handler": "c.reschedule",
+      "sourceRoute": "/professional-appointments/:id/reschedule",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Booking"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional-appointments/{id}/service",
+      "file": "backend/services/agenda-service/src/payment-demo/routes.ts",
+      "line": 22,
+      "handler": "async(req,res,next)=>{try{\n    const ctx=res.locals.context as RequestContext,b=fields(req.body,['serviceId']),id=oid(req.params.id);\n    const data=await billi",
+      "sourceRoute": "/professional-appointments/:id/service",
+      "availability": "payment-agenda-demo-blocked",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ServiceAssociation"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/professional/appointments",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 22,
+      "handler": "c.received",
+      "sourceRoute": "/professional/appointments",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "from",
+        "to",
+        "limit",
+        "before",
+        "status",
+        "capabilityId"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional/appointments/{id}/accept",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 25,
+      "handler": "c.resolve(action)",
+      "sourceRoute": "/professional/appointments/:id/accept",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional/appointments/{id}/cancel",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 25,
+      "handler": "c.resolve(action)",
+      "sourceRoute": "/professional/appointments/:id/cancel",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Review"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional/appointments/{id}/complete",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 25,
+      "handler": "c.resolve(action)",
+      "sourceRoute": "/professional/appointments/:id/complete",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional/appointments/{id}/decline",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 25,
+      "handler": "c.resolve(action)",
+      "sourceRoute": "/professional/appointments/:id/decline",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Review"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/professional/availability-exceptions",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 17,
+      "handler": "c.exceptions",
+      "sourceRoute": "/professional/availability-exceptions",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "capabilityId"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional/availability-exceptions",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 16,
+      "handler": "c.createException",
+      "sourceRoute": "/professional/availability-exceptions",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/AvailabilityException"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "delete",
+      "path": "/agenda/professional/availability-exceptions/{id}",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 18,
+      "handler": "c.removeException",
+      "sourceRoute": "/professional/availability-exceptions/:id",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/professional/availability-rules",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 13,
+      "handler": "c.rules",
+      "sourceRoute": "/professional/availability-rules",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "capabilityId"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "post",
+      "path": "/agenda/professional/availability-rules",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 12,
+      "handler": "c.createRule",
+      "sourceRoute": "/professional/availability-rules",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/AvailabilityRule"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "delete",
+      "path": "/agenda/professional/availability-rules/{id}",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 15,
+      "handler": "c.removeRule",
+      "sourceRoute": "/professional/availability-rules/:id",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "patch",
+      "path": "/agenda/professional/availability-rules/{id}",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 14,
+      "handler": "c.updateRule",
+      "sourceRoute": "/professional/availability-rules/:id",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/AvailabilityRule"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "agenda",
+      "method": "get",
+      "path": "/agenda/professionals/{professionalId}/availability",
+      "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
+      "line": 19,
+      "handler": "c.availability",
+      "sourceRoute": "/professionals/:professionalId/availability",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "capabilityId",
+        "from",
+        "to",
+        "mode",
+        "environment"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-agenda.md"
+    },
+    {
+      "service": "coach",
+      "method": "get",
+      "path": "/ai-coach/capabilities",
+      "file": "backend/services/ai-coach-service/src/app.ts",
+      "line": 32,
+      "handler": "(_req, res) => res.json({ data: { categories: CATEGORIES, tools: TOOLS, mode: 'isolated-synthetic', conversationRetentionDays: 7, auditRetentionDays: 30, propos",
+      "sourceRoute": "/ai-coach/capabilities",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "get",
+      "path": "/ai-coach/conversations",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 6,
+      "handler": "c.list",
+      "sourceRoute": "/conversations",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "post",
+      "path": "/ai-coach/conversations",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 6,
+      "handler": "c.create",
+      "sourceRoute": "/conversations",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Conversation"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "delete",
+      "path": "/ai-coach/conversations/{id}",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 7,
+      "handler": "c.remove",
+      "sourceRoute": "/conversations/:id",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "get",
+      "path": "/ai-coach/conversations/{id}/actions",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 10,
+      "handler": "c.actions",
+      "sourceRoute": "/conversations/:id/actions",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "get",
+      "path": "/ai-coach/conversations/{id}/messages",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 8,
+      "handler": "c.history",
+      "sourceRoute": "/conversations/:id/messages",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "post",
+      "path": "/ai-coach/conversations/{id}/messages",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 8,
+      "handler": "c.send",
+      "sourceRoute": "/conversations/:id/messages",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Message"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "patch",
+      "path": "/ai-coach/conversations/{id}/permissions",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 7,
+      "handler": "c.permissions",
+      "sourceRoute": "/conversations/:id/permissions",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/CoachPermissions"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "get",
+      "path": "/ai-coach/conversations/{id}/proposals",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 10,
+      "handler": "c.proposals",
+      "sourceRoute": "/conversations/:id/proposals",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "get",
+      "path": "/ai-coach/conversations/{id}/recommendations",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 9,
+      "handler": "c.recommendations",
+      "sourceRoute": "/conversations/:id/recommendations",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "post",
+      "path": "/ai-coach/proposals/{id}/confirm",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 11,
+      "handler": "c.confirm",
+      "sourceRoute": "/proposals/:id/confirm",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Proposal"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "post",
+      "path": "/ai-coach/proposals/{id}/reconcile",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 11,
+      "handler": "c.reconcile",
+      "sourceRoute": "/proposals/:id/reconcile",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ProposalReconcile"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "coach",
+      "method": "post",
+      "path": "/ai-coach/proposals/{id}/reject",
+      "file": "backend/services/ai-coach-service/src/routes/coach.routes.ts",
+      "line": 11,
+      "handler": "c.reject",
+      "sourceRoute": "/proposals/:id/reject",
+      "availability": "disabled-by-default",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ProposalPatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "ai-coach.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/admin/step-up",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 16,
+      "handler": "wrap(async(req,res)=>res.status(201).json({data:await service.stepUp(res.locals.security,req.body)}))",
+      "sourceRoute": "/admin/step-up",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/StepUp"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "get",
+      "path": "/auth/administration/audit",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 32,
+      "handler": "wrap(async(req,res)=>{const q=pagination(req.query);if(q.q!==undefined||q.role!==undefined||q.status!==undefined)throw new ApiError(400,'VALIDATION_ERROR','Only",
+      "sourceRoute": "/audit",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "get",
+      "path": "/auth/administration/role-requests",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 29,
+      "handler": "wrap(async(req,res)=>{const q=pagination(req.query);if(q.q!==undefined||q.role!==undefined||q.status!==undefined&&!['pending','approved','rejected'].includes(q.",
+      "sourceRoute": "/role-requests",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/administration/role-requests/{id}/approve",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 30,
+      "handler": "wrap(async(req,res)=>res.json({data:await service.decideRole(res.locals.security,req.params.id,action==='approve',req.body,proof(req))}))",
+      "sourceRoute": "/role-requests/:id/approve",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/Mutation"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/administration/role-requests/{id}/reject",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 30,
+      "handler": "wrap(async(req,res)=>res.json({data:await service.decideRole(res.locals.security,req.params.id,action==='approve',req.body,proof(req))}))",
+      "sourceRoute": "/role-requests/:id/reject",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/Mutation"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "get",
+      "path": "/auth/administration/users",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 25,
+      "handler": "wrap(async(req,res)=>{const q=pagination(req.query),filter:any={};if(q.before)filter._id={$lt:q.before};if(q.role!==undefined){if(!['utilizador','profissional',",
+      "sourceRoute": "/users",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "q",
+        "role",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "get",
+      "path": "/auth/administration/users/{id}",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 26,
+      "handler": "wrap(async(req,res)=>{const u=await AuthUser.findById(identifier(req.params.id));if(!u)throw new ApiError(404,'NOT_FOUND','Account not found');await service.aud",
+      "sourceRoute": "/users/:id",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "get",
+      "path": "/auth/administration/users/{id}/history",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 31,
+      "handler": "wrap(async(req,res)=>{const target=identifier(req.params.id),q=pagination(req.query);if(q.q!==undefined||q.role!==undefined||q.status!==undefined)throw new ApiE",
+      "sourceRoute": "/users/:id/history",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/administration/users/{id}/reactivate",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 27,
+      "handler": "wrap(async(req,res)=>res.json({data:await service.userAction(res.locals.security,req.params.id,action,req.body,proof(req))}))",
+      "sourceRoute": "/users/:id/reactivate",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/Mutation"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/administration/users/{id}/revoke",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 27,
+      "handler": "wrap(async(req,res)=>res.json({data:await service.userAction(res.locals.security,req.params.id,action,req.body,proof(req))}))",
+      "sourceRoute": "/users/:id/revoke",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/Mutation"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/administration/users/{id}/role-requests",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 28,
+      "handler": "wrap(async(req,res)=>res.status(201).json({data:await service.requestRole(res.locals.security,req.params.id,req.body,proof(req))}))",
+      "sourceRoute": "/users/:id/role-requests",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/RoleMutation"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/administration/users/{id}/suspend",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 27,
+      "handler": "wrap(async(req,res)=>res.json({data:await service.userAction(res.locals.security,req.params.id,action,req.body,proof(req))}))",
+      "sourceRoute": "/users/:id/suspend",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/Mutation"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/initial-admin-invitation/accept",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 15,
+      "handler": "wrap(async(req,res)=>res.status(201).json({data:await service.acceptSecond(req.body)}))",
+      "sourceRoute": "/initial-admin-invitation/accept",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "public-or-challenge",
+      "body": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "token": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": [
+          "token",
+          "name",
+          "password"
+        ]
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/login",
+      "file": "backend/services/auth-service/src/routes/auth.routes.ts",
+      "line": 12,
+      "handler": "controller.login",
+      "sourceRoute": "/login",
+      "availability": "local-fictional-data",
+      "authentication": "public-or-challenge",
+      "body": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/logout",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 17,
+      "handler": "wrap(async(req,res)=>{object(req.body||{},[]);await service.models.Session.updateOne({_id:res.locals.security.session._id},{$set:{revokedAt:new Date(service.now",
+      "sourceRoute": "/logout",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/manager-invitations",
+      "file": "backend/services/auth-service/src/manager-invitations.ts",
+      "line": 24,
+      "handler": "async(req,res,next)=>{try{\n   const b=body(req.body,['email']);if(typeof b.email!=='string')throw new ApiError(400,'VALIDATION_ERROR','Email required');const em",
+      "sourceRoute": "/",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/InvitationIssue"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/manager-invitations/{id}/revoke",
+      "file": "backend/services/auth-service/src/manager-invitations.ts",
+      "line": 29,
+      "handler": "async(req,res,next)=>{try{if(!/^[a-f0-9]{24}$/.test(req.params.id))throw new ApiError(400,'VALIDATION_ERROR','Invalid invitation');body(req.body||{},[]);const m",
+      "sourceRoute": "/:id/revoke",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/manager-invitations/accept",
+      "file": "backend/services/auth-service/src/manager-invitations.ts",
+      "line": 31,
+      "handler": "async(req,res,next)=>{try{\n   const key=req.ip||'unknown',now=Date.now();for(const [k,v]of attempts)if(v.until<=now)attempts.delete(k);if(attempts.size>10000&&!",
+      "sourceRoute": "/accept",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "public-or-challenge",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/InvitationAccept"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "get",
+      "path": "/auth/me",
+      "file": "backend/services/auth-service/src/routes/auth.routes.ts",
+      "line": 13,
+      "handler": "controller.me",
+      "sourceRoute": "/me",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/mfa/complete",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 14,
+      "handler": "wrap(async(req,res)=>res.json(await service.complete(req.body)))",
+      "sourceRoute": "/mfa/complete",
+      "availability": "local-fictional-data",
+      "authentication": "public-or-challenge",
+      "body": {
+        "$ref": "./administration-v1.openapi.json#/components/schemas/MfaFactor"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/mfa/enroll",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 13,
+      "handler": "wrap(async(req,res)=>res.json({data:await service.enroll(req.body)}))",
+      "sourceRoute": "/mfa/enroll",
+      "availability": "local-fictional-data",
+      "authentication": "public-or-challenge",
+      "body": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "challenge": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": [
+          "challenge",
+          "password"
+        ]
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "post",
+      "path": "/auth/register",
+      "file": "backend/services/auth-service/src/routes/auth.routes.ts",
+      "line": 11,
+      "handler": "controller.register",
+      "sourceRoute": "/register",
+      "availability": "local-fictional-data",
+      "authentication": "public-or-challenge",
+      "body": {
+        "$ref": "#/components/schemas/Register"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "auth",
+      "method": "get",
+      "path": "/auth/sessions",
+      "file": "backend/services/auth-service/src/administration/routes.ts",
+      "line": 18,
+      "handler": "wrap(async(_req,res)=>{const rows=await service.models.Session.find({userId:String(res.locals.security.user._id),revokedAt:{$exists:false},expiresAt:{$gt:new Da",
+      "sourceRoute": "/sessions",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "administration-v1.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/care-relationships",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 6,
+      "handler": "controller.create",
+      "sourceRoute": "/",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Relationship"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/care-relationships/{relationshipId}",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 8,
+      "handler": "controller.get",
+      "sourceRoute": "/:relationshipId",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/care-relationships/{relationshipId}/accept",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 10,
+      "handler": "controller.command('accept')",
+      "sourceRoute": "/:relationshipId/accept",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/care-relationships/{relationshipId}/cancel",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 12,
+      "handler": "controller.command('cancel')",
+      "sourceRoute": "/:relationshipId/cancel",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/care-relationships/{relationshipId}/decline",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 11,
+      "handler": "controller.command('decline')",
+      "sourceRoute": "/:relationshipId/decline",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/care-relationships/{relationshipId}/end",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 13,
+      "handler": "controller.command('end')",
+      "sourceRoute": "/:relationshipId/end",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/care-relationships/{relationshipId}/history",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 9,
+      "handler": "controller.history",
+      "sourceRoute": "/:relationshipId/history",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/care-relationships/me",
+      "file": "backend/services/professional-service/src/routes/care-relationship.routes.ts",
+      "line": 7,
+      "handler": "controller.list",
+      "sourceRoute": "/me",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "gateway",
+      "method": "get",
+      "path": "/health",
+      "file": "backend/api-gateway/src/app.ts",
+      "line": 22,
+      "handler": "(_req, res) => res.json({ service: 'api-gateway', status: 'ok' })",
+      "sourceRoute": "/health",
+      "availability": "read-only-health",
+      "authentication": "public-or-challenge",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/local-setup.md"
+    },
+    {
+      "service": "hydration",
+      "method": "get",
+      "path": "/hydration/goal",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 7,
+      "handler": "controller.getGoal",
+      "sourceRoute": "/goal",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "put",
+      "path": "/hydration/goal",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 8,
+      "handler": "controller.setGoal",
+      "sourceRoute": "/goal",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/HydrationGoal"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "get",
+      "path": "/hydration/goal/history",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 9,
+      "handler": "controller.goalHistory",
+      "sourceRoute": "/goal/history",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "post",
+      "path": "/hydration/goal/suggest",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 6,
+      "handler": "controller.suggest",
+      "sourceRoute": "/goal/suggest",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/HydrationSuggestion"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "get",
+      "path": "/hydration/intakes",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 12,
+      "handler": "controller.history",
+      "sourceRoute": "/intakes",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to",
+        "timezone"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "post",
+      "path": "/hydration/intakes",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 10,
+      "handler": "controller.createIntake",
+      "sourceRoute": "/intakes",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Intake"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "delete",
+      "path": "/hydration/intakes/{intakeId}",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 14,
+      "handler": "controller.deleteIntake",
+      "sourceRoute": "/intakes/:intakeId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "patch",
+      "path": "/hydration/intakes/{intakeId}",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 13,
+      "handler": "controller.updateIntake",
+      "sourceRoute": "/intakes/:intakeId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/IntakePatch"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "get",
+      "path": "/hydration/intakes/daily",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 11,
+      "handler": "controller.daily",
+      "sourceRoute": "/intakes/daily",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "date",
+        "timezone"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "get",
+      "path": "/hydration/reminders",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 15,
+      "handler": "controller.getReminder",
+      "sourceRoute": "/reminders",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "hydration",
+      "method": "put",
+      "path": "/hydration/reminders",
+      "file": "backend/services/hydration-service/src/routes/hydration.routes.ts",
+      "line": 16,
+      "handler": "controller.setReminder",
+      "sourceRoute": "/reminders",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Reminder"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/administration/applications",
+      "file": "backend/services/management-service/src/routes/administration.routes.ts",
+      "line": 17,
+      "handler": "wrap(async(req,res)=>{const options=page(req.query),ctx=res.locals.context;await service.ports.adminCheck(ctx,'administration.read','professional',{});const res",
+      "sourceRoute": "/applications",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/administration/professionals",
+      "file": "backend/services/management-service/src/routes/administration.routes.ts",
+      "line": 17,
+      "handler": "wrap(async(req,res)=>{const options=page(req.query),ctx=res.locals.context;await service.ports.adminCheck(ctx,'administration.read','professional',{});const res",
+      "sourceRoute": "/professionals",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "q",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/administration/professionals/{id}/history",
+      "file": "backend/services/management-service/src/routes/administration.routes.ts",
+      "line": 18,
+      "handler": "wrap(async(req,res)=>{const ctx=res.locals.context,target=id(req.params.id);await service.ports.adminCheck(ctx,'administration.read','professional',{});res.json",
+      "sourceRoute": "/professionals/:id/history",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/administration/professionals/{id}/suspend",
+      "file": "backend/services/management-service/src/routes/administration.routes.ts",
+      "line": 19,
+      "handler": "wrap(async(req,res)=>{const ctx=res.locals.context,target=id(req.params.id),b=object(req.body,['reasonCode']),reasonCode=reason(b.reasonCode),n=version(req.get(",
+      "sourceRoute": "/professionals/:id/suspend",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reasonCode": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,63}$"
+          }
+        },
+        "required": [
+          "reasonCode"
+        ]
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/administration/services",
+      "file": "backend/services/management-service/src/routes/administration.routes.ts",
+      "line": 17,
+      "handler": "wrap(async(req,res)=>{const options=page(req.query),ctx=res.locals.context;await service.ports.adminCheck(ctx,'administration.read','professional',{});const res",
+      "sourceRoute": "/services",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "q",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/administration/services/{id}/suspend",
+      "file": "backend/services/management-service/src/routes/administration.routes.ts",
+      "line": 19,
+      "handler": "wrap(async(req,res)=>{const ctx=res.locals.context,target=id(req.params.id),b=object(req.body,['reasonCode']),reasonCode=reason(b.reasonCode),n=version(req.get(",
+      "sourceRoute": "/services/:id/suspend",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reasonCode": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,63}$"
+          }
+        },
+        "required": [
+          "reasonCode"
+        ]
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/appointments",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 20,
+      "handler": "work(async(req,res)=>send(res,await service.readOwner(ctx(res),owner,action,permission,req.query)))",
+      "sourceRoute": "/appointments",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/assignments",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 18,
+      "handler": "work(async(req,res)=>send(res,await service.listAssignments(ctx(res),req.query)))",
+      "sourceRoute": "/assignments",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/assignments",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 17,
+      "handler": "work(async(req,res)=>send(res,await service.requestAssignment(ctx(res),req.body),201))",
+      "sourceRoute": "/assignments",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/AssignmentRequest"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/assignments/{id}/approve",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 19,
+      "handler": "work(async(req,res)=>send(res,await service.assignmentAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body)))",
+      "sourceRoute": "/assignments/:id/approve",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/assignments/{id}/approve-revocation",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 19,
+      "handler": "work(async(req,res)=>send(res,await service.assignmentAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body)))",
+      "sourceRoute": "/assignments/:id/approve-revocation",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/Reason"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/assignments/{id}/history",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 13,
+      "handler": "work(async(req,res)=>send(res,await service.assignmentHistory(ctx(res),req.params.id,req.query)))",
+      "sourceRoute": "/assignments/:id/history",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/assignments/{id}/reject",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 19,
+      "handler": "work(async(req,res)=>send(res,await service.assignmentAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body)))",
+      "sourceRoute": "/assignments/:id/reject",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reasonCode": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,63}$"
+          }
+        },
+        "required": [
+          "reasonCode"
+        ]
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/assignments/{id}/request-revocation",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 19,
+      "handler": "work(async(req,res)=>send(res,await service.assignmentAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body)))",
+      "sourceRoute": "/assignments/:id/request-revocation",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/Reason"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/audit",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 26,
+      "handler": "work(async(req,res)=>send(res,await service.listAudit(ctx(res),req.query)))",
+      "sourceRoute": "/audit",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/cases",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 23,
+      "handler": "work(async(req,res)=>send(res,await service.listCases(ctx(res),req.query)))",
+      "sourceRoute": "/cases",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status",
+        "q"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/cases",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 22,
+      "handler": "work(async(req,res)=>send(res,await service.createCase(ctx(res),req.body),201))",
+      "sourceRoute": "/cases",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/CaseCreate"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "patch",
+      "path": "/management/cases/{id}",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 24,
+      "handler": "work(async(req,res)=>send(res,await service.updateCase(ctx(res),req.params.id,version(req.get('if-match'),req.params.id),req.body)))",
+      "sourceRoute": "/cases/:id",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/CaseTransition"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/cases/{id}/history",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 25,
+      "handler": "work(async(req,res)=>send(res,await service.caseHistory(ctx(res),req.params.id,req.query)))",
+      "sourceRoute": "/cases/:id/history",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/dashboard",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 27,
+      "handler": "work(async(req,res)=>{\n   const b=object(req.query,['from','to']),from=String(b.from),to=String(b.to),a=new Date(from),z=new Date(to);if(!/^\\d{4}-\\d{2}-\\d{2}$/.",
+      "sourceRoute": "/dashboard",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "from",
+        "to"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/me",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 11,
+      "handler": "work(async(req,res)=>send(res,await service.me(ctx(res))))",
+      "sourceRoute": "/me",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/operators",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 12,
+      "handler": "work(async(req,res)=>send(res,await service.listOperators(ctx(res),req.query)))",
+      "sourceRoute": "/operators",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "q",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/operators",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 14,
+      "handler": "work(async(req,res)=>send(res,await service.createOperator(ctx(res),req.body),201))",
+      "sourceRoute": "/operators",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/OperatorCreate"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/payments",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 20,
+      "handler": "work(async(req,res)=>send(res,await service.readOwner(ctx(res),owner,action,permission,req.query)))",
+      "sourceRoute": "/payments",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/management/professional-applications",
+      "file": "backend/services/professional-service/src/routes/application.routes.ts",
+      "line": 6,
+      "handler": "controller.list",
+      "sourceRoute": "/",
+      "availability": "legacy-review-disabled",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/management/professional-applications/{applicationId}",
+      "file": "backend/services/professional-service/src/routes/application.routes.ts",
+      "line": 7,
+      "handler": "controller.detail",
+      "sourceRoute": "/:applicationId",
+      "availability": "legacy-review-disabled",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/management/professional-applications/{applicationId}/approve",
+      "file": "backend/services/professional-service/src/routes/application.routes.ts",
+      "line": 9,
+      "handler": "controller.decide('approve')",
+      "sourceRoute": "/:applicationId/approve",
+      "availability": "legacy-review-disabled",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/LegacyReviewApprove"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/management/professional-applications/{applicationId}/history",
+      "file": "backend/services/professional-service/src/routes/application.routes.ts",
+      "line": 8,
+      "handler": "controller.history",
+      "sourceRoute": "/:applicationId/history",
+      "availability": "legacy-review-disabled",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/management/professional-applications/{applicationId}/reject",
+      "file": "backend/services/professional-service/src/routes/application.routes.ts",
+      "line": 10,
+      "handler": "controller.decide('reject')",
+      "sourceRoute": "/:applicationId/reject",
+      "availability": "legacy-review-disabled",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/LegacyReviewReason"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/management/professional-applications/{applicationId}/suspend",
+      "file": "backend/services/professional-service/src/routes/application.routes.ts",
+      "line": 11,
+      "handler": "controller.decide('suspend')",
+      "sourceRoute": "/:applicationId/suspend",
+      "availability": "legacy-review-disabled",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/LegacyReviewReason"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/professionals",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 20,
+      "handler": "work(async(req,res)=>send(res,await service.readOwner(ctx(res),owner,action,permission,req.query)))",
+      "sourceRoute": "/professionals",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status",
+        "q"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/scopes",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 16,
+      "handler": "work(async(req,res)=>send(res,await service.scopes(ctx(res),req.query)))",
+      "sourceRoute": "/scopes",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/scopes",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 15,
+      "handler": "work(async(req,res)=>send(res,await service.createScope(ctx(res),req.body),201))",
+      "sourceRoute": "/scopes",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/ScopeCreate"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "X-Admin-Step-Up",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "get",
+      "path": "/management/services",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 20,
+      "handler": "work(async(req,res)=>send(res,await service.readOwner(ctx(res),owner,action,permission,req.query)))",
+      "sourceRoute": "/services",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status",
+        "q"
+      ],
+      "headers": [],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/services/{id}/reactivate",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 21,
+      "handler": "work(async(req,res)=>send(res,await service.serviceAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body)))",
+      "sourceRoute": "/services/:id/reactivate",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/Reason"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "management",
+      "method": "post",
+      "path": "/management/services/{id}/suspend",
+      "file": "backend/services/management-service/src/routes/management.routes.ts",
+      "line": 21,
+      "handler": "work(async(req,res)=>send(res,await service.serviceAction(ctx(res),req.params.id,action,version(req.get('if-match'),req.params.id),req.body)))",
+      "sourceRoute": "/services/:id/suspend",
+      "availability": "privileged-no-provisioned-admin",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "./management-v1.openapi.json#/components/schemas/Reason"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "management-v1.md"
+    },
+    {
+      "service": "notification",
+      "method": "get",
+      "path": "/notifications",
+      "file": "backend/services/notification-service/src/routes/notification.routes.ts",
+      "line": 6,
+      "handler": "controller.list",
+      "sourceRoute": "/",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "unread"
+      ],
+      "headers": [],
+      "ownerDocument": "notification-service.md"
+    },
+    {
+      "service": "notification",
+      "method": "post",
+      "path": "/notifications/{notificationId}/read",
+      "file": "backend/services/notification-service/src/routes/notification.routes.ts",
+      "line": 11,
+      "handler": "controller.markRead",
+      "sourceRoute": "/:notificationId/read",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "notification-service.md"
+    },
+    {
+      "service": "notification",
+      "method": "get",
+      "path": "/notifications/preferences",
+      "file": "backend/services/notification-service/src/routes/notification.routes.ts",
+      "line": 9,
+      "handler": "controller.getPreferences",
+      "sourceRoute": "/preferences",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "notification-service.md"
+    },
+    {
+      "service": "notification",
+      "method": "put",
+      "path": "/notifications/preferences",
+      "file": "backend/services/notification-service/src/routes/notification.routes.ts",
+      "line": 10,
+      "handler": "controller.setPreferences",
+      "sourceRoute": "/preferences",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/NotificationPreferences"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "notification-service.md"
+    },
+    {
+      "service": "notification",
+      "method": "post",
+      "path": "/notifications/read-all",
+      "file": "backend/services/notification-service/src/routes/notification.routes.ts",
+      "line": 8,
+      "handler": "controller.markAllRead",
+      "sourceRoute": "/read-all",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "notification-service.md"
+    },
+    {
+      "service": "notification",
+      "method": "get",
+      "path": "/notifications/unread-count",
+      "file": "backend/services/notification-service/src/routes/notification.routes.ts",
+      "line": 7,
+      "handler": "controller.unreadCount",
+      "sourceRoute": "/unread-count",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "notification-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "get",
+      "path": "/payments",
+      "file": "backend/services/payment-service/src/routes/payment.routes.ts",
+      "line": 7,
+      "handler": "controller.list",
+      "sourceRoute": "/",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "post",
+      "path": "/payments",
+      "file": "backend/services/payment-service/src/routes/payment.routes.ts",
+      "line": 6,
+      "handler": "controller.create",
+      "sourceRoute": "/",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/PaymentInput"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "get",
+      "path": "/payments/{paymentId}",
+      "file": "backend/services/payment-service/src/routes/payment.routes.ts",
+      "line": 8,
+      "handler": "controller.get",
+      "sourceRoute": "/:paymentId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "post",
+      "path": "/payments/{paymentId}/cancel",
+      "file": "backend/services/payment-service/src/routes/payment.routes.ts",
+      "line": 10,
+      "handler": "controller.cancel",
+      "sourceRoute": "/:paymentId/cancel",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "post",
+      "path": "/payments/{paymentId}/confirm",
+      "file": "backend/services/payment-service/src/routes/payment.routes.ts",
+      "line": 9,
+      "handler": "controller.confirm",
+      "sourceRoute": "/:paymentId/confirm",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "get",
+      "path": "/payments/appointment-payments/{id}",
+      "file": "backend/services/payment-service/src/payment-demo/routes.ts",
+      "line": 9,
+      "handler": "work(async(req,res)=>res.json({data:await service.get(ctx(res),req.params.id)}))",
+      "sourceRoute": "/appointment-payments/:id",
+      "availability": "payment-agenda-demo-blocked",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "post",
+      "path": "/payments/appointment-payments/{id}/cancel",
+      "file": "backend/services/payment-service/src/payment-demo/routes.ts",
+      "line": 10,
+      "handler": "work(async(req,res)=>{fields(req.body||{},[]);res.json({data:action==='reconcile'?await service.reconcile(ctx(res),req.params.id):await service[action](ctx(res)",
+      "sourceRoute": "/appointment-payments/:id/cancel",
+      "availability": "payment-agenda-demo-blocked",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "post",
+      "path": "/payments/appointment-payments/{id}/confirm",
+      "file": "backend/services/payment-service/src/payment-demo/routes.ts",
+      "line": 10,
+      "handler": "work(async(req,res)=>{fields(req.body||{},[]);res.json({data:action==='reconcile'?await service.reconcile(ctx(res),req.params.id):await service[action](ctx(res)",
+      "sourceRoute": "/appointment-payments/:id/confirm",
+      "availability": "payment-agenda-demo-blocked",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "post",
+      "path": "/payments/appointment-payments/{id}/reconcile",
+      "file": "backend/services/payment-service/src/payment-demo/routes.ts",
+      "line": 10,
+      "handler": "work(async(req,res)=>{fields(req.body||{},[]);res.json({data:action==='reconcile'?await service.reconcile(ctx(res),req.params.id):await service[action](ctx(res)",
+      "sourceRoute": "/appointment-payments/:id/reconcile",
+      "availability": "payment-agenda-demo-blocked",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "payment",
+      "method": "post",
+      "path": "/payments/appointments/{appointmentId}",
+      "file": "backend/services/payment-service/src/payment-demo/routes.ts",
+      "line": 8,
+      "handler": "work(async(req,res)=>{fields(req.body||{},[]);res.status(201).json({data:await service.create(ctx(res),req.params.appointmentId,key(req))});})",
+      "sourceRoute": "/appointments/:appointmentId",
+      "availability": "payment-agenda-demo-blocked",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "payment-service.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/goals",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 18,
+      "handler": "controller.listGoals",
+      "sourceRoute": "/goals",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "put",
+      "path": "/performance/goals/{kind}",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 19,
+      "handler": "controller.setGoal",
+      "sourceRoute": "/goals/:kind",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/PerformanceGoal"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/heart-rate",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 17,
+      "handler": "controller.heartRateHistory",
+      "sourceRoute": "/heart-rate",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "post",
+      "path": "/performance/heart-rate",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 15,
+      "handler": "controller.createHeartRate",
+      "sourceRoute": "/heart-rate",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/HeartRate"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/heart-rate/summary",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 16,
+      "handler": "controller.heartRateSummary",
+      "sourceRoute": "/heart-rate/summary",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/measurements",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 8,
+      "handler": "controller.listMeasurements",
+      "sourceRoute": "/measurements",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "post",
+      "path": "/performance/measurements",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 6,
+      "handler": "controller.createMeasurement",
+      "sourceRoute": "/measurements",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/PerformanceMeasurement"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "delete",
+      "path": "/performance/measurements/{measurementId}",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 10,
+      "handler": "controller.deleteMeasurement",
+      "sourceRoute": "/measurements/:measurementId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "patch",
+      "path": "/performance/measurements/{measurementId}",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 9,
+      "handler": "controller.updateMeasurement",
+      "sourceRoute": "/measurements/:measurementId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/PerformanceMeasurementPatch"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/measurements/evolution",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 7,
+      "handler": "controller.measurementEvolution",
+      "sourceRoute": "/measurements/evolution",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/steps",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 14,
+      "handler": "controller.listSteps",
+      "sourceRoute": "/steps",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "post",
+      "path": "/performance/steps",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 11,
+      "handler": "controller.createSteps",
+      "sourceRoute": "/steps",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Steps"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/steps/daily",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 12,
+      "handler": "controller.dailySteps",
+      "sourceRoute": "/steps/daily",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "date",
+        "timezone"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/steps/summary",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 13,
+      "handler": "controller.stepsSummary",
+      "sourceRoute": "/steps/summary",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "from",
+        "to"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "performance",
+      "method": "get",
+      "path": "/performance/summary",
+      "file": "backend/services/performance-service/src/routes/performance.routes.ts",
+      "line": 20,
+      "handler": "controller.overview",
+      "sourceRoute": "/summary",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/catalog",
+      "file": "backend/services/professional-service/src/app.ts",
+      "line": 53,
+      "handler": "createApplicationController(applications).catalog",
+      "sourceRoute": "/professionals/catalog",
+      "availability": "local-fictional-data",
+      "authentication": "public-or-challenge",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/eligible-capabilities",
+      "file": "backend/services/professional-service/src/app.ts",
+      "line": 59,
+      "handler": "careController.eligible",
+      "sourceRoute": "/professionals/eligible-capabilities",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 17,
+      "handler": "controller.getProfile",
+      "sourceRoute": "/me",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "patch",
+      "path": "/professionals/me",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 19,
+      "handler": "controller.updateProfile",
+      "sourceRoute": "/me",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ProfessionalProfilePatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "put",
+      "path": "/professionals/me",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 18,
+      "handler": "controller.createProfile",
+      "sourceRoute": "/me",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ProfessionalProfile"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-None-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/application-status",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 16,
+      "handler": "application.status",
+      "sourceRoute": "/me/application-status",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/availability-declaration",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 28,
+      "handler": "controller.getAvailability",
+      "sourceRoute": "/me/availability-declaration",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "patch",
+      "path": "/professionals/me/availability-declaration",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 30,
+      "handler": "controller.updateAvailability",
+      "sourceRoute": "/me/availability-declaration",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/AvailabilityDeclarationPatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "put",
+      "path": "/professionals/me/availability-declaration",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 29,
+      "handler": "controller.createAvailability",
+      "sourceRoute": "/me/availability-declaration",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/AvailabilityDeclaration"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-None-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/capabilities",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 20,
+      "handler": "controller.listCapabilities",
+      "sourceRoute": "/me/capabilities",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/professionals/me/capabilities",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 21,
+      "handler": "controller.createCapability",
+      "sourceRoute": "/me/capabilities",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Capability"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/capabilities/{capabilityId}",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 22,
+      "handler": "controller.getCapability",
+      "sourceRoute": "/me/capabilities/:capabilityId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "patch",
+      "path": "/professionals/me/capabilities/{capabilityId}",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 23,
+      "handler": "controller.updateCapability",
+      "sourceRoute": "/me/capabilities/:capabilityId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/CapabilityPatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/care-relationships",
+      "file": "backend/services/professional-service/src/app.ts",
+      "line": 60,
+      "handler": "careController.inbox",
+      "sourceRoute": "/professionals/me/care-relationships",
+      "availability": "professional-eligibility-required",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/qualifications",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 24,
+      "handler": "controller.listQualifications",
+      "sourceRoute": "/me/qualifications",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/professionals/me/qualifications",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 25,
+      "handler": "controller.createQualification",
+      "sourceRoute": "/me/qualifications",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Qualification"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/qualifications/{qualificationId}",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 26,
+      "handler": "controller.getQualification",
+      "sourceRoute": "/me/qualifications/:qualificationId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "patch",
+      "path": "/professionals/me/qualifications/{qualificationId}",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 27,
+      "handler": "controller.updateQualification",
+      "sourceRoute": "/me/qualifications/:qualificationId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/QualificationPatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/professionals/me/reopen",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 15,
+      "handler": "application.reopen",
+      "sourceRoute": "/me/reopen",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/services",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 32,
+      "handler": "offerings.listMine",
+      "sourceRoute": "/me/services",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "before"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/professionals/me/services",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 31,
+      "handler": "offerings.create",
+      "sourceRoute": "/me/services",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ProfessionalService"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/me/services/{serviceId}",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 33,
+      "handler": "offerings.get",
+      "sourceRoute": "/me/services/:serviceId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "patch",
+      "path": "/professionals/me/services/{serviceId}",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 34,
+      "handler": "offerings.update",
+      "sourceRoute": "/me/services/:serviceId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ProfessionalServicePatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/professionals/me/services/{serviceId}/deactivate",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 35,
+      "handler": "offerings.deactivate",
+      "sourceRoute": "/me/services/:serviceId/deactivate",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "post",
+      "path": "/professionals/me/submit",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 14,
+      "handler": "application.submit",
+      "sourceRoute": "/me/submit",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ApplicationSubmit"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/services",
+      "file": "backend/services/professional-service/src/app.ts",
+      "line": 54,
+      "handler": "offerings.publicCatalog",
+      "sourceRoute": "/professionals/services",
+      "availability": "local-fictional-data",
+      "authentication": "public-or-challenge",
+      "body": null,
+      "query": [
+        "limit",
+        "before",
+        "q",
+        "category",
+        "capabilityId"
+      ],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "professional",
+      "method": "get",
+      "path": "/professionals/specializations",
+      "file": "backend/services/professional-service/src/routes/professional.routes.ts",
+      "line": 13,
+      "handler": "(_req, res) => res.json({ data: catalogDto() })",
+      "sourceRoute": "/specializations",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "professional-service.md"
+    },
+    {
+      "service": "gateway",
+      "method": "get",
+      "path": "/ready",
+      "file": "backend/api-gateway/src/app.ts",
+      "line": 23,
+      "handler": "readiness()",
+      "sourceRoute": "/ready",
+      "availability": "read-only-health",
+      "authentication": "public-or-challenge",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/local-setup.md"
+    },
+    {
+      "service": "training",
+      "method": "get",
+      "path": "/training/exercises",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 6,
+      "handler": "controller.listExercises",
+      "sourceRoute": "/exercises",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize",
+        "environment",
+        "difficulty",
+        "type",
+        "muscleGroup"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/exercises",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 7,
+      "handler": "controller.createExercise",
+      "sourceRoute": "/exercises",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Exercise"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "get",
+      "path": "/training/exercises/{exerciseId}",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 8,
+      "handler": "controller.getExercise",
+      "sourceRoute": "/exercises/:exerciseId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "get",
+      "path": "/training/plans",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 10,
+      "handler": "controller.listPlans",
+      "sourceRoute": "/plans",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/plans",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 9,
+      "handler": "controller.createPlan",
+      "sourceRoute": "/plans",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Plan"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "get",
+      "path": "/training/plans/{planId}",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 11,
+      "handler": "controller.getPlan",
+      "sourceRoute": "/plans/:planId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "patch",
+      "path": "/training/plans/{planId}",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 12,
+      "handler": "controller.updatePlan",
+      "sourceRoute": "/plans/:planId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/PlanPatch"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/plans/{planId}/archive",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 13,
+      "handler": "controller.archivePlan",
+      "sourceRoute": "/plans/:planId/archive",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/plans/{planId}/duplicate",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 14,
+      "handler": "controller.duplicatePlan",
+      "sourceRoute": "/plans/:planId/duplicate",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/plans/{planId}/exercises",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 15,
+      "handler": "controller.addPlanExercise",
+      "sourceRoute": "/plans/:planId/exercises",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/PlanExercise"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "delete",
+      "path": "/training/plans/{planId}/exercises/{exerciseId}",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 16,
+      "handler": "controller.removePlanExercise",
+      "sourceRoute": "/plans/:planId/exercises/:exerciseId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "get",
+      "path": "/training/sessions",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 18,
+      "handler": "controller.listSessions",
+      "sourceRoute": "/sessions",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "page",
+        "pageSize"
+      ],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/sessions",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 17,
+      "handler": "controller.createSession",
+      "sourceRoute": "/sessions",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Session"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "get",
+      "path": "/training/sessions/{sessionId}",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 19,
+      "handler": "controller.getSession",
+      "sourceRoute": "/sessions/:sessionId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/sessions/{sessionId}/cancel",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 20,
+      "handler": "controller.transition",
+      "sourceRoute": "/sessions/:sessionId/:action(start|pause|resume|complete|cancel)",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/sessions/{sessionId}/complete",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 20,
+      "handler": "controller.transition",
+      "sourceRoute": "/sessions/:sessionId/:action(start|pause|resume|complete|cancel)",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/sessions/{sessionId}/exercises",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 21,
+      "handler": "controller.recordExercise",
+      "sourceRoute": "/sessions/:sessionId/exercises",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/SessionExercise"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/sessions/{sessionId}/pause",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 20,
+      "handler": "controller.transition",
+      "sourceRoute": "/sessions/:sessionId/:action(start|pause|resume|complete|cancel)",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/sessions/{sessionId}/resume",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 20,
+      "handler": "controller.transition",
+      "sourceRoute": "/sessions/:sessionId/:action(start|pause|resume|complete|cancel)",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "training",
+      "method": "post",
+      "path": "/training/sessions/{sessionId}/start",
+      "file": "backend/services/training-service/src/routes/training.routes.ts",
+      "line": 20,
+      "handler": "controller.transition",
+      "sourceRoute": "/sessions/:sessionId/:action(start|pause|resume|complete|cancel)",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Empty"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "../release-v1/frontend.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 8,
+      "handler": "c.getProfile",
+      "sourceRoute": "/me",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "patch",
+      "path": "/users/me",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 10,
+      "handler": "c.updateProfile",
+      "sourceRoute": "/me",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/ProfilePatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "put",
+      "path": "/users/me",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 9,
+      "handler": "c.createProfile",
+      "sourceRoute": "/me",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Profile"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-None-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/goals",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 22,
+      "handler": "c.listGoals",
+      "sourceRoute": "/me/goals",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "cursor",
+        "status"
+      ],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "post",
+      "path": "/users/me/goals",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 23,
+      "handler": "c.createGoal",
+      "sourceRoute": "/me/goals",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/UserGoal"
+      },
+      "query": [],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/goals/{goalId}",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 24,
+      "handler": "c.getGoal",
+      "sourceRoute": "/me/goals/:goalId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "patch",
+      "path": "/users/me/goals/{goalId}",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 25,
+      "handler": "c.updateGoal",
+      "sourceRoute": "/me/goals/:goalId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/UserGoalPatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/habits",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 14,
+      "handler": "c.getHabits",
+      "sourceRoute": "/me/habits",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "patch",
+      "path": "/users/me/habits",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 16,
+      "handler": "c.updateHabits",
+      "sourceRoute": "/me/habits",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/HabitsPatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "put",
+      "path": "/users/me/habits",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 15,
+      "handler": "c.createHabits",
+      "sourceRoute": "/me/habits",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Habits"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-None-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/measurements",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 19,
+      "handler": "c.listMeasurements",
+      "sourceRoute": "/me/measurements",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "cursor",
+        "kind"
+      ],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "post",
+      "path": "/users/me/measurements",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 20,
+      "handler": "c.createMeasurement",
+      "sourceRoute": "/me/measurements",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/UserMeasurement"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "Idempotency-Key",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/measurements/{measurementId}",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 21,
+      "handler": "c.getMeasurement",
+      "sourceRoute": "/me/measurements/:measurementId",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/physical-data",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 17,
+      "handler": "c.physicalData",
+      "sourceRoute": "/me/physical-data",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/preferences",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 11,
+      "handler": "c.getPreferences",
+      "sourceRoute": "/me/preferences",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "patch",
+      "path": "/users/me/preferences",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 13,
+      "handler": "c.updatePreferences",
+      "sourceRoute": "/me/preferences",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/PreferencesPatch"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "put",
+      "path": "/users/me/preferences",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 12,
+      "handler": "c.createPreferences",
+      "sourceRoute": "/me/preferences",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": {
+        "$ref": "#/components/schemas/Preferences"
+      },
+      "query": [],
+      "headers": [
+        {
+          "name": "If-None-Match",
+          "required": true
+        }
+      ],
+      "ownerDocument": "user-service.md"
+    },
+    {
+      "service": "user",
+      "method": "get",
+      "path": "/users/me/weight-history",
+      "file": "backend/services/user-service/src/routes/user.routes.ts",
+      "line": 18,
+      "handler": "c.weightHistory",
+      "sourceRoute": "/me/weight-history",
+      "availability": "local-fictional-data",
+      "authentication": "persisted-bearer-session",
+      "body": null,
+      "query": [
+        "limit",
+        "cursor",
+        "kind"
+      ],
+      "headers": [],
+      "ownerDocument": "user-service.md"
+    }
+  ]
+}

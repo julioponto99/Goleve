@@ -1,5 +1,11 @@
 # Arrancar o backend integrado e desenvolver o frontend
 
+> **Entrega Fase 5.14:** este documento preserva o procedimento histórico.
+> Numa máquina nova, seguir a [instalação independente](../release-v1/local-setup.md)
+> e a [API central](backend-release-v1.md). A CLI histórica `up/status` pressupõe
+> 14 componentes principais; `start` pode recriar recursos e `test` inclui paragens.
+> Nenhum controlo histórico foi alterado nesta consolidação.
+
 Ambiente paralelo, apenas dados fictícios. [Arquitetura e bloqueios](../architecture/backend-integration-v1.md),
 [OpenAPI](backend-integration-v1.openapi.json), [validação](backend-integration-v1-validation.md).
 

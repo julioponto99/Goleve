@@ -957,3 +957,33 @@ verificação profissional, fluxo privilegiado integrado, configuração finance
 isolada compatível, convergência de medições/preferências e validação operacional
 de recuperação/artefactos. Coach permanece desativado. Não se declara prontidão
 para produção. Sem migrações, commit, push ou merge.
+
+## 23. Fase 5.14 — Consolidação e entrega de desenvolvimento
+
+[Entrega](release-v1/README.md), [instalação independente](release-v1/local-setup.md),
+[contrato central de API](api/backend-release-v1.md),
+[frontend web/Android/iPhone](release-v1/frontend.md),
+[prontidão](release-v1/readiness.md) e [validação](release-v1/validation.md).
+
+Branch `feat/backend-release-v1`, baseada em `000cc43`. Referência dos onze serviços
+através do Gateway, inventário de rotas verificável e OpenAPI central que reutiliza
+os contratos administrativos. DTOs ainda genéricos estão explicitamente limitados;
+não se declara um SDK estrito completo. Scripts offline verificam drift/referências,
+sem carregar serviços ou iniciar infraestrutura.
+
+Instalação nova gera instância, bases, volumes e segredos próprios. O guia distingue
+o Compose paralelo do principal legado e documenta a dependência histórica da CLI
+em 14 componentes principais, sem a contornar nos validadores ou alterar segurança.
+Ainda não se executou uma instalação limpa noutra máquina. Não se criam fixtures
+privilegiadas, Administradores, aprovações ou dados reais.
+
+Os **12 bloqueios da Fase 5.13 permanecem abertos**. O último E2E 80/0/12 é evidência
+histórica, não uma regressão nova nesta fase. A Agenda Pessoal real usa os tipos
+`personal/workout`; as diferenças face aos requisitos históricos foram assinaladas.
+Há orientações de sessão, MFA/step-up, concorrência, erros, notificações, unidades
+e estrutura futura dos frontends, sem implementar interfaces.
+
+Validação apenas documental/estática e sondas não disruptivas. Sem alterações de
+código de negócio, configurações executáveis, MongoDB/RabbitMQ, contentores, volumes
+ou segredos; sem migrações, provisionamento, commit, push ou merge. Produção continua
+dependente de revisão de segurança e dos percursos/autoridades/contratos pendentes.
