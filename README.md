@@ -1,11 +1,23 @@
 # GoLeve
 
+Para desenvolver o frontend com o backend atual, usar a
+[integração paralela V1](documentation/api/backend-integration-v1.md):
+`node scripts/integration.cjs init`, `up`, `test` e `status`.
+Gateway local por defeito em `http://127.0.0.1:64344`, com MongoDB replica set,
+RabbitMQ e 11 microserviços. Apenas dados fictícios; funcionalidades bloqueadas
+e limites de produção estão documentados. Não altera a stack principal.
+
 A [demonstração local isolada](documentation/api/isolated-demo.md) usa cinco componentes reais e dados fictícios em MongoDB temporário. Arranque explícito com `node scripts/demo.cjs init`, `up` e `prepare`; a aprovação profissional permanece bloqueada no servidor real.
 
 Monorepo local com API Gateway, 11 microserviços TypeScript/Express, MongoDB e RabbitMQ.
 Pagamentos: apenas simulados, nunca reais.
 
 ## Arranque
+
+**Configuração principal legada:** os comandos seguintes descrevem o Compose
+anterior. Não reconstruir/reiniciar esse ambiente para testar a Fase 5.12;
+usar a CLI paralela acima. O Compose principal ainda requer uma atualização
+e migração aprovadas para executar todas as funcionalidades atuais.
 
 Requisitos: Docker Engine com contentores Linux e Docker Compose v2 ou superior.
 Antes do primeiro arranque, definir `JWT_SECRET` no `.env` local. Se o ficheiro ainda não existir, criá-lo a partir de `.env.example`. Para gerar uma chave aleatória de 32 bytes:

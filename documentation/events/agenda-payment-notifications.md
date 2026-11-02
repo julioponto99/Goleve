@@ -169,3 +169,15 @@ removidos após verificar identidade e isolamento. Nenhum volume foi eliminado.
 Os 31 contentores preexistentes conservaram estado, health, mounts e redes;
 os 14 componentes principais permaneceram saudáveis. Sem migrações, backups,
 commit, push ou merge. Coach IA e os restantes serviços não foram alterados.
+
+## Valida??o na integra??o V1 ? Fase 5.12
+
+A [stack paralela](../architecture/backend-integration-v1.md) preserva estes contratos.
+Training/Hydration e o pagamento MockBank independente foram exercitados por HTTP,
+com outboxes reais, confirma??es RabbitMQ, persist?ncia/deduplica??o, retry/DLQ
+e recupera??o ap?s indisponibilidade do broker. O broker principal n?o foi alterado.
+
+Payment+Agenda permanece desativado devido aos validadores de loopback preservados
+por decis?o do utilizador; eventos de reservas/reembolsos n?o foram emitidos por
+um fluxo profissional positivo nesta stack. N?o se criaram profissionais aprovados
+na base de desenvolvimento. Nenhum pagamento ou reembolso real foi executado.

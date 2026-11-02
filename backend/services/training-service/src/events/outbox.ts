@@ -15,20 +15,36 @@ export function newOutboxEvent(eventType: string, aggregateId: string, recipient
   return { eventId: randomUUID(), eventType, eventVersion: 1, sourceService: 'training-service', aggregateId, recipientUserId, occurredAt: new Date(), payload, status: 'pending', attempts: 0, nextAttemptAt: new Date(), createdAt: new Date(), updatedAt: new Date() };
 }
 export async function publishPending(models: TrainingModels, rabbitUrl: string, limit = 10) {
-  const connection: ChannelModel = await amqp.connect(rabbitUrl); const channel: ConfirmChannel = await connection.createConfirmChannel();
-  await channel.assertExchange('goleve.notifications', 'topic', { durable: true });
-  for (let i = 0; i < limit; i += 1) {
-    const now = new Date();
-    const event = await models.Outbox.findOneAndUpdate({ status: { $in: ['pending', 'failed', 'publishing'] }, nextAttemptAt: { $lte: now }, $or: [{ lockedUntil: { $exists: false } }, { lockedUntil: { $lte: now } }] }, { $set: { status: 'publishing', lockedUntil: new Date(now.getTime() + 30000) }, $inc: { attempts: 1 } }, { sort: { createdAt: 1 }, returnDocument: 'after' });
-    if (!event) break;
+  const connection = await amqp.connect(rabbitUrl, { timeout: 3000 });
+  connection.on('error', () => undefined);
+  try {
+    const channel = await connection.createConfirmChannel(); channel.on('error', () => undefined);
     try {
-      await new Promise<void>((resolve, reject) => channel.publish('goleve.notifications', 'event', Buffer.from(JSON.stringify({ eventId: event.eventId, contractVersion: event.eventVersion, type: event.eventType, source: event.sourceService, recipientUserId: event.recipientUserId, occurredAt: event.occurredAt.toISOString(), payload: event.payload })), { persistent: true, contentType: 'application/json' }, (error) => error ? reject(error) : resolve()));
-      await models.Outbox.updateOne({ _id: event._id, status: 'publishing' }, { $set: { status: 'published', publishedAt: new Date(), lockedUntil: undefined } });
-    } catch (error) {
-      await models.Outbox.updateOne({ _id: event._id, status: 'publishing' }, { $set: { status: 'failed', lastError: error instanceof Error ? error.message.slice(0, 500) : 'publish failed', nextAttemptAt: new Date(Date.now() + Math.min(300000, 1000 * 2 ** Math.min(event.attempts, 8))), lockedUntil: undefined } });
-    }
-  }
-  await channel.close(); await connection.close();
+      await channel.assertExchange('goleve.notifications', 'topic', { durable: true });
+      // Keep a durable route even while the notification consumer is down.
+      await channel.assertQueue('goleve.notification-service.events', { durable: true, deadLetterExchange: 'goleve.notifications.retry', deadLetterRoutingKey: 'retry' });
+      await channel.bindQueue('goleve.notification-service.events', 'goleve.notifications', 'event');
+      for (let i = 0; i < limit; i++) {
+        const now = new Date(), leaseId = randomUUID();
+        const event = await models.Outbox.findOneAndUpdate({ status: { $in: ['pending', 'failed', 'publishing'] }, nextAttemptAt: { $lte: now }, $or: [{ lockedUntil: { $exists: false } }, { lockedUntil: { $lte: now } }] }, { $set: { status: 'publishing', leaseId, lockedUntil: new Date(now.getTime() + 30000) }, $inc: { attempts: 1 } }, { sort: { createdAt: 1 }, returnDocument: 'after' });
+        if (!event) break;
+        const claimed = { _id: event._id, status: 'publishing', leaseId };
+        let returned = false;
+        const onReturn = (message: { properties: { messageId?: string } }) => { if (message.properties.messageId === event.eventId) returned = true; };
+        channel.on('return', onReturn);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error('Publication confirmation unavailable')), 5000);
+            channel.publish('goleve.notifications', 'event', Buffer.from(JSON.stringify({ eventId: event.eventId, contractVersion: event.eventVersion, type: event.eventType, source: event.sourceService, recipientUserId: event.recipientUserId, occurredAt: event.occurredAt.toISOString(), payload: event.payload })), { persistent: true, mandatory: true, contentType: 'application/json', messageId: event.eventId }, error => { clearTimeout(timer); error ? reject(error) : resolve(); });
+          });
+          if (returned) throw new Error('Unroutable publication');
+          await models.Outbox.updateOne(claimed, { $set: { status: 'published', publishedAt: new Date() }, $unset: { leaseId: 1, lockedUntil: 1, lastError: 1 } });
+        } catch {
+          await models.Outbox.updateOne(claimed, { $set: { status: 'failed', lastError: 'PUBLISH_UNCONFIRMED', nextAttemptAt: new Date(Date.now() + Math.min(300000, 1000 * 2 ** Math.min(event.attempts, 8))) }, $unset: { leaseId: 1, lockedUntil: 1 } });
+        } finally { channel.removeListener('return', onReturn); }
+      }
+    } finally { await channel.close().catch(() => undefined); }
+  } finally { await connection.close().catch(() => undefined); }
 }
 export async function withOutboxTransaction<T>(connection: Connection, operation: (session: ClientSession) => Promise<T>) {
   if (!outboxEnabled()) throw new Error('Transactional outbox is disabled; MongoDB replica set is required');

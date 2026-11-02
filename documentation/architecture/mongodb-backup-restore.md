@@ -1,5 +1,15 @@
 # Preparação de backup e restauro do MongoDB
 
+> Fase 5.12: a [integração paralela](backend-integration-v1.md) não lê, copia ou
+> restaura dados principais. Não foram executados backups/restauros/migrações
+> nesta fase. Este procedimento continua sujeito a autorização operacional
+> separada. Atualizar o inventário antes da execução: Auth/Management/Agenda,
+> sessões/MFA/auditoria e outboxes acrescentaram coleções e requisitos. Definir
+> consistência do dump standalone (janela sem escritas), cifragem/ACL, retenção,
+> hashes, verificação de restauro/índices e custódia separada das chaves antes
+> de migrar. Preservar a origem e impedir escritas concorrentes no cutover;
+> rollback de topologia/dados deve ser ensaiado e aprovado, nunca improvisado.
+
 ## Objetivo e limites
 
 Este documento prepara, mas não executa, o backup e o restauro do MongoDB

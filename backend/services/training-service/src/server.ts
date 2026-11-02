@@ -32,7 +32,8 @@ if (require.main === module) {
     await initializeModels(models);
     if (outboxEnabled()) {
       await assertTransactionsAvailable(connection);
-      setInterval(() => { void publishPending(models, process.env.RABBITMQ_URL || '').catch((error) => console.error('training outbox worker failed', error instanceof Error ? error.message : 'unknown')); }, 1000);
+      let publishing = false;
+    setInterval(() => { if (publishing) return; publishing = true; void publishPending(models, process.env.RABBITMQ_URL || '').catch(() => console.error('training outbox worker unavailable')).finally(() => { publishing = false; }); }, 1000);
     }
     const app = await createApp(process.env.AUTH_SERVICE_URL || 'http://127.0.0.1:3001', connection, models);
     const port = Number(process.env.PORT || 3003);

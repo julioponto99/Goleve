@@ -1,6 +1,8 @@
 # Arquitetura do GoLeve
 
-Microserviços com base lógica por domínio e integração através de contratos dos proprietários. Não aceder diretamente às bases de outros serviços. O gateway encaminha pedidos; os proprietários validam identidade, titularidade e permissões. RabbitMQ destina-se a integração assíncrona futura: o broker existente não significa que publicação e consumo estejam implementados. Multi-tenancy continua futura.
+[Integra??o global de desenvolvimento ? Fase 5.12](backend-integration-v1.md), [arranque/frontend](../api/backend-integration-v1.md) e [valida??o](../api/backend-integration-v1-validation.md).
+
+Microserviços com base lógica por domínio e integração através de contratos dos proprietários. Não aceder diretamente às bases de outros serviços. O gateway encaminha pedidos; os proprietários validam identidade, titularidade e permissões. RabbitMQ integra as outboxes e o Notification no ambiente isolado; publica??o, consumo e recupera??o foram validados na Fase 5.12. Isso n?o ativa automaticamente os eventos do ambiente principal nem elimina os bloqueios de demonstra??o. Multi-tenancy continua futura.
 
 O núcleo pessoal é independente de ginásio, profissionais, contratação, pagamentos e IA. Uma dependência necessária a acompanhamento não deve ser uma condição global para operações próprias. Autenticação e políticas de dados continuam obrigatórias.
 

@@ -1,0 +1,879 @@
+{
+  "name": "${INTEGRATION_PROJECT}",
+  "services": {
+    "mongodb": {
+      "image": "mongo:7",
+      "restart": "unless-stopped",
+      "init": true,
+      "entrypoint": [
+        "bash",
+        "/integration/mongodb-entrypoint.sh"
+      ],
+      "env_file": [
+        "${INTEGRATION_ROOT}/mongo.env"
+      ],
+      "environment": {
+        "INTEGRATION_INSTANCE": "${INTEGRATION_INSTANCE}"
+      },
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "512m",
+      "pids_limit": 256,
+      "tmpfs": [
+        "/run/keys:rw,nosuid,nodev,noexec,size=1m"
+      ],
+      "volumes": [
+        "mongo_data:/data/db",
+        "mongo_config:/data/configdb",
+        "./scripts/integration:/integration:ro"
+      ],
+      "secrets": [
+        {
+          "source": "replica_key",
+          "target": "replica-key"
+        }
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "quit(db.adminCommand({ping:1}).ok?0:1)"
+        ],
+        "interval": "5s",
+        "timeout": "5s",
+        "retries": 30,
+        "start_period": "20s"
+      }
+    },
+    "mongo-init": {
+      "image": "mongo:7",
+      "init": true,
+      "entrypoint": [
+        "mongosh",
+        "--nodb",
+        "--quiet",
+        "/integration/mongodb-init.js"
+      ],
+      "env_file": [
+        "${INTEGRATION_ROOT}/mongo.env"
+      ],
+      "environment": {
+        "INTEGRATION_INSTANCE": "${INTEGRATION_INSTANCE}"
+      },
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "secrets": [
+        {
+          "source": "databases",
+          "target": "databases.json"
+        }
+      ],
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        }
+      },
+      "restart": "no"
+    },
+    "rabbitmq": {
+      "image": "rabbitmq:3-management",
+      "hostname": "integration-rabbitmq",
+      "restart": "unless-stopped",
+      "env_file": [
+        "${INTEGRATION_ROOT}/rabbit.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "384m",
+      "volumes": [
+        "rabbit_data:/var/lib/rabbitmq"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "rabbitmq-diagnostics",
+          "-q",
+          "check_running"
+        ],
+        "interval": "10s",
+        "timeout": "10s",
+        "retries": 15,
+        "start_period": "25s"
+      }
+    },
+    "auth-service": {
+      "image": "${INTEGRATION_PROJECT}-auth:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/auth-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/auth-service.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3001",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "MANAGEMENT_CONTRACT_ENABLED": "true",
+        "MANAGEMENT_SERVICE_URL": "http://management-service:3008",
+        "MANAGEMENT_AUTH_KEY_FILE": "/run/secrets/management_auth",
+        "AUTH_BOOTSTRAP_ENABLED": "false",
+        "AUTH_MFA_ENCRYPTION_KEY_FILE": "/run/secrets/mfa"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      },
+      "secrets": [
+        "management_auth",
+        "mfa"
+      ]
+    },
+    "user-service": {
+      "image": "${INTEGRATION_PROJECT}-user:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/user-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/user-service.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3002",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "USER_DATA_MODE": "synthetic",
+        "USER_DATA_KEY_FILE": "/run/secrets/user_key"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3002/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      },
+      "secrets": [
+        "user_key"
+      ]
+    },
+    "training-service": {
+      "image": "${INTEGRATION_PROJECT}-training:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/training-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/training-service.env",
+        "${INTEGRATION_ROOT}/events.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3003",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "OUTBOX_ENABLED": "true"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3003/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    },
+    "agenda-service": {
+      "image": "${INTEGRATION_PROJECT}-agenda:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/agenda-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/agenda-service.env",
+        "${INTEGRATION_ROOT}/events.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3004",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "MANAGEMENT_CONTRACT_ENABLED": "true",
+        "MANAGEMENT_SERVICE_URL": "http://management-service:3008",
+        "MANAGEMENT_AGENDA_KEY_FILE": "/run/secrets/management_agenda",
+        "AGENDA_PROFESSIONAL_ENABLED": "true",
+        "AGENDA_PROFESSIONAL_MODE": "isolated",
+        "PROFESSIONAL_SERVICE_URL": "http://professional-service:3007",
+        "AGENDA_SERVICE_KEY_ID": "integration",
+        "AGENDA_SERVICE_KEY_FILE": "/run/secrets/agenda_key",
+        "AGENDA_PROFESSIONAL_PUBLISH_EVENTS": "true",
+        "PAYMENT_AGENDA_DEMO_ENABLED": "false"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3004/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      },
+      "secrets": [
+        "management_agenda",
+        "agenda_key"
+      ]
+    },
+    "performance-service": {
+      "image": "${INTEGRATION_PROJECT}-performance:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/performance-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/performance-service.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3005",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3005/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    },
+    "hydration-service": {
+      "image": "${INTEGRATION_PROJECT}-hydration:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/hydration-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/hydration-service.env",
+        "${INTEGRATION_ROOT}/events.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3006",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "OUTBOX_ENABLED": "true"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3006/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    },
+    "professional-service": {
+      "image": "${INTEGRATION_PROJECT}-professional:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/professional-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/professional-service.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3007",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "MANAGEMENT_CONTRACT_ENABLED": "true",
+        "MANAGEMENT_SERVICE_URL": "http://management-service:3008",
+        "MANAGEMENT_PROFESSIONAL_KEY_FILE": "/run/secrets/management_professional",
+        "PROFESSIONAL_DATA_MODE": "synthetic",
+        "PROFESSIONAL_REVIEW_MODE": "disabled",
+        "PROFESSIONAL_REVIEWER_IDS": "",
+        "PROFESSIONAL_AGENDA_CONTRACT_ENABLED": "true",
+        "AGENDA_PROFESSIONAL_MODE": "isolated",
+        "AGENDA_SERVICE_KEY_ID": "integration",
+        "AGENDA_SERVICE_KEY_FILE": "/run/secrets/agenda_key",
+        "PROFESSIONAL_DEMO_ELIGIBILITY_ENABLED": "false",
+        "PAYMENT_AGENDA_DEMO_ENABLED": "false"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3007/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      },
+      "secrets": [
+        "management_professional",
+        "agenda_key"
+      ]
+    },
+    "management-service": {
+      "image": "${INTEGRATION_PROJECT}-management:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/management-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/management-service.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3008",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "MANAGEMENT_CONTRACT_ENABLED": "true",
+        "MANAGEMENT_SERVICE_URL": "http://management-service:3008",
+        "MANAGEMENT_AUTH_KEY_FILE": "/run/secrets/management_auth",
+        "MANAGEMENT_PROFESSIONAL_KEY_FILE": "/run/secrets/management_professional",
+        "MANAGEMENT_AGENDA_KEY_FILE": "/run/secrets/management_agenda",
+        "MANAGEMENT_PAYMENT_KEY_FILE": "/run/secrets/management_payment",
+        "PROFESSIONAL_SERVICE_URL": "http://professional-service:3007",
+        "AGENDA_SERVICE_URL": "http://agenda-service:3004",
+        "PAYMENT_SERVICE_URL": "http://payment-service:3009"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3008/ready',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      },
+      "secrets": [
+        "management_auth",
+        "management_professional",
+        "management_agenda",
+        "management_payment"
+      ]
+    },
+    "payment-service": {
+      "image": "${INTEGRATION_PROJECT}-payment:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/payment-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/payment-service.env",
+        "${INTEGRATION_ROOT}/events.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3009",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "MANAGEMENT_CONTRACT_ENABLED": "true",
+        "MANAGEMENT_SERVICE_URL": "http://management-service:3008",
+        "MANAGEMENT_PAYMENT_KEY_FILE": "/run/secrets/management_payment",
+        "PAYMENT_DEMO_ENABLED": "true",
+        "PAYMENT_AGENDA_DEMO_ENABLED": "false",
+        "PAYMENT_NOTIFICATION_EVENTS_ENABLED": "true",
+        "PAYMENT_DEMO_FIXTURES": "integration-approve:2500:approve,integration-decline:2500:decline"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3009/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      },
+      "secrets": [
+        "management_payment"
+      ]
+    },
+    "notification-service": {
+      "image": "${INTEGRATION_PROJECT}-notification:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/notification-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/notification-service.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3010",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "NOTIFICATION_DEMO_EVENTS_ENABLED": "true"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3010/ready',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    },
+    "ai-coach-service": {
+      "image": "${INTEGRATION_PROJECT}-ai-coach:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/ai-coach-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "mem_limit": "192m",
+      "pids_limit": 128,
+      "env_file": [
+        "${INTEGRATION_ROOT}/ai-coach-service.env"
+      ],
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3011",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "NODE_OPTIONS": "--max-old-space-size=112",
+        "GOLEVE_DEMO_MODE": "disabled",
+        "AI_COACH_ENABLED": "false",
+        "AI_COACH_PROVIDER": "none"
+      },
+      "volumes": [
+        "./scripts/integration:/integration:ro"
+      ],
+      "depends_on": {
+        "mongo-init": {
+          "condition": "service_completed_successfully"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3011/health',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    },
+    "api-gateway": {
+      "image": "${INTEGRATION_PROJECT}-gateway:local",
+      "build": {
+        "context": "./backend",
+        "dockerfile": "api-gateway/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "read_only": true,
+      "tmpfs": [
+        "/tmp:rw,nosuid,nodev,noexec,size=16m"
+      ],
+      "mem_limit": "128m",
+      "pids_limit": 128,
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3000",
+        "CORS_ALLOWED_ORIGINS": "http://localhost:5173,http://127.0.0.1:5173",
+        "GATEWAY_API_RATE_LIMIT": "300",
+        "AUTH_SERVICE_URL": "http://auth-service:3001",
+        "USER_SERVICE_URL": "http://user-service:3002",
+        "TRAINING_SERVICE_URL": "http://training-service:3003",
+        "AGENDA_SERVICE_URL": "http://agenda-service:3004",
+        "PERFORMANCE_SERVICE_URL": "http://performance-service:3005",
+        "HYDRATION_SERVICE_URL": "http://hydration-service:3006",
+        "PROFESSIONAL_SERVICE_URL": "http://professional-service:3007",
+        "MANAGEMENT_SERVICE_URL": "http://management-service:3008",
+        "PAYMENT_SERVICE_URL": "http://payment-service:3009",
+        "NOTIFICATION_SERVICE_URL": "http://notification-service:3010",
+        "AI_COACH_SERVICE_URL": "http://ai-coach-service:3011"
+      },
+      "networks": [
+        "backend",
+        "edge"
+      ],
+      "ports": [
+        "127.0.0.1:${INTEGRATION_PORT:-64344}:3000"
+      ],
+      "depends_on": {
+        "auth-service": {
+          "condition": "service_healthy"
+        },
+        "user-service": {
+          "condition": "service_healthy"
+        },
+        "training-service": {
+          "condition": "service_healthy"
+        },
+        "agenda-service": {
+          "condition": "service_healthy"
+        },
+        "performance-service": {
+          "condition": "service_healthy"
+        },
+        "hydration-service": {
+          "condition": "service_healthy"
+        },
+        "professional-service": {
+          "condition": "service_healthy"
+        },
+        "management-service": {
+          "condition": "service_healthy"
+        },
+        "payment-service": {
+          "condition": "service_healthy"
+        },
+        "notification-service": {
+          "condition": "service_healthy"
+        },
+        "ai-coach-service": {
+          "condition": "service_healthy"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/ready',{signal:AbortSignal.timeout(3500)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    }
+  },
+  "networks": {
+    "backend": {
+      "internal": true
+    },
+    "edge": {}
+  },
+  "volumes": {
+    "mongo_data": {},
+    "mongo_config": {},
+    "rabbit_data": {}
+  },
+  "secrets": {
+    "replica_key": {
+      "file": "${INTEGRATION_ROOT}/replica.key"
+    },
+    "databases": {
+      "file": "${INTEGRATION_ROOT}/databases.json"
+    },
+    "mfa": {
+      "file": "${INTEGRATION_ROOT}/mfa.key"
+    },
+    "user_key": {
+      "file": "${INTEGRATION_ROOT}/user_key.key"
+    },
+    "agenda_key": {
+      "file": "${INTEGRATION_ROOT}/agenda_key.key"
+    },
+    "management_auth": {
+      "file": "${INTEGRATION_ROOT}/management_auth.key"
+    },
+    "management_professional": {
+      "file": "${INTEGRATION_ROOT}/management_professional.key"
+    },
+    "management_agenda": {
+      "file": "${INTEGRATION_ROOT}/management_agenda.key"
+    },
+    "management_payment": {
+      "file": "${INTEGRATION_ROOT}/management_payment.key"
+    }
+  }
+}

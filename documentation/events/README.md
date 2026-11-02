@@ -1,5 +1,10 @@
 # Eventos do backend
 
+Integração de desenvolvimento e topologia operacional:
+[Fase 5.12](../architecture/backend-integration-v1.md#eventos).
+Os testes da stack paralela validam publicação/consumo reais, recuperação,
+deduplicação e DLQ, sem declarar filas no RabbitMQ principal.
+
 Contratos aceites pelo Notification: `hydration.reminder.requested.v1`,
 `hydration.daily_goal.reached.v1`, `training.session.completed.v1` e
 `agenda.activity.reminder.requested.v1` (este último não implica um agendador

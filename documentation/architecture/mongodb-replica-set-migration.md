@@ -1,5 +1,16 @@
 # Plano de migração do MongoDB para replica set
 
+> Atualização Fase 5.12 (2026-11-02): o estado detalhado nas secções seguintes
+> é um inventário histórico anterior às implementações transacionais. Auth,
+> Management, Agenda e outboxes já usam transações no código atual. Management
+> requer agora base própria e contratos técnicos. O MongoDB principal continua
+> standalone e não foi migrado. A [stack paralela](backend-integration-v1.md)
+> usa outro replica set/volumes/credenciais; não é destino de migração ou backup.
+> Uma futura migração principal exige nova autorização, inventário atualizado,
+> backup cifrado consistente, restauro ensaiado e validado em destino próprio,
+> janela controlada, validação de índices/TTL/transações e plano de rollback.
+> Não executar aqui os comandos propostos nem reutilizar volumes principais.
+
 ## 1. Objetivo e limites
 
 Este documento prepara a futura migração do MongoDB do ambiente principal

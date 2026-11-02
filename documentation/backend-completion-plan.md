@@ -903,3 +903,26 @@ Dependências V1: implantação controlada de replica set/chaves/contratos, revi
 de segurança integrada, autoridade profissional real, política operacional de
 recuperação completa e rotação de fatores/chaves. Não se declara prontidão para
 produção nem se ativa qualquer funcionalidade sintética nesse ambiente.
+
+## 21. Fase 5.12 — Integração de desenvolvimento
+
+[Arquitetura](architecture/backend-integration-v1.md),
+[arranque/frontend](api/backend-integration-v1.md),
+[OpenAPI](api/backend-integration-v1.openapi.json) e
+[validação](api/backend-integration-v1-validation.md).
+
+Stack paralela com 14 componentes, replica set autenticado, identidades Mongo
+por base, volumes/segredos próprios, contratos Management/Agenda configurados,
+outboxes Training/Hydration/Payment e consumidor Notification. Gateway com CORS
+explícito, readiness agregada, limite geral e proteção da fronteira pública.
+Sem alteração do Compose ou dos recursos principais.
+
+Decisão aprovada: não alterar validadores restritos a loopback. Payment+Agenda
+em Docker e Coach ativo permanecem bloqueados/documentados. A Agenda Profissional
+normal não aceita elegibilidade sintética. Não existem Administradores nem
+profissionais aprovados automaticamente na base de desenvolvimento.
+
+Validar HTTP, isolamento Mongo, eventos/DLQ, sessões/MFA e recuperação apenas
+nos recursos novos. Testes administrativos usam base/credencial separadas.
+Sem pagamentos reais, migrações, backups, commit, push ou merge. Preparação de
+produção continua dependente de revisão de segurança e validação de implantação.
