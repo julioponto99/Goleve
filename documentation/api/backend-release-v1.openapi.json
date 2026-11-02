@@ -8143,7 +8143,7 @@
         ],
         "x-source": {
           "file": "backend/api-gateway/src/app.ts",
-          "line": 22,
+          "line": 23,
           "sourceRoute": "/health"
         },
         "x-availability": "read-only-health",
@@ -19870,7 +19870,7 @@
         ],
         "x-source": {
           "file": "backend/api-gateway/src/app.ts",
-          "line": 23,
+          "line": 24,
           "sourceRoute": "/ready"
         },
         "x-availability": "read-only-health",

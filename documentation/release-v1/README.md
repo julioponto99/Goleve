@@ -10,6 +10,8 @@ Percurso recomendado para outro programador:
 2. Consultar a [referência central](../api/backend-release-v1.md), o
    [índice de endpoints](../api/backend-release-v1-endpoints.md) e o
    [OpenAPI 3.1](../api/backend-release-v1.openapi.json).
+   A [Swagger UI opcional](../api/swagger-ui.md) permite explorar estes contratos
+   em desenvolvimento autorizado, sem ativação automática nos contentores.
 3. Seguir o [guia web/Android/iPhone](frontend.md).
 4. Rever a [matriz de prontidão e os 12 bloqueios](readiness.md).
 5. Consultar a [validação desta entrega](validation.md) e o

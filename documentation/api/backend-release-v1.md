@@ -4,6 +4,12 @@ Base: `000cc43ee2a47af9de5b0f8ace7fb09e8a5d5dd6`, branch `feat/backend-release-v
 Não é uma versão de produção. [Entrega](../release-v1/README.md),
 [instalação independente](../release-v1/local-setup.md), [frontend](../release-v1/frontend.md).
 
+[Swagger UI opcional](swagger-ui.md): `/api-docs` e `/api-docs/openapi.json`,
+apenas mediante ativação explícita em desenvolvimento; Try it out tem autorização
+separada e produção mantém 404. Em 2026-11-02 foi ativada, com autorização,
+apenas no Gateway paralelo em `127.0.0.1:64344`, em modo de leitura e sem Try it out.
+O ambiente principal permanece inalterado; ver o registo de ativação no guia Swagger.
+
 O [índice completo de endpoints](backend-release-v1-endpoints.md) contém as operações
 realmente declaradas e encaminháveis pelo Gateway. O
 [OpenAPI central 3.1](backend-release-v1.openapi.json) reúne os onze serviços,

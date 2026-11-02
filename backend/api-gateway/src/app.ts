@@ -13,6 +13,7 @@ import { createNotificationRoutes } from './routes/notification.routes';
 import { createAiCoachRoutes } from './routes/ai-coach.routes';
 import { createPaymentRoutes } from './routes/payment.routes';
 import { publicBoundary, corsPolicy, apiRateLimiter, readiness } from './middlewares/integration.middleware';
+import { createApiDocsRoutes } from './routes/api-docs.routes';
 
 export function createApp() {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp() {
   app.use(publicBoundary(), corsPolicy(), apiRateLimiter());
   app.get('/health', (_req, res) => res.json({ service: 'api-gateway', status: 'ok' }));
   app.get('/ready', readiness());
+  app.use('/api-docs', createApiDocsRoutes());
   app.post(['/auth/register', '/auth/login'], createAuthRateLimiter());
   // Proxy the original request stream before any JSON body parser consumes it.
   app.use('/auth', createAuthRoutes());

@@ -131,8 +131,8 @@ As condições indicam limites de runtime; não implicam que os fluxos bloqueado
 
 | Método | Caminho | Payload / query / headers | Disponibilidade | Fonte |
 |---|---|---|---|---|
-| GET | `/health` | — | read-only-health | [app.ts:22](../../backend/api-gateway/src/app.ts) |
-| GET | `/ready` | — | read-only-health | [app.ts:23](../../backend/api-gateway/src/app.ts) |
+| GET | `/health` | — | read-only-health | [app.ts:23](../../backend/api-gateway/src/app.ts) |
+| GET | `/ready` | — | read-only-health | [app.ts:24](../../backend/api-gateway/src/app.ts) |
 
 ## hydration
 

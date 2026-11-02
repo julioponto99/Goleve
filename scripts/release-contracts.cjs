@@ -46,6 +46,8 @@ function mountedPaths(file){
 }
 function validateMounts(result){
  const gateway=mountedPaths('backend/api-gateway/src/app.ts');
+ // Development documentation is served locally, not proxied to a domain service.
+ gateway.delete('/api-docs');
  assert.deepEqual([...gateway].sort(),[...new Set(result.filter(r=>r.service!=='gateway').map(r=>'/'+r.path.split('/')[1]))].sort(),'Gateway prefixes changed: review public descriptors');
  for(const [service,,mount]of descriptors){if(!mount||service==='gateway')continue;
   const folder=base+(service==='coach'?'ai-coach':service)+'-service/src/',file=fs.existsSync(path.join(root,folder+'app.ts'))?folder+'app.ts':folder+'server.ts';
@@ -206,7 +208,7 @@ function generate(){
  }
  const index=['# Referência central de operações Gateway','', 'Gerado de rotas reais em `000cc43`; não editar esta tabela à mão. [Guia](backend-release-v1.md), [OpenAPI 3.1](backend-release-v1.openapi.json).','', 'As condições indicam limites de runtime; não implicam que os fluxos bloqueados tenham sido validados. Payloads de inventário parcial estão marcados no OpenAPI e remetem para o contrato proprietário.',''];
  for(const service of [...new Set(metadata.map(r=>r.service))]){index.push('## '+service,'','| Método | Caminho | Payload / query / headers | Disponibilidade | Fonte |','|---|---|---|---|---|');for(const r of metadata.filter(x=>x.service===service)){let body=r.body?.$ref?.split('/').at(-1)|| (r.body?'contrato proprietário':'—');index.push('| '+r.method.toUpperCase()+' | `'+r.path+'` | '+body+(r.query.length?'; query: `'+r.query.join('`, `')+'`':'')+(r.headers.length?'; headers: `'+r.headers.map(h=>h.name+(h.required?'*':'')).join('`, `')+'`':'')+' | '+r.availability+' | ['+path.basename(r.file)+':'+r.line+'](../../'+r.file+') |');}index.push('');}
- return {spec,metadata,index:index.join('\n')+'\n'};
+ return {spec,metadata,index:index.join('\n').trimEnd()+'\n'};
 }
 function resolveRef(file,ref){const [name,pointer]=ref.split('#');const target=name?path.resolve(path.dirname(file),name):file;assert(target.startsWith(path.join(root,'documentation')),'External/non-repository ref');let value=JSON.parse(fs.readFileSync(target,'utf8'));if(pointer)for(const token of pointer.slice(1).split('/')){value=value[token.replace(/~1/g,'/').replace(/~0/g,'~')];assert(value!==undefined,'Unresolved ref '+ref);}return value;}
 function validate(spec,file){

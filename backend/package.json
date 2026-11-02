@@ -2,6 +2,9 @@
   "name": "goleve-backend",
   "private": true,
   "version": "0.1.0",
+  "scarfSettings": {
+    "enabled": false
+  },
   "scripts": {
     "demo": "node ../scripts/demo.cjs",
     "test:demo": "npm run build --workspace=@goleve/auth-service && npm run build --workspace=@goleve/user-service && npm run build --workspace=@goleve/professional-service && npm run build --workspace=@goleve/api-gateway && node --test tests/demo-integration.test.cjs"
