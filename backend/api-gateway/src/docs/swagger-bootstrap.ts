@@ -1,6 +1,7 @@
 interface UiSettings {
   tryItOut: boolean;
   operations: Array<{ method: string; path: string }>;
+  specUrl: string;
 }
 
 // Self-contained function: served as a local JS asset, without inline scripts/CDNs.
@@ -17,7 +18,7 @@ export function initializeSwaggerUi(settings: UiSettings) {
     ).join('/') + '$'),
   }));
   browser.ui = browser.SwaggerUIBundle({
-    url: '/api-docs/openapi.json',
+    url: settings.specUrl,
     dom_id: '#swagger-ui',
     layout: 'BaseLayout',
     deepLinking: true,
@@ -26,7 +27,7 @@ export function initializeSwaggerUi(settings: UiSettings) {
     operationsSorter: 'alpha',
     defaultModelsExpandDepth: -1,
     supportedSubmitMethods: settings.tryItOut ? ['get', 'post', 'put', 'patch', 'delete'] : [],
-    tryItOutEnabled: false,
+    tryItOutEnabled: settings.tryItOut,
     persistAuthorization: false,
     queryConfigEnabled: false,
     validatorUrl: null,
@@ -37,7 +38,7 @@ export function initializeSwaggerUi(settings: UiSettings) {
       const url = new URL(request.url, browser.location.href);
       const method = (request.method || 'GET').toUpperCase();
       if (url.origin !== browser.location.origin || url.username || url.password) throw new Error('Swagger requests must stay on the current Gateway');
-      if (method === 'GET' && url.pathname === '/api-docs/openapi.json') {
+      if (method === 'GET' && url.pathname === new URL(settings.specUrl, browser.location.href).pathname) {
         request.credentials = 'omit';
         for (const key of Object.keys(request.headers || {})) if (key.toLowerCase() === 'authorization') delete request.headers![key];
         return request;

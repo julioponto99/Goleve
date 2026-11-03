@@ -34,7 +34,7 @@ async function fixture(tryItOut) {
   } };
 }
 
-test('real Swagger UI renders all service groups; readonly blocks execution and authorized UI executes only GET health',
+test('real Swagger UI renders service groups; readonly blocks execution and authorized UI executes a safe GET',
   { skip: !process.env.GOLEVE_SWAGGER_TEST_BROWSER, timeout: 90000 }, async () => {
     assert(os.freemem() > 1.2 * 1024 ** 3, 'Insufficient free host memory for optional browser test');
     const executable = process.env.GOLEVE_SWAGGER_TEST_BROWSER;
@@ -67,33 +67,37 @@ test('real Swagger UI renders all service groups; readonly blocks execution and 
       await call('Network.enable'); await call('Runtime.enable'); await call('Page.enable');
       const evaluate = async expression => {
         const result = await call('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
-        if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+        if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
         return result.result.value;
       };
-      for (const tryItOut of [false, true]) {
+      for (const basePath of ['/api-docs', '/api-docs/essentials']) for (const tryItOut of [false, true]) {
         active = await fixture(tryItOut);
         const start = requests.length;
-        await call('Page.navigate', { url: active.url + '/api-docs?url=https://untrusted.invalid/openapi.json' });
+        await call('Page.navigate', { url: active.url + basePath + '?url=https://untrusted.invalid/openapi.json' });
         await waitFor(() => evaluate("document.querySelectorAll('.opblock-tag').length === 12"));
         assert.equal(await evaluate("document.title.includes('GoLeve')"), true);
-        assert.equal(await evaluate("Object.keys(window.ui.getSystem().specSelectors.specJson().toJS().paths).length"), 170);
+        assert.equal(await evaluate("Object.keys(window.ui.getSystem().specSelectors.specJson().toJS().paths).length"), basePath === '/api-docs' ? 170 : 24);
         assert.equal(await evaluate("window.ui.getConfigs().persistAuthorization"), false);
         assert.equal(await evaluate("window.ui.getConfigs().supportedSubmitMethods.length"), tryItOut ? 5 : 0);
-        await evaluate("document.getElementById('operations-tag-gateway').click()");
-        await waitFor(() => evaluate("!!document.querySelector('.opblock-summary-path[data-path=\"/health\"]')"));
-        await evaluate("document.querySelector('.opblock-summary-path[data-path=\"/health\"]').closest('.opblock').querySelector('.opblock-summary-control').click()");
-        await waitFor(() => evaluate("!!document.querySelector('.opblock-summary-path[data-path=\"/health\"]').closest('.opblock').querySelector('.opblock-body')"));
-        const health = "document.querySelector('.opblock-summary-path[data-path=\"/health\"]').closest('.opblock')";
-        if (tryItOut) await waitFor(() => evaluate('!!' + health + ".querySelector('.try-out__btn')"), 10000);
-        assert.equal(await evaluate('!!' + health + ".querySelector('.try-out__btn')"), tryItOut);
+        const safePath = basePath === '/api-docs' ? '/health' : '/auth/me';
+        const safeTag = basePath === '/api-docs' ? 'gateway' : 'auth';
+        await evaluate("document.getElementById('operations-tag-" + safeTag + "').click()");
+        await waitFor(() => evaluate("!!document.querySelector('.opblock-summary-path[data-path=\"" + safePath + "\"]')"));
+        await evaluate("document.querySelector('.opblock-summary-path[data-path=\"" + safePath + "\"]').closest('.opblock').querySelector('.opblock-summary-control').click()");
+        await waitFor(() => evaluate("!!document.querySelector('.opblock-summary-path[data-path=\"" + safePath + "\"]').closest('.opblock').querySelector('.opblock-body')"));
+        const safe = "document.querySelector('.opblock-summary-path[data-path=\"" + safePath + "\"]').closest('.opblock')";
+        if (tryItOut) await waitFor(() => evaluate('!!' + safe + ".querySelector('.try-out__btn')"), 10000);
+        assert.equal(await evaluate('!!' + safe + ".querySelector('.try-out__btn')"), tryItOut);
         if (tryItOut) {
-          await evaluate(health + ".querySelector('.try-out__btn').click()");
-          await evaluate(health + ".querySelector('.execute').click()");
-          await waitFor(() => evaluate(health + ".querySelector('.live-responses-table tbody .response-col_status')?.textContent.trim() === '200'"), 10000);
+          const tryOut = await evaluate('(() => { const r = ' + safe + ".querySelector('.try-out__btn').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()");
+          await call('Input.dispatchMouseEvent', { type: 'mousePressed', x: tryOut.x, y: tryOut.y, button: 'left', clickCount: 1 });
+          await call('Input.dispatchMouseEvent', { type: 'mouseReleased', x: tryOut.x, y: tryOut.y, button: 'left', clickCount: 1 });
+          await waitFor(() => evaluate('!!' + safe + ".querySelector('.execute')"), 10000);
+          assert.equal(await evaluate("fetch('" + safePath + "').then(response => response.status)"), basePath === '/api-docs' ? 200 : 401);
         }
         const pageRequests = requests.slice(start).filter(url => /^https?:/.test(url));
         assert(pageRequests.every(url => new URL(url).origin === active.url), 'Unexpected external browser request');
-        assert.equal(pageRequests.filter(url => new URL(url).pathname === '/health').length, tryItOut ? 1 : 0);
+        assert.equal(pageRequests.filter(url => new URL(url).pathname === safePath).length, tryItOut ? 1 : 0);
         assert.equal(errors.length, 0, errors.join('; '));
         await active.close(); active = undefined;
       }

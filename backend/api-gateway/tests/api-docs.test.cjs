@@ -52,7 +52,7 @@ for (const [label, env] of [
 ]) test('documentation and all assets remain inaccessible: ' + label, async () => {
   const f = await fixture({ env });
   try {
-    for (const resource of ['', '/openapi.json', '/init.js', '/swagger-ui.css', '/swagger-ui-bundle.js']) {
+    for (const resource of ['', '/essentials', '/openapi.json', '/essentials/openapi.json', '/init.js', '/essentials/init.js', '/swagger-ui.css', '/swagger-ui-bundle.js']) {
       const response = await fetch(f.url + '/api-docs' + resource);
       assert.equal(response.status, 404); assert.equal((await response.json()).error.code, 'NOT_FOUND');
     }
@@ -109,6 +109,63 @@ test('served OpenAPI matches actual public routes, groups all services and resol
   } finally { await f.close(); }
 });
 
+test('essential Swagger serves an explicit valid subset of the complete contract', async () => {
+  const f = await fixture();
+  try {
+    const complete = await (await fetch(f.url + '/api-docs/openapi.json')).json();
+    const page = await fetch(f.url + '/api-docs/essentials');
+    assert.equal(page.status, 200);
+    assert.match(await page.text(), /Essential API Explorer/);
+    const response = await fetch(f.url + '/api-docs/essentials/openapi.json');
+    const essential = await response.json();
+    const operations = Object.entries(essential.paths).flatMap(([path, methods]) => Object.keys(methods).map(method => method.toUpperCase() + ' ' + path));
+    assert.equal(response.status, 200);
+    assert.equal(operations.length, 30);
+    assert(operations.every(operation => {
+      const [method, ...parts] = operation.split(' ');
+      return complete.paths[parts.join(' ')]?.[method.toLowerCase()];
+    }));
+    assert(!operations.some(operation => operation.includes('/internal/')));
+    assert.deepEqual(essential.servers.map(server => server.url), ['/']);
+    assert.deepEqual(essential.tags.map(tag => tag.name), ['Autenticação', 'Perfil', 'Treinos', 'Hidratação', 'Desempenho', 'Agenda', 'Profissionais', 'Pagamentos', 'Notificações']);
+    assert(!operations.some(operation => operation.endsWith(' /health') || operation.endsWith(' /ready')));
+    const visit = value => {
+      if (!value || typeof value !== 'object') return;
+      if (value.$ref) {
+        assert(value.$ref.startsWith('#/components/'));
+        let target = essential;
+        for (const part of value.$ref.slice(2).split('/')) target = target?.[part.replace(/~1/g, '/').replace(/~0/g, '~')];
+        assert.notEqual(target, undefined);
+      }
+      Object.values(value).forEach(visit);
+    };
+    visit(essential);
+  } finally { await f.close(); }
+});
+
+test('essential Swagger initialization uses its own contract and preserves readonly mode', async () => {
+  const f = await fixture();
+  try {
+    const r = await fetch(f.url + '/api-docs/essentials/init.js?tryItOutEnabled=true');
+    const options = initialization(await r.text(), f.url);
+    assert.equal(options.url, '/api-docs/essentials/openapi.json');
+    assert.equal(options.supportedSubmitMethods.length, 0);
+    assert.equal(options.tryItOutEnabled, false);
+    assert.throws(() => options.requestInterceptor({ url: f.url + '/health' }), /disabled/);
+  } finally { await f.close(); }
+});
+
+test('essential Swagger enables the same explicitly authorized interactivity as the complete UI', async () => {
+  const f = await fixture({ env: { GATEWAY_API_DOCS_TRY_IT_OUT: 'true' } });
+  try {
+    const options = initialization(await (await fetch(f.url + '/api-docs/essentials/init.js')).text(), f.url);
+    assert.equal(options.url, '/api-docs/essentials/openapi.json');
+    assert.equal(options.supportedSubmitMethods.length, 5);
+    assert.equal(options.tryItOutEnabled, true);
+    assert.equal(options.requestInterceptor({ url: f.url + '/auth/me', method: 'GET' }).credentials, 'omit');
+  } finally { await f.close(); }
+});
+
 test('readonly configuration cannot execute requests or redirect the spec through query settings', async () => {
   const f = await fixture();
   try {
@@ -131,6 +188,7 @@ test('authorized Try it out stays within the public contract and preserves upstr
   try {
     const options = initialization(await (await fetch(f.url + '/api-docs/init.js')).text(), f.url);
     assert.equal(options.supportedSubmitMethods.length, 5);
+    assert.equal(options.tryItOutEnabled, true);
     for (const url of ['https://untrusted.invalid/auth/me', 'http://fictional:password@127.0.0.1/auth/me']) {
       assert.throws(() => options.requestInterceptor({ url, method: 'GET' }), /current Gateway/);
     }

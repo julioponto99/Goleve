@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { dirname, join } from 'node:path';
 import { initializeSwaggerUi } from '../docs/swagger-bootstrap';
+import { createEssentialDocument, essentialOperationList } from '../docs/swagger-documents';
 
 interface DocsSettings { tryItOut: boolean; origin?: string }
 function settings(env: NodeJS.ProcessEnv): DocsSettings | undefined {
@@ -47,14 +48,27 @@ export function createApiDocsRoutes() {
   });
   // Lazy loading keeps the document and UI assets out of disabled/production startup.
   const { apiDocsDocument } = require('../generated/api-docs-document') as {
-    apiDocsDocument: { paths: Record<string, Record<string, unknown>> };
+    apiDocsDocument: { paths: Record<string, Record<string, unknown>>; [key: string]: unknown };
   };
-  const operations = Object.entries(apiDocsDocument.paths).flatMap(([path, methods]) => Object.keys(methods).map(method => ({ method, path })));
-  const bootstrap = '(' + initializeSwaggerUi.toString() + ')(' + JSON.stringify({ tryItOut: config.tryItOut, operations }) + ');';
+  const completeDocument = {
+    ...apiDocsDocument,
+    info: { ...(apiDocsDocument.info as Record<string, unknown>), title: 'GoLeve V1 — API Explorer' },
+  };
+  const essentialDocument = createEssentialDocument(completeDocument);
+  const documents = [
+    { prefix: '', specPath: '/api-docs/openapi.json', document: completeDocument },
+    { prefix: '/essentials', specPath: '/api-docs/essentials/openapi.json', document: essentialDocument },
+  ];
   const assets = dirname(require.resolve('swagger-ui-dist/package.json'));
-  router.get('/', (_req, res) => { res.type('html').send('<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GoLeve V1 — API de desenvolvimento</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/api-docs/swagger-ui.css"></head><body><p>GoLeve V1 — desenvolvimento fictício. Try it out: ' + (config.tryItOut ? 'ativado; as APIs mantêm autenticação e permissões.' : 'desativado.') + '</p><div id="swagger-ui"></div><script src="/api-docs/swagger-ui-bundle.js"></script><script src="/api-docs/init.js"></script></body></html>'); });
-  router.get('/openapi.json', (_req, res) => { res.json(apiDocsDocument); });
-  router.get('/init.js', (_req, res) => { res.type('application/javascript').send(bootstrap); });
+  for (const entry of documents) {
+    const operations = entry.prefix ? essentialOperationList() : Object.entries(entry.document.paths).flatMap(([path, methods]) => Object.keys(methods).map(method => ({ method, path })));
+    const bootstrap = '(' + initializeSwaggerUi.toString() + ')(' + JSON.stringify({ tryItOut: config.tryItOut, operations, specUrl: entry.specPath }) + ');';
+    const title = entry.prefix ? 'GoLeve V1 — Essential API Explorer' : 'GoLeve V1 — API Explorer';
+    const status = config.tryItOut ? 'Try it out ativado; as APIs mantêm autenticação e permissões.' : 'Try it out: desativado.';
+    router.get(entry.prefix || '/', (_req, res) => { res.type('html').send('<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + title + '</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/api-docs/swagger-ui.css"></head><body><p>GoLeve V1 API Explorer. ' + status + '</p><div id="swagger-ui"></div><script src="/api-docs/swagger-ui-bundle.js"></script><script src="/api-docs' + (entry.prefix ? '/essentials' : '') + '/init.js"></script></body></html>'); });
+    router.get(entry.specPath.replace('/api-docs', ''), (_req, res) => { res.json(entry.document); });
+    router.get((entry.prefix || '') + '/init.js', (_req, res) => { res.type('application/javascript').send(bootstrap); });
+  }
   for (const file of ['swagger-ui-bundle.js', 'swagger-ui.css']) router.get('/' + file, (_req, res) => { res.sendFile(join(assets, file)); });
   router.use(notFound);
   return router;
