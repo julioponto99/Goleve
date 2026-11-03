@@ -3,12 +3,12 @@
   "info": {
     "title": "GoLeve V1 — Development Gateway reference",
     "version": "0.14.0",
-    "description": "Routes verified statically at 000cc43. Local fictional development only; operation existence is not proof of runtime eligibility. Inspect x-availability and schema completeness; see backend-release-v1.md."
+    "description": "Routes derived from the current source (historical baseline 000cc43). Local fictional development only; operation existence is not proof of runtime eligibility. Inspect x-availability and schema completeness; see backend-release-v1.md."
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:64344",
-      "description": "Example independent developer instance; configurable port"
+      "url": "http://127.0.0.1:3000",
+      "description": "Official local-demo Gateway; private development only"
     }
   ],
   "security": [
@@ -1213,7 +1213,7 @@
         "operationId": "agenda_get___agenda__professional_appointments",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 21,
+          "line": 23,
           "sourceRoute": "/professional-appointments"
         },
         "x-availability": "professional-eligibility-required",
@@ -1276,7 +1276,7 @@
         "operationId": "agenda_post___agenda__professional_appointments",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 20,
+          "line": 22,
           "sourceRoute": "/professional-appointments"
         },
         "x-availability": "professional-eligibility-required",
@@ -1331,7 +1331,7 @@
         "operationId": "agenda_get___agenda__professional_appointments___id",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 24,
+          "line": 26,
           "sourceRoute": "/professional-appointments/:id"
         },
         "x-availability": "professional-eligibility-required",
@@ -1412,7 +1412,7 @@
         "operationId": "agenda_post___agenda__professional_appointments___id___cancel",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 26,
+          "line": 28,
           "sourceRoute": "/professional-appointments/:id/cancel"
         },
         "x-availability": "professional-eligibility-required",
@@ -1467,7 +1467,7 @@
         "operationId": "agenda_get___agenda__professional_appointments___id___history",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 23,
+          "line": 25,
           "sourceRoute": "/professional-appointments/:id/history"
         },
         "x-availability": "professional-eligibility-required",
@@ -1548,7 +1548,7 @@
         "operationId": "agenda_post___agenda__professional_appointments___id___reschedule",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 27,
+          "line": 29,
           "sourceRoute": "/professional-appointments/:id/reschedule"
         },
         "x-availability": "professional-eligibility-required",
@@ -1716,7 +1716,7 @@
         "operationId": "agenda_get___agenda__professional__appointments",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 22,
+          "line": 24,
           "sourceRoute": "/professional/appointments"
         },
         "x-availability": "professional-eligibility-required",
@@ -1797,7 +1797,7 @@
         "operationId": "agenda_post___agenda__professional__appointments___id___accept",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 25,
+          "line": 27,
           "sourceRoute": "/professional/appointments/:id/accept"
         },
         "x-availability": "professional-eligibility-required",
@@ -1878,7 +1878,7 @@
         "operationId": "agenda_post___agenda__professional__appointments___id___cancel",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 25,
+          "line": 27,
           "sourceRoute": "/professional/appointments/:id/cancel"
         },
         "x-availability": "professional-eligibility-required",
@@ -1959,7 +1959,7 @@
         "operationId": "agenda_post___agenda__professional__appointments___id___complete",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 25,
+          "line": 27,
           "sourceRoute": "/professional/appointments/:id/complete"
         },
         "x-availability": "professional-eligibility-required",
@@ -2040,7 +2040,7 @@
         "operationId": "agenda_post___agenda__professional__appointments___id___decline",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 25,
+          "line": 27,
           "sourceRoute": "/professional/appointments/:id/decline"
         },
         "x-availability": "professional-eligibility-required",
@@ -2111,7 +2111,7 @@
         "operationId": "agenda_get___agenda__professional__availability_exceptions",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 17,
+          "line": 19,
           "sourceRoute": "/professional/availability-exceptions"
         },
         "x-availability": "professional-eligibility-required",
@@ -2174,7 +2174,7 @@
         "operationId": "agenda_post___agenda__professional__availability_exceptions",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 16,
+          "line": 18,
           "sourceRoute": "/professional/availability-exceptions"
         },
         "x-availability": "professional-eligibility-required",
@@ -2245,7 +2245,7 @@
         "operationId": "agenda_delete___agenda__professional__availability_exceptions___id",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 18,
+          "line": 20,
           "sourceRoute": "/professional/availability-exceptions/:id"
         },
         "x-availability": "professional-eligibility-required",
@@ -2316,7 +2316,7 @@
         "operationId": "agenda_get___agenda__professional__availability_rules",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 13,
+          "line": 15,
           "sourceRoute": "/professional/availability-rules"
         },
         "x-availability": "professional-eligibility-required",
@@ -2379,7 +2379,7 @@
         "operationId": "agenda_post___agenda__professional__availability_rules",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 12,
+          "line": 14,
           "sourceRoute": "/professional/availability-rules"
         },
         "x-availability": "professional-eligibility-required",
@@ -2450,7 +2450,7 @@
         "operationId": "agenda_delete___agenda__professional__availability_rules___id",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 15,
+          "line": 17,
           "sourceRoute": "/professional/availability-rules/:id"
         },
         "x-availability": "professional-eligibility-required",
@@ -2529,7 +2529,7 @@
         "operationId": "agenda_patch___agenda__professional__availability_rules___id",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 14,
+          "line": 16,
           "sourceRoute": "/professional/availability-rules/:id"
         },
         "x-availability": "professional-eligibility-required",
@@ -2624,7 +2624,7 @@
         "operationId": "agenda_get___agenda__professionals___professionalId___availability",
         "x-source": {
           "file": "backend/services/agenda-service/src/routes/professional-agenda.routes.ts",
-          "line": 19,
+          "line": 21,
           "sourceRoute": "/professionals/:professionalId/availability"
         },
         "x-availability": "professional-eligibility-required",
@@ -3736,7 +3736,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 16,
+          "line": 17,
           "sourceRoute": "/admin/step-up"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -3912,7 +3912,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 32,
+          "line": 33,
           "sourceRoute": "/audit"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -4099,7 +4099,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 29,
+          "line": 30,
           "sourceRoute": "/role-requests"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -4287,7 +4287,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 30,
+          "line": 31,
           "sourceRoute": "/role-requests/:id/approve"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -4475,7 +4475,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 30,
+          "line": 31,
           "sourceRoute": "/role-requests/:id/reject"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -4681,7 +4681,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 25,
+          "line": 26,
           "sourceRoute": "/users"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -4830,7 +4830,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 26,
+          "line": 27,
           "sourceRoute": "/users/:id"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -5009,7 +5009,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 31,
+          "line": 32,
           "sourceRoute": "/users/:id/history"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -5170,7 +5170,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 27,
+          "line": 28,
           "sourceRoute": "/users/:id/reactivate"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -5331,7 +5331,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 27,
+          "line": 28,
           "sourceRoute": "/users/:id/revoke"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -5492,7 +5492,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 28,
+          "line": 29,
           "sourceRoute": "/users/:id/role-requests"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -5653,7 +5653,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 27,
+          "line": 28,
           "sourceRoute": "/users/:id/suspend"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -5837,7 +5837,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 15,
+          "line": 16,
           "sourceRoute": "/initial-admin-invitation/accept"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -6143,7 +6143,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 17,
+          "line": 18,
           "sourceRoute": "/logout"
         },
         "x-availability": "local-fictional-data",
@@ -6319,7 +6319,7 @@
         },
         "x-source": {
           "file": "backend/services/auth-service/src/manager-invitations.ts",
-          "line": 24,
+          "line": 25,
           "sourceRoute": "/"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -6488,7 +6488,7 @@
         },
         "x-source": {
           "file": "backend/services/auth-service/src/manager-invitations.ts",
-          "line": 29,
+          "line": 30,
           "sourceRoute": "/:id/revoke"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -6650,7 +6650,7 @@
         },
         "x-source": {
           "file": "backend/services/auth-service/src/manager-invitations.ts",
-          "line": 31,
+          "line": 32,
           "sourceRoute": "/accept"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -6673,6 +6673,17 @@
                   "properties": {
                     "user": {
                       "$ref": "./backend-integration-v1.openapi.json#/components/schemas/Identity"
+                    },
+                    "authority": {
+                      "type": "string",
+                      "enum": [
+                        "standard",
+                        "local-demo"
+                      ]
+                    },
+                    "demoInstanceId": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{16}$"
                     }
                   },
                   "required": [
@@ -6942,7 +6953,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 14,
+          "line": 15,
           "sourceRoute": "/mfa/complete"
         },
         "x-availability": "local-fictional-data",
@@ -7122,7 +7133,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 13,
+          "line": 14,
           "sourceRoute": "/mfa/enroll"
         },
         "x-availability": "local-fictional-data",
@@ -7431,7 +7442,7 @@
         ],
         "x-source": {
           "file": "backend/services/auth-service/src/administration/routes.ts",
-          "line": 18,
+          "line": 19,
           "sourceRoute": "/sessions"
         },
         "x-availability": "local-fictional-data",
@@ -10387,7 +10398,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 20,
+          "line": 21,
           "sourceRoute": "/appointments"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -10578,7 +10589,7 @@
         ],
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 18,
+          "line": 19,
           "sourceRoute": "/assignments"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -10752,7 +10763,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 17,
+          "line": 18,
           "sourceRoute": "/assignments"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -10946,7 +10957,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 19,
+          "line": 20,
           "sourceRoute": "/assignments/:id/approve"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -11140,7 +11151,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 19,
+          "line": 20,
           "sourceRoute": "/assignments/:id/approve-revocation"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -11303,7 +11314,7 @@
         "operationId": "management_get___management__assignments___id___history",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 13,
+          "line": 14,
           "sourceRoute": "/assignments/:id/history"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -11507,7 +11518,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 19,
+          "line": 20,
           "sourceRoute": "/assignments/:id/reject"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -11701,7 +11712,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 19,
+          "line": 20,
           "sourceRoute": "/assignments/:id/request-revocation"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -11876,7 +11887,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 26,
+          "line": 27,
           "sourceRoute": "/audit"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -12066,7 +12077,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 23,
+          "line": 24,
           "sourceRoute": "/cases"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -12230,7 +12241,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 22,
+          "line": 23,
           "sourceRoute": "/cases"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -12415,7 +12426,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 24,
+          "line": 25,
           "sourceRoute": "/cases/:id"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -12599,7 +12610,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 25,
+          "line": 26,
           "sourceRoute": "/cases/:id/history"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -12776,7 +12787,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 27,
+          "line": 28,
           "sourceRoute": "/dashboard"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -12932,7 +12943,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 11,
+          "line": 12,
           "sourceRoute": "/me"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -13106,7 +13117,7 @@
         "operationId": "management_get___management__operators",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 12,
+          "line": 13,
           "sourceRoute": "/operators"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -13279,7 +13290,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 14,
+          "line": 15,
           "sourceRoute": "/operators"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -13461,7 +13472,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 20,
+          "line": 21,
           "sourceRoute": "/payments"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -14075,7 +14086,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 20,
+          "line": 21,
           "sourceRoute": "/professionals"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -14253,7 +14264,7 @@
         ],
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 16,
+          "line": 17,
           "sourceRoute": "/scopes"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -14427,7 +14438,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 15,
+          "line": 16,
           "sourceRoute": "/scopes"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -14617,7 +14628,7 @@
         "x-authorized-role": "gestor",
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 20,
+          "line": 21,
           "sourceRoute": "/services"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -14802,7 +14813,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 21,
+          "line": 22,
           "sourceRoute": "/services/:id/reactivate"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -14987,7 +14998,7 @@
         },
         "x-source": {
           "file": "backend/services/management-service/src/routes/management.routes.ts",
-          "line": 21,
+          "line": 22,
           "sourceRoute": "/services/:id/suspend"
         },
         "x-availability": "privileged-no-provisioned-admin",
@@ -18014,7 +18025,7 @@
         "operationId": "professional_get___professionals__catalog",
         "x-source": {
           "file": "backend/services/professional-service/src/app.ts",
-          "line": 53,
+          "line": 54,
           "sourceRoute": "/professionals/catalog"
         },
         "x-availability": "local-fictional-data",
@@ -18077,7 +18088,7 @@
         "operationId": "professional_get___professionals__eligible_capabilities",
         "x-source": {
           "file": "backend/services/professional-service/src/app.ts",
-          "line": 59,
+          "line": 60,
           "sourceRoute": "/professionals/eligible-capabilities"
         },
         "x-availability": "professional-eligibility-required",
@@ -18781,7 +18792,7 @@
         "operationId": "professional_get___professionals__me__care_relationships",
         "x-source": {
           "file": "backend/services/professional-service/src/app.ts",
-          "line": 60,
+          "line": 61,
           "sourceRoute": "/professionals/me/care-relationships"
         },
         "x-availability": "professional-eligibility-required",
@@ -19578,7 +19589,7 @@
         "operationId": "professional_get___professionals__services",
         "x-source": {
           "file": "backend/services/professional-service/src/app.ts",
-          "line": 54,
+          "line": 55,
           "sourceRoute": "/professionals/services"
         },
         "x-availability": "local-fictional-data",

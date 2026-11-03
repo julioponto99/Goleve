@@ -1,3 +1,5 @@
+import { localDemo } from '../local-demo';
+import { fixtureEligible } from '../local-demo-fixtures';
 import express, { Router } from 'express';
 import { Connection, Schema } from 'mongoose';
 import { ApiError } from '../config/errors';
@@ -17,8 +19,8 @@ export function createPaymentDemoRoutes(connection:Connection,models:Professiona
     const cap=await models.Capability.findOne({_id:oid(b.capabilityId),status:{$nin:['suspended','expired','rejected']},...(b.professionalId?{professionalId:oid(b.professionalId)}:{})});
     const profile=cap&&await models.Profile.findOne({_id:cap.professionalId,authUserId:cap.authUserId,profileStatus:{$nin:['suspended','archived']}});
     const approved=profile&&await models.Application.exists({professionalId:profile._id,authUserId:profile.authUserId,status:'approved',publicationEnabled:true});
-    const service=approved&&await models.Service.findOne({professionalId:profile!._id,capabilityId:cap!._id,authUserId:profile!.authUserId,category:cap!.kind,active:true,...(operation==='quote'?{_id:oid(b.serviceId)}:{})});
-    if(!cap||!profile||!approved||!service)throw new ApiError(404,'DEMO_PROFESSIONAL_INELIGIBLE','Approved synthetic professional service required');
+    const service=(approved||localDemo.policy())&&await models.Service.findOne({professionalId:profile!._id,capabilityId:cap!._id,authUserId:profile!.authUserId,category:cap!.kind,active:true,...(operation==='quote'?{_id:oid(b.serviceId)}:{})});
+    if(!cap||!profile||!service||(localDemo.policy()?!await fixtureEligible(models,profile,cap,service):!approved))throw new ApiError(404,'DEMO_PROFESSIONAL_INELIGIBLE','Approved synthetic professional service required');
     let data:unknown;
     if(operation==='eligibility'){
       let relationshipAccepted=false;

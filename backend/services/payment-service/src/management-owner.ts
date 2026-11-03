@@ -1,3 +1,4 @@
+import { localDemo } from './local-demo';
 import express,{Router} from 'express';
 import { Connection } from 'mongoose';
 import { ApiError } from './config/errors';
@@ -9,8 +10,9 @@ export function managementOwnerRoutes(connection:Connection,config:ContractConfi
   const b=req.body;if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>!['serviceIds','permission','limit','before','q','status','serviceId','version','reasonCode','resourceId','from','to'].includes(k))||!Array.isArray(b.serviceIds)||b.serviceIds.length<1||b.serviceIds.length>500||new Set(b.serviceIds).size!==b.serviceIds.length||b.serviceIds.some((id:unknown)=>typeof id!=='string'||!/^[a-f0-9]{24}$/.test(id)))throw new ApiError(400,'VALIDATION_ERROR','Canonical scope identifiers required');
   const expected=config.peer==='professional'?{validate:'scope.validate',services:'services.read',professionals:'professionals.read',suspend:'services.suspend',reactivate:'services.reactivate',resource:'cases.write',metrics:'dashboard.read'}:config.peer==='agenda'?{appointments:'appointments.read',resource:'cases.write',metrics:'dashboard.read'}:{payments:'payments.read',resource:'cases.write',metrics:'dashboard.read'};
   if(expected[op as keyof typeof expected]!==b.permission)throw new ApiError(403,'PERMISSION_FORBIDDEN','Operation permission mismatch');
-  const grant=await new ContractClient(config).call<{actorId:string;serviceIds:string[];permission:string}>('management','authorize',{serviceIds:b.serviceIds,permission:b.permission},bearer);
+  const grant=await new ContractClient(config).call<{actorId:string;serviceIds:string[];permission:string;authority?:string;demoInstanceId?:string}>('management','authorize',{serviceIds:b.serviceIds,permission:b.permission},bearer);
   if(!grant||grant.permission!==b.permission||!/^[a-f0-9]{24}$/.test(grant.actorId)||JSON.stringify([...grant.serviceIds].sort())!==JSON.stringify([...b.serviceIds].sort()))throw new ApiError(403,'SCOPE_FORBIDDEN','Current authorization required');
+  const demo=localDemo.policy();if(grant.authority==='local-demo'){if(!demo||grant.demoInstanceId!==demo.instance||!demo.accounts.some((a:any)=>a.id===grant.actorId&&['gestor','administrador'].includes(a.role))||b.serviceIds.some((id:string)=>![demo.resources.ptService,demo.resources.nutritionService].includes(id)))throw new ApiError(403,'LOCAL_DEMO_AUTHORITY_REQUIRED','Fixture scope unavailable');}else if(demo?.accounts.some((a:any)=>a.id===grant.actorId))throw new ApiError(403,'AUTHORITY_MISMATCH','Explicit fixture authority required');
   const data=await handler(op,b,grant.actorId);res.set('Cache-Control','no-store').json(data);
  }catch(e){next(e);}});return r;
 }

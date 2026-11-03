@@ -1,3 +1,4 @@
+import { localDemo } from './local-demo';
 import express from 'express';
 import { Connection } from 'mongoose';
 import { isDatabaseHealthy } from './config/database';
@@ -30,7 +31,7 @@ export function createApp(settings: ProfessionalSettings, connection: Connection
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
   const management=loadContract('professional');if(management)app.use('/internal/v1/management',(_req,_res,next)=>{if(settings.dataMode!=='synthetic'){next(new ApiError(503,'PROFESSIONAL_DATA_DISABLED','Owner data policy is disabled'));return;}next();},createManagementRoutes(connection,models,management));
   if(management)app.use('/internal/v1/management',administrationRoutes(connection,models,management));
-  if(settings.paymentDemo){if(settings.dataMode!=='synthetic'||settings.reviewMode!=='synthetic')throw new Error('Synthetic Professional review required');app.use('/internal/v1/payment-demo',createPaymentDemoRoutes(connection,models,settings.paymentDemo));}
+  if(settings.paymentDemo){if(settings.dataMode!=='synthetic'||settings.reviewMode!=='synthetic'&&!localDemo.policy())throw new Error('Synthetic Professional review required');app.use('/internal/v1/payment-demo',createPaymentDemoRoutes(connection,models,settings.paymentDemo));}
   if (settings.agendaServiceKeys) app.use('/internal/v1/agenda', createAgendaInternalRoutes(connection, models, settings.agendaServiceKeys, settings.demoEligibilityEnabled));
   app.get('/health', async (_req, res) => {
     res.set('Cache-Control', 'no-store'); const healthy = await isDatabaseHealthy(connection);
@@ -58,7 +59,7 @@ export function createApp(settings: ProfessionalSettings, connection: Connection
   }, express.json({ limit: '16kb' }), available, legacyReviewAuthorization(management), createApplicationRoutes(applications));
   app.get('/professionals/eligible-capabilities', available, careController.eligible);
   app.get('/professionals/me/care-relationships', available, careController.inbox);
-  app.use('/care-relationships', express.json({ limit: '16kb' }), available, createCareRelationshipRoutes(relationships));
+  app.use('/care-relationships', express.json({ limit: '16kb' }), available, (req,res,next)=>{const p=localDemo.policy();if(req.method==='POST'&&p&&!p.accounts.some((a:any)=>a.id===res.locals.context?.identity.id)){next(new ApiError(403,'LOCAL_DEMO_IDENTITIES_ONLY','Synthetic relationships require fixture identities'));return;}next();}, createCareRelationshipRoutes(relationships));
   app.use('/professionals', express.json({ limit: '16kb' }), available, createProfessionalRoutes(new ProfessionalService(models), applications));
   app.use((_req, _res, next) => next(new ApiError(404, 'NOT_FOUND', 'Endpoint not found')));
   app.use(errorHandler); return app;

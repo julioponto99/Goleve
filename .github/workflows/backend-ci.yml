@@ -1,0 +1,105 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Build and test backend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend --no-audit --no-fund
+
+      - name: Build all backend workspaces
+        run: npm run build --prefix backend --workspaces --if-present
+
+      - name: Run backend test suite
+        run: npm run test --prefix backend --workspaces --if-present
+
+      - name: Validate Swagger and API boundary
+        run: npm run test:docs --prefix backend --workspace=@goleve/api-gateway
+
+      - name: Scan tracked files for operational secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(git grep -IlE \
+            '-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9_]+|xox[baprs]-[A-Za-z0-9-]+|AKIA[0-9A-Z]{16}|mongodb(\+srv)?://[^[:space:]"]+:[^[:space:]"]+@' \
+            -- ':!backend/services/ai-coach-service/tests/unit.test.cjs' ':!*.md' || true)"
+          if [[ -n "$matches" ]]; then
+            printf 'Potential operational secret patterns found in tracked files:\n%s\n' "$matches"
+            exit 1
+          fi
+
+      - name: Run clean-install unit checks
+        run: node --test scripts/tests/new-install.test.cjs scripts/tests/local-runtime.test.cjs
+
+  clean-install:
+    name: Isolated clean-install validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CI_PROJECT: goleve-ci-${{ github.run_id }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend --no-audit --no-fund
+
+      - name: Prepare isolated installation
+        run: |
+          node scripts/backend-setup.cjs init \
+            --project "$CI_PROJECT" \
+            --gateway-port 3300 \
+            --mongo-port 37019 \
+            --rabbit-port 35672 \
+            --rabbit-management-port 35673
+
+      - name: Validate isolated Compose configuration
+        run: docker compose --env-file .env -f compose.yaml -p "$CI_PROJECT" config --quiet
+
+      - name: Run isolated installation checks
+        run: node --test scripts/tests/new-install.test.cjs
+
+      - name: Remove isolated installation resources
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [[ -f .env ]]; then
+            docker compose --env-file .env -f compose.yaml -p "$CI_PROJECT" down --volumes --remove-orphans
+          fi
+          rm -f .env
+          rm -rf .local

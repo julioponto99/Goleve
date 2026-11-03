@@ -592,6 +592,17 @@
                   "properties": {
                     "user": {
                       "$ref": "#/components/schemas/Identity"
+                    },
+                    "authority": {
+                      "type": "string",
+                      "enum": [
+                        "standard",
+                        "local-demo"
+                      ]
+                    },
+                    "demoInstanceId": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{16}$"
                     }
                   },
                   "required": [

@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { Connection, Schema } from 'mongoose';
@@ -6,13 +7,13 @@ export type Peer = 'agenda' | 'payment' | 'professional';
 export interface DemoConfig { service: Peer; instance: string; origins: Partial<Record<Peer,string>>; keys: Partial<Record<Peer,Buffer>> }
 const error = (status:number,code:string):never => { throw new ApiError(status,code,'Payment integration demonstration contract unavailable or invalid'); };
 export function assertDemo(config: DemoConfig, database: string) {
-  if (!['development','test'].includes(process.env.NODE_ENV || '') || !/^[a-f0-9]{16}$/.test(config.instance) || database !== 'goleve_payagenda_'+config.instance+'_'+config.service) throw new Error('Payment integration requires an isolated synthetic database and is forbidden in production');
+  if (!['development','test'].includes(process.env.NODE_ENV || '') || !/^[a-f0-9]{16}$/.test(config.instance) || database !== 'goleve_payagenda_'+config.instance+'_'+config.service && !(localDemo.policy()?.instance===config.instance&&localDemo.permitsDemoDatabase(config.service,database))) throw new Error('Payment integration requires an isolated synthetic database and is forbidden in production');
 }
 export function loadDemo(service: Peer): DemoConfig | undefined {
   const flag=process.env.PAYMENT_AGENDA_DEMO_ENABLED || 'false'; if(!['true','false'].includes(flag))throw new Error('Invalid payment integration flag'); if(flag==='false')return;
   const instance=process.env.PAYMENT_AGENDA_DEMO_INSTANCE || '',uri=new URL(process.env.MONGO_URI || '');
   const config:DemoConfig={service,instance,origins:{},keys:{}};
-  if(uri.protocol!=='mongodb:' || !['127.0.0.1','localhost'].includes(uri.hostname))throw new Error('Isolated loopback MongoDB required');
+  if(uri.protocol!=='mongodb:' || !['127.0.0.1','localhost'].includes(uri.hostname)&&!(uri.hostname==='mongodb'&&localDemo.permitsDemoDatabase(service,uri.pathname.slice(1))))throw new Error('Isolated loopback MongoDB required');
   assertDemo(config,uri.pathname.slice(1));
   for(const peer of ['agenda','payment','professional'] as Peer[])if(peer!==service){
     const variable=peer==='agenda'?'AGENDA_SERVICE_URL':peer==='professional'?'PROFESSIONAL_SERVICE_URL':'PAYMENT_SERVICE_URL',value=process.env[variable];

@@ -31,7 +31,7 @@ export const paymentSchema = new Schema<PaymentData>({
   method: { type: String, required: true, enum: ['mock'], immutable: true, default: 'mock' },
   transactionReference: { type: String, maxlength: 100 },
   idempotencyKey: { type: String, required: true, immutable: true, maxlength: 128 },
-  confirmationKey: { type: String, maxlength: 128 },
+  confirmationKey: { type: String, maxlength: 128, validate: { validator: (value: unknown) => value === undefined || typeof value === 'string' && /^[A-Za-z0-9._-]{1,128}$/.test(value), message: 'Invalid confirmation key' } },
   bankAttempt: { type: bankAttemptSchema, required: false },
   history: { type: [historySchema], required: true, default: [] },
 }, { timestamps: true, versionKey: false, strict: 'throw', collection: 'payments' });
@@ -39,5 +39,7 @@ paymentSchema.add(outboxFields);
 paymentSchema.index({'notificationOutbox.status':1,'notificationOutbox.nextAttemptAt':1});
 paymentSchema.index({ ownerId: 1, idempotencyKey: 1 }, { unique: true });
 paymentSchema.index({ ownerId: 1, createdAt: -1, _id: -1 });
-paymentSchema.index({ ownerId: 1, confirmationKey: 1 }, { unique: true, sparse: true });
+// A compound sparse index also indexes missing keys when ownerId exists.
+// Existing installations need the explicit reviewed index migration; never syncIndexes here.
+paymentSchema.index({ ownerId: 1, confirmationKey: 1 }, { name: 'ownerId_confirmationKey_valid_unique_v2', unique: true, partialFilterExpression: { confirmationKey: { $type: 'string' } } });
 export type PaymentDocument = HydratedDocument<PaymentData>;

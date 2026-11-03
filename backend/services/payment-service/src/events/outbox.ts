@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import { randomUUID } from 'node:crypto';
 import amqp from 'amqplib';
 import { Schema } from 'mongoose';
@@ -29,7 +30,7 @@ export async function notificationTransition(Model: any, filter: any, update: an
 }
 
 export function assertNotificationDemo(database: string) {
-  if(!['development','test'].includes(process.env.NODE_ENV || '') || !/^goleve_(payagenda_[a-f0-9]{16}_payment|notification59_[a-f0-9]+_payment)$/.test(database)) throw new Error('Payment notification publishing requires an isolated local demo');
+  if(!['development','test'].includes(process.env.NODE_ENV || '') || !/^goleve_(payagenda_[a-f0-9]{16}_payment|notification59_[a-f0-9]+_payment)$/.test(database)&&!localDemo.permitsDemoDatabase('payment',database)) throw new Error('Payment notification publishing requires an isolated local demo');
 }
 export async function publishPaymentOutbox(Model: any, url: string, limit = 20) {
   assertNotificationDemo(Model.db.name);

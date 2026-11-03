@@ -1,4 +1,6 @@
+import { localDemo } from './local-demo';
 import 'dotenv/config';
+localDemo.policy();
 import { loadSettings } from './config/settings';
 import { openDatabase } from './config/database';
 import { createCoachModels, initializeModels } from './models';

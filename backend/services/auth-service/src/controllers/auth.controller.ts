@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import { NextFunction, Request, Response } from 'express';
 import { validateLogin, validateRegister } from '../config/validation';
 import * as authService from '../services/auth.service';
@@ -20,7 +21,8 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
 export async function me(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.json({ user: await authService.currentUser(res.locals.userId as string) });
+    const demo=localDemo.account(res.locals.security.user);
+    res.json({ user: await authService.currentUser(res.locals.userId as string),...(demo?{authority:'local-demo',demoInstanceId:demo.instance}:{authority:'standard'}) });
   } catch (error) {
     next(error);
   }

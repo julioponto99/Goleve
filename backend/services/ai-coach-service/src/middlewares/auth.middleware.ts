@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import { NextFunction, Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { ApiError } from '../config/errors';
@@ -9,6 +10,7 @@ export async function verifyIdentity(origin: string, authorization: string, sign
     if (response.status === 401 || response.status === 403) throw new ApiError(401, 'INVALID_TOKEN', 'Invalid or expired authentication');
     if (!response.ok) throw new Error();
     const body = await response.json() as { user?: { id?: unknown } };
+      localDemo.identityEnvelope(body);
     if (!body.user || typeof body.user.id !== 'string' || !/^[a-f0-9]{24}$/.test(body.user.id)) throw new Error();
     // Auth verifies the signature. Enforce the existing common GoLeve API audience as well.
     const parts = authorization.slice(7).split('.');

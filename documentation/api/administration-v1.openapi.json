@@ -4351,6 +4351,17 @@
               "type": "string",
               "pattern": "^[a-f0-9]{32}$"
             }
+          },
+          "authority": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "local-demo"
+            ]
+          },
+          "demoInstanceId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{16}$"
           }
         },
         "required": [
@@ -4509,6 +4520,41 @@
               "targetId",
               "parameters"
             ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "password": {
+                "type": "string",
+                "format": "password"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "user.suspend",
+                  "user.reactivate",
+                  "user.revoke"
+                ]
+              },
+              "targetId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "parameters": {
+                "type": "object",
+                "description": "Exact canonical parameters specified in administration-v1.md"
+              }
+            },
+            "required": [
+              "password",
+              "action",
+              "targetId",
+              "parameters"
+            ],
+            "description": "Only the five explicitly provisioned local-demo identities in development. Password reauthentication; never MFA verification. Normal administrators require TOTP or recovery factor and independent approvals remain mandatory.",
+            "x-required-authority": "local-demo"
           }
         ]
       },
