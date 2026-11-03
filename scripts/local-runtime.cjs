@@ -50,10 +50,11 @@ function prepare(root = ROOT) {
     RABBITMQ_PORT: '5672', RABBITMQ_MANAGEMENT_PORT: '15672', MONGO_DB_PREFIX: 'goleve',
     RABBITMQ_USER: original.RABBITMQ_USER || (rabbit && decodeURIComponent(rabbit.username)) || 'goleve',
     RABBITMQ_PASSWORD: original.RABBITMQ_PASSWORD || (rabbit && decodeURIComponent(rabbit.password)) || secret(),
+    MONGO_EXPRESS_USERNAME: 'goleve-tools', MONGO_EXPRESS_PASSWORD: secret(),
     JWT_SECRET: secret(), USER_DATA_KEY_PATH: './.secrets/user-data-key.key',
   };
   const state = appendMissing(rootFile, rootDefaults, e => {
-    if (e.COMPOSE_PROJECT_NAME !== 'goleve' || !/^[a-z][a-z0-9_]*$/.test(e.MONGO_DB_PREFIX)) throw Error('Unexpected official project or database prefix');
+    if (!/^[a-z0-9][a-z0-9_-]{0,47}$/.test(e.COMPOSE_PROJECT_NAME) || !/^[a-z][a-z0-9_]*$/.test(e.MONGO_DB_PREFIX)) throw Error('Unexpected official project or database prefix');
     if (!e.JWT_SECRET || e.JWT_SECRET.length < 32 || /development-only|change-me/i.test(e.JWT_SECRET)) throw Error('Existing JWT configuration is insecure; not overwritten');
   }).values;
   const keyDir = path.join(root, '.secrets', 'local-runtime');
@@ -69,8 +70,8 @@ function prepare(root = ROOT) {
   const files = [];
   function emit(relative, values) { const file = path.join(root, relative); assertIgnored(root, file); const r = appendMissing(file, values); files.push({ file: relative, variablesAdded: r.added }); }
   for (const [name, port, database] of services) {
-    const e = { NODE_ENV: 'development', PORT: String(port), AUTH_SERVICE_URL: peerUrls.AUTH_SERVICE_URL,
-      MONGO_URI: 'mongodb://mongodb:27017/' + state.MONGO_DB_PREFIX + '_' + database,
+    const e = { NODE_ENV: 'development', GOLEVE_LOCAL_DEMO_ENABLED: 'false', PORT: String(port), AUTH_SERVICE_URL: peerUrls.AUTH_SERVICE_URL,
+      MONGO_URI: 'mongodb://mongodb:27017/' + state.MONGO_DB_PREFIX + '_' + database + '?replicaSet=goleveV1&retryWrites=true&w=majority',
       RABBITMQ_URL: rabbitUrl };
     if (name === 'auth') Object.assign(e, { JWT_SECRET: state.JWT_SECRET, AUTH_BOOTSTRAP_ENABLED: 'false', AUTH_MFA_ENCRYPTION_KEY_FILE: '/run/secrets/mfa' });
     if (name === 'user') Object.assign(e, { USER_DATA_MODE: state.USER_DATA_MODE || 'disabled', USER_DATA_KEY_FILE: '/run/secrets/user_data_key' });
@@ -86,11 +87,10 @@ function prepare(root = ROOT) {
     if (name === 'ai-coach') Object.assign(e, { AI_COACH_ENABLED: 'false', AI_COACH_PROVIDER: 'none' });
     emit('backend/services/' + name + '-service/.env', e);
   }
-  emit('backend/api-gateway/.env', { NODE_ENV: 'development', PORT: '3000', ...peerUrls,
+  emit('backend/api-gateway/.env', { NODE_ENV: 'development', GOLEVE_LOCAL_DEMO_ENABLED: 'false', PORT: '3000', ...peerUrls,
     CORS_ALLOWED_ORIGINS: 'http://127.0.0.1:5173,http://localhost:5173', GATEWAY_API_DOCS_ENABLED: 'true',
-    GATEWAY_API_DOCS_ORIGIN: 'http://127.0.0.1:3000', GATEWAY_API_DOCS_TRY_IT_OUT: 'false' });
-  emit('frontend/web/.env', { VITE_API_BASE_URL: 'http://127.0.0.1:3000' });
-  emit('frontend/mobile/.env', { EXPO_PUBLIC_API_BASE_URL: 'http://10.0.2.2:3000' });
+    GATEWAY_API_DOCS_ORIGIN: 'http://127.0.0.1:' + state.API_GATEWAY_PORT, GATEWAY_API_DOCS_TRY_IT_OUT: 'false' });
+  // Backend-only setup does not create frontend workspaces or configuration.
   return { prepared: files, secrets: 'generated only when absent; never printed', infrastructureChanged: false, accountsCreated: 0 };
 }
 function environmentInventory(root = ROOT) {

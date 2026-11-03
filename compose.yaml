@@ -1,4 +1,4 @@
-# Official local-demo stack. Prepare .env and local secrets before starting.
+# Local development backend. Use scripts/backend-setup.cjs for a fresh installation.
 # Existing external volumes remain mandatory. Never use --remove-orphans.
 {
   "name": "goleve",
@@ -35,7 +35,10 @@
         "timeout": "5s",
         "retries": 12,
         "start_period": "30s"
-      }
+      },
+      "tmpfs": [
+        "/data/configdb:rw,size=32m"
+      ]
     },
     "mongo-express": {
       "image": "mongo-express:1.0.2-20",
@@ -672,17 +675,17 @@
   },
   "networks": {
     "backend": {
-      "name": "goleve_backend",
+      "name": "${GOLEVE_NETWORK_NAME:-goleve_backend}",
       "external": true
     }
   },
   "volumes": {
     "mongo_data": {
-      "name": "goleve_mongo_data",
+      "name": "${GOLEVE_MONGO_VOLUME_NAME:-goleve_mongo_data}",
       "external": true
     },
     "rabbitmq_data": {
-      "name": "goleve_rabbitmq_data",
+      "name": "${GOLEVE_RABBIT_VOLUME_NAME:-goleve_rabbitmq_data}",
       "external": true
     }
   },
