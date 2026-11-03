@@ -10,7 +10,7 @@ explicita `--local-demo` e seed manual. Nao copiar segredos ou dados desta maqui
 Os registos seguintes descrevem a consolidacao de uma instalacao preexistente;
 nao substituem o procedimento de primeiro arranque.
 
-**Consolidação do ambiente oficial em curso (2026-11-03).** O projeto operacional
+**Consolidação do ambiente oficial em curso.** O projeto operacional
 é `goleve`, com [compose.yaml](compose.yaml), Gateway em `127.0.0.1:3000` e os
 volumes existentes preservados. Consultar o [registo de execução e recuperação](documentation/consolidation-v1.md)
 antes de iniciar serviços: os 14 componentes e cinco contas local-demo foram
