@@ -1,258 +1,730 @@
-# Local backend: docker compose up -d --build
-x-node-environment: &node-environment
-  NODE_ENV: production
-  RABBITMQ_URL: "amqp://${RABBITMQ_USER:-goleve}:${RABBITMQ_PASSWORD:-goleve-local}@rabbitmq:5672"
-  JWT_SECRET: "${JWT_SECRET:-development-only-change-me}"
-
-x-node-service: &node-service
-  restart: unless-stopped
-  init: true
-  networks: [backend]
-  depends_on:
-    mongodb:
-      condition: service_healthy
-    rabbitmq:
-      condition: service_healthy
-  healthcheck:
-    test:
-      - CMD
-      - node
-      - -e
-      - "fetch('http://127.0.0.1:' + process.env.PORT + '/health', { signal: AbortSignal.timeout(3000) }).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
-    interval: 15s
-    timeout: 5s
-    retries: 5
-    start_period: 20s
-
-services:
-  mongodb:
-    image: mongo:7
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:${MONGO_PORT:-27019}:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks: [backend]
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ ping: 1 }).ok ? 0 : 1)"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    hostname: rabbitmq
-    restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER:-goleve}"
-      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:-goleve-local}"
-    ports:
-      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
-      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    networks: [backend]
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping && rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_port_connectivity"]
-      interval: 15s
-      timeout: 15s
-      retries: 5
-      start_period: 40s
-
-  api-gateway:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: api-gateway/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3000"
-      AUTH_SERVICE_URL: "http://auth-service:3001"
-      USER_SERVICE_URL: "http://user-service:3002"
-      TRAINING_SERVICE_URL: "http://training-service:3003"
-      AGENDA_SERVICE_URL: "http://agenda-service:3004"
-      PERFORMANCE_SERVICE_URL: "http://performance-service:3005"
-      HYDRATION_SERVICE_URL: "http://hydration-service:3006"
-      PROFESSIONAL_SERVICE_URL: "http://professional-service:3007"
-      MANAGEMENT_SERVICE_URL: "http://management-service:3008"
-      PAYMENT_SERVICE_URL: "http://payment-service:3009"
-      NOTIFICATION_SERVICE_URL: "http://notification-service:3010"
-      AI_COACH_SERVICE_URL: "http://ai-coach-service:3011"
-    ports:
-      - "127.0.0.1:${API_GATEWAY_PORT:-3000}:3000"
-    depends_on:
-      auth-service:
-        condition: service_healthy
-      user-service:
-        condition: service_healthy
-      training-service:
-        condition: service_healthy
-      agenda-service:
-        condition: service_healthy
-      performance-service:
-        condition: service_healthy
-      hydration-service:
-        condition: service_healthy
-      professional-service:
-        condition: service_healthy
-      management-service:
-        condition: service_healthy
-      payment-service:
-        condition: service_healthy
-      notification-service:
-        condition: service_healthy
-      ai-coach-service:
-        condition: service_healthy
-
-  auth-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/auth-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3001"
-      JWT_SECRET: "${JWT_SECRET:?Set a strong JWT_SECRET in the local .env before starting auth-service}"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_auth"
-
-  user-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/user-service/Dockerfile
-    environment:
-      NODE_ENV: production
-      PORT: "3002"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_user"
-      AUTH_SERVICE_URL: "http://auth-service:3001"
-      USER_DATA_MODE: "${USER_DATA_MODE:-disabled}"
-      USER_DATA_KEY_FILE: "/run/secrets/user_data_key"
-    secrets:
-      - user_data_key
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-
-  training-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/training-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3003"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_training"
-
-  agenda-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/agenda-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3004"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_agenda"
-      AUTH_SERVICE_URL: "http://auth-service:3001"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-
-  performance-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/performance-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3005"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_performance"
-
-  hydration-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/hydration-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3006"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_hydration"
-
-  professional-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/professional-service/Dockerfile
-    environment:
-      NODE_ENV: production
-      PORT: "3007"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_professional"
-      AUTH_SERVICE_URL: "http://auth-service:3001"
-      PROFESSIONAL_DATA_MODE: "${PROFESSIONAL_DATA_MODE:-disabled}"
-      PROFESSIONAL_REVIEW_MODE: "${PROFESSIONAL_REVIEW_MODE:-disabled}"
-      PROFESSIONAL_REVIEWER_IDS: "${PROFESSIONAL_REVIEWER_IDS:-}"
-      CARE_INVITATION_TTL_DAYS: "${CARE_INVITATION_TTL_DAYS:-7}"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-
-  management-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/management-service/Dockerfile
-    environment:
-      NODE_ENV: production
-      PORT: "3008"
-      PROFESSIONAL_SERVICE_URL: "http://professional-service:3007"
-    depends_on:
-      professional-service:
-        condition: service_healthy
-
-  payment-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/payment-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3009"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_payment"
-
-  notification-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/notification-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3010"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_notification"
-
-  ai-coach-service:
-    <<: *node-service
-    build:
-      context: ./backend
-      dockerfile: services/ai-coach-service/Dockerfile
-    environment:
-      <<: *node-environment
-      PORT: "3011"
-      MONGO_URI: "mongodb://mongodb:27017/${MONGO_DB_PREFIX:-goleve}_ai_coach"
-
-networks:
-  backend:
-    driver: bridge
-
-volumes:
-  mongo_data:
-  rabbitmq_data:
-
-secrets:
-  user_data_key:
-    file: "${USER_DATA_KEY_PATH:-./.secrets/user-data-key.key}"
+# Official local-demo stack. Prepare .env and local secrets before starting.
+# Existing external volumes remain mandatory. Never use --remove-orphans.
+{
+  "name": "goleve",
+  "services": {
+    "mongodb": {
+      "image": "mongo:7",
+      "restart": "unless-stopped",
+      "command": [
+        "mongod",
+        "--bind_ip_all",
+        "--replSet",
+        "goleveV1",
+        "--wiredTigerCacheSizeGB",
+        "0.25"
+      ],
+      "ports": [
+        "127.0.0.1:${MONGO_PORT:-27019}:27017"
+      ],
+      "volumes": [
+        "mongo_data:/data/db"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "const h=db.adminCommand({hello:1}); quit(h.setName==='goleveV1'&&h.isWritablePrimary?0:1)"
+        ],
+        "interval": "10s",
+        "timeout": "5s",
+        "retries": 12,
+        "start_period": "30s"
+      }
+    },
+    "mongo-express": {
+      "image": "mongo-express:1.0.2-20",
+      "profiles": [
+        "tools"
+      ],
+      "restart": "unless-stopped",
+      "environment": {
+        "ME_CONFIG_MONGODB_URL": "mongodb://mongodb:27017/?replicaSet=goleveV1",
+        "ME_CONFIG_MONGODB_ENABLE_ADMIN": "true",
+        "ME_CONFIG_BASICAUTH_ENABLED": "true",
+        "ME_CONFIG_BASICAUTH_USERNAME": "${MONGO_EXPRESS_USERNAME:?Configure local .env}",
+        "ME_CONFIG_BASICAUTH_PASSWORD": "${MONGO_EXPRESS_PASSWORD:?Configure local .env}"
+      },
+      "ports": [
+        "127.0.0.1:${MONGO_EXPRESS_PORT:-8081}:8081"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        }
+      }
+    },
+    "rabbitmq": {
+      "image": "rabbitmq:3-management",
+      "hostname": "rabbitmq",
+      "restart": "unless-stopped",
+      "environment": {
+        "RABBITMQ_DEFAULT_USER": "${RABBITMQ_USER:?Configure root .env}",
+        "RABBITMQ_DEFAULT_PASS": "${RABBITMQ_PASSWORD:?Configure root .env}"
+      },
+      "ports": [
+        "127.0.0.1:${RABBITMQ_PORT:-5672}:5672",
+        "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+      ],
+      "volumes": [
+        "rabbitmq_data:/var/lib/rabbitmq"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "rabbitmq-diagnostics -q ping && rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_port_connectivity"
+        ],
+        "interval": "15s",
+        "timeout": "15s",
+        "retries": 8,
+        "start_period": "40s"
+      }
+    },
+    "api-gateway": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "api-gateway/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/api-gateway/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/ready',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "auth-service": {
+          "condition": "service_healthy"
+        },
+        "user-service": {
+          "condition": "service_healthy"
+        },
+        "training-service": {
+          "condition": "service_healthy"
+        },
+        "agenda-service": {
+          "condition": "service_healthy"
+        },
+        "performance-service": {
+          "condition": "service_healthy"
+        },
+        "hydration-service": {
+          "condition": "service_healthy"
+        },
+        "professional-service": {
+          "condition": "service_healthy"
+        },
+        "management-service": {
+          "condition": "service_healthy"
+        },
+        "payment-service": {
+          "condition": "service_healthy"
+        },
+        "notification-service": {
+          "condition": "service_healthy"
+        },
+        "ai-coach-service": {
+          "condition": "service_healthy"
+        }
+      },
+      "ports": [
+        "127.0.0.1:${API_GATEWAY_PORT:-3000}:3000"
+      ],
+      "secrets": [
+        "local_demo_identities"
+      ]
+    },
+    "auth-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/auth-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/auth-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "mfa",
+        "management_auth",
+        "local_demo_identities",
+        "identity_auth_professional",
+        "local_demo_credentials",
+        "local_demo_credentials_key"
+      ]
+    },
+    "user-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/user-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/user-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "user_data_key",
+        "local_demo_identities"
+      ]
+    },
+    "training-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/training-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/training-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "local_demo_identities"
+      ]
+    },
+    "agenda-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/agenda-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/agenda-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "management_agenda",
+        "local_demo_identities",
+        "payment_agenda",
+        "agenda_professional"
+      ]
+    },
+    "performance-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/performance-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/performance-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "local_demo_identities"
+      ]
+    },
+    "hydration-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/hydration-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/hydration-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "local_demo_identities"
+      ]
+    },
+    "professional-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/professional-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/professional-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "management_professional",
+        "local_demo_identities",
+        "identity_auth_professional",
+        "payment_professional",
+        "agenda_professional"
+      ]
+    },
+    "management-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/management-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/management-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/ready',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "management_auth",
+        "management_professional",
+        "management_agenda",
+        "management_payment",
+        "local_demo_identities"
+      ]
+    },
+    "payment-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/payment-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/payment-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "management_payment",
+        "local_demo_identities",
+        "payment_agenda",
+        "payment_professional"
+      ]
+    },
+    "notification-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/notification-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/notification-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/ready',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "local_demo_identities"
+      ]
+    },
+    "ai-coach-service": {
+      "build": {
+        "context": "./backend",
+        "dockerfile": "services/ai-coach-service/Dockerfile"
+      },
+      "restart": "unless-stopped",
+      "init": true,
+      "env_file": [
+        "./backend/services/ai-coach-service/.env"
+      ],
+      "networks": [
+        "backend"
+      ],
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:'+process.env.PORT+'/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 8,
+        "start_period": "30s"
+      },
+      "depends_on": {
+        "mongodb": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        }
+      },
+      "secrets": [
+        "local_demo_identities"
+      ]
+    }
+  },
+  "networks": {
+    "backend": {
+      "name": "goleve_backend",
+      "external": true
+    }
+  },
+  "volumes": {
+    "mongo_data": {
+      "name": "goleve_mongo_data",
+      "external": true
+    },
+    "rabbitmq_data": {
+      "name": "goleve_rabbitmq_data",
+      "external": true
+    }
+  },
+  "secrets": {
+    "user_data_key": {
+      "file": "${USER_DATA_KEY_PATH:-./.secrets/user-data-key.key}"
+    },
+    "mfa": {
+      "file": "./.secrets/local-runtime/mfa.key"
+    },
+    "management_auth": {
+      "file": "./.secrets/local-runtime/management_auth.key"
+    },
+    "management_professional": {
+      "file": "./.secrets/local-runtime/management_professional.key"
+    },
+    "management_agenda": {
+      "file": "./.secrets/local-runtime/management_agenda.key"
+    },
+    "management_payment": {
+      "file": "./.secrets/local-runtime/management_payment.key"
+    },
+    "local_demo_identities": {
+      "file": "./.secrets/local-runtime/demo-identities.json"
+    },
+    "identity_auth_professional": {
+      "file": "./.secrets/local-runtime/identity_auth_professional.key"
+    },
+    "local_demo_credentials": {
+      "file": "./.secrets/local-runtime/demo-credentials.enc"
+    },
+    "local_demo_credentials_key": {
+      "file": "./.secrets/local-runtime/demo-credentials.key"
+    },
+    "payment_agenda": {
+      "file": "./.secrets/local-runtime/payment_agenda.key"
+    },
+    "payment_professional": {
+      "file": "./.secrets/local-runtime/payment_professional.key"
+    },
+    "agenda_professional": {
+      "file": "./.secrets/local-runtime/agenda_professional.key"
+    }
+  }
+}

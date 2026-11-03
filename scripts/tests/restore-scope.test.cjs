@@ -1,0 +1,10 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const {sameRestoreInventory}=require('../mongodb/consolidation-backup.cjs');
+const source=()=>[{name:'admin',collections:[{name:'system.version',count:1,indexes:[]},{name:'system.keys',count:2,contentSha256:'metadata',indexes:[]}]},{name:'goleve_payment',collections:[{name:'payments',count:4,contentSha256:'original',indexes:[{name:'unique',key:{ownerId:1,confirmationKey:1},unique:true}]}]}];
+test('only explicit authorization permits omitted admin.system.keys and leaves source unchanged',()=>{const a=source(),b=structuredClone(a),original=structuredClone(a);b[0].collections.pop();assert.equal(sameRestoreInventory(a,b),false);assert.equal(sameRestoreInventory(a,b,true),true);assert.deepEqual(a,original);});
+test('application document hashes, counts and index constraints remain strict',()=>{for(const mutate of [c=>c.count--,c=>c.contentSha256='changed',c=>c.indexes[0].unique=false]){const a=source(),b=structuredClone(a);b[0].collections.pop();mutate(b[1].collections[0]);assert.equal(sameRestoreInventory(a,b,true),false);}});
+test('compound index order remains semantic',()=>{const a=source(),b=structuredClone(a);b[1].collections[0].indexes[0].key={confirmationKey:1,ownerId:1};assert.equal(sameRestoreInventory(a,b,true),false);});
+test('no other admin collection can be omitted',()=>{const a=source(),b=structuredClone(a);b[0].collections.shift();assert.equal(sameRestoreInventory(a,b,true),false);});
+test('unexpected collections or missing application databases fail',()=>{const a=source(),b=structuredClone(a);b[1].collections.push({name:'unexpected',count:1});assert.equal(sameRestoreInventory(a,b,true),false);assert.equal(sameRestoreInventory(a,a.slice(0,1),true),false);});
+test('system.keys outside admin is not exempt',()=>{const a=source();a[1].collections.push({name:'system.keys',count:1});const b=structuredClone(a);b[1].collections.pop();assert.equal(sameRestoreInventory(a,b,true),false);});

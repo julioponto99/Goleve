@@ -15,6 +15,7 @@ export interface AuthUserData {
   userType: UserType;
   createdAt: Date;
   updatedAt: Date;
+  localDemoInstanceId?: string;
   demoInstanceId?: string;
 }
 
@@ -25,6 +26,7 @@ const schema = new Schema<AuthUserData>({
   email: { type: String, required: true, trim: true, lowercase: true, maxlength: 254, unique: true },
   passwordHash: { type: String, required: true, select: false },
   userType: { type: String, required: true, enum: USER_TYPES, default: 'utilizador' },
+  localDemoInstanceId: { type: String, match: /^[a-f0-9]{16}$/, select: false, immutable: true },
   demoInstanceId: { type: String, match: /^[a-f0-9]{16}$/, select: false, immutable: true },
 }, {
   timestamps: true,

@@ -1,4 +1,6 @@
+import { localDemo } from './local-demo';
 import 'dotenv/config';
+localDemo.policy();
 import { openDatabase } from './config/database';
 import { createAgendaModels, initializeModels } from './models';
 import { createApp } from './app';

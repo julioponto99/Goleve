@@ -25,7 +25,7 @@ export async function register(input: RegisterInput,security=new SecurityService
 
 export async function login(input: LoginInput,security=new SecurityService()) {
   await security.limit('login:'+digest(input.email),10);
-  const user = await AuthUser.findOne({ email: input.email }).select('+passwordHash');
+  const user = await AuthUser.findOne({ email: input.email }).select('+passwordHash +localDemoInstanceId');
   const matches = await bcrypt.compare(input.password, user?.passwordHash ?? await dummyHash);
   if (!user || !user.passwordHash || !matches || user.accountStatus==='suspended') {
     throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');

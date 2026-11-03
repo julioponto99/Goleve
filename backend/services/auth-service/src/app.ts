@@ -1,3 +1,5 @@
+import { localDemo } from './local-demo';
+import { localIdentityRoutes } from './local-demo.routes';
 import express from 'express';
 import { isDatabaseHealthy } from './config/database';
 import { getJwtSecret } from './config/token';
@@ -15,7 +17,7 @@ import { auditAdministrativeFailure } from './administration/audit.middleware';
 
 export function createApp(options?:{securityForTests?:SecurityService}) {
   if(options?.securityForTests&&(process.env.NODE_ENV!=='test'||!/^goleve_administration511_[a-f0-9]+_auth$/.test(AuthUser.db.name)))throw new Error('Security clock injection restricted to isolated automated tests');
-  getJwtSecret();
+  getJwtSecret(); localDemo.policy();
   const demo = loadDemoConfig();
   const app = express();
   app.locals.security=options?.securityForTests||new SecurityService();
@@ -25,6 +27,7 @@ export function createApp(options?:{securityForTests?:SecurityService}) {
     app.post('/auth/register', (_req, _res, next) => next(new ApiError(403, 'DEMO_FIXTURES_ONLY', 'Use explicit fictional fixture preparation in this isolated demo')));
   }
   app.use(express.json({ limit: '16kb' }));
+  if(localDemo.policy())app.use('/internal/v1/local-demo',localIdentityRoutes());
   const management=loadContract('auth');
   if(management){app.use('/internal/v1/management',managementIdentityRoutes(management,app.locals.security));app.use('/internal/v1/management',internalAdministrationRoutes(management,app.locals.security));}
   app.use('/auth',securityRoutes(app.locals.security));

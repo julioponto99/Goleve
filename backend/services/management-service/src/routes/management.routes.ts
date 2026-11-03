@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import express,{Router,Request,Response,NextFunction} from 'express';
 import { ManagementService } from '../services/management.service';
 import { Context,readIdentity } from '../middlewares/auth.middleware';
@@ -37,7 +38,7 @@ export function authorizationRoutes(service:ManagementService,config:ContractCon
   await verifyService(service.connection,config,caller as 'professional'|'agenda'|'payment','/internal/v1/management/authorize',req.body,bearer,req.get('authorization'));
   const identity=await readIdentity(authOrigin,bearer),context={identity,bearer,requestId:require('node:crypto').randomUUID()} as Context,b=object(req.body,['serviceIds','permission']),serviceIds=ids(b.serviceIds,500);
   const permitted:Record<string,string[]>={professional:['scope.validate','professionals.read','services.read','services.suspend','services.reactivate','cases.write','dashboard.read'],agenda:['appointments.read','cases.write','dashboard.read'],payment:['payments.read','cases.write','dashboard.read']};if(!permitted[caller!].includes(String(b.permission)))throw new ApiError(403,'PERMISSION_FORBIDDEN','Owner permission mismatch');
-  if(b.permission==='scope.validate')service.admin(context);else{if(!PERMISSIONS.includes(b.permission as any))throw new ApiError(403,'PERMISSION_FORBIDDEN','Known permission required');await service.authorize(context,b.permission as any,serviceIds);}
-  res.set('Cache-Control','no-store').json({actorId:identity.id,permission:b.permission,serviceIds,checkedAt:new Date().toISOString()});
+  if(identity.authority==='local-demo'&&serviceIds.some(id=>![localDemo.policy().resources.ptService,localDemo.policy().resources.nutritionService].includes(id)))throw new ApiError(403,'SCOPE_FORBIDDEN','Outside fixture scope');if(b.permission==='scope.validate')service.admin(context);else{if(!PERMISSIONS.includes(b.permission as any))throw new ApiError(403,'PERMISSION_FORBIDDEN','Known permission required');await service.authorize(context,b.permission as any,serviceIds);}
+  res.set('Cache-Control','no-store').json({actorId:identity.id,permission:b.permission,serviceIds,checkedAt:new Date().toISOString(),authority:identity.authority||'standard',demoInstanceId:identity.demoInstanceId});
  }));return r;
 }

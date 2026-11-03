@@ -1,3 +1,5 @@
+import { localDemo } from '../local-demo';
+import { fixtureEligible } from '../local-demo-fixtures';
 import { HydratedDocument, Types } from 'mongoose';
 import { ApiError } from '../config/errors';
 import { expectedVersion, PageOptions } from '../config/http';
@@ -63,6 +65,7 @@ export class ProfessionalOfferingService {
     return dto(updated);
   }
   async publicCatalog(query: PublicServiceQuery) {
+    if(localDemo.policy()){const filter:any={active:true,...(query.before?{_id:{$lt:query.before}}:{}),...(query.category?{category:query.category}:{}),...(query.capabilityId?{capabilityId:query.capabilityId}:{} )};if(query.q)filter.name={$regex:query.q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),$options:'i'};const docs=await this.models.Service.find(filter).sort({_id:-1}).limit(query.limit+1),items:any[]=[];for(const doc of docs){const profile=await this.models.Profile.findById(doc.professionalId),cap=await this.models.Capability.findById(doc.capabilityId);if(await fixtureEligible(this.models,profile,cap,doc))items.push({...publicDto(doc),authority:'synthetic',demonstration:true});}return{items:items.slice(0,query.limit),nextBefore:docs.length>query.limit?String(docs[query.limit-1]._id):null};}
     const applications = await this.models.Application.find({ status: 'approved', publicationEnabled: true }).select('professionalId');
     const visible=await this.models.Profile.find({_id:{$in:applications.map(a=>a.professionalId)},profileStatus:{$nin:['suspended','archived']},administrativelySuspended:{$ne:true}}).select('_id');
     const professionalIds = visible.map(p=>p._id);

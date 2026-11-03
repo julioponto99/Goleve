@@ -1,28 +1,99 @@
 # GoLeve
 
+**Consolidação do ambiente oficial em curso (2026-11-03).** O projeto operacional
+é `goleve`, com [compose.yaml](compose.yaml), Gateway em `127.0.0.1:3000` e os
+volumes existentes preservados. Consultar o [registo de execução e recuperação](documentation/consolidation-v1.md)
+antes de iniciar serviços: os 14 componentes e cinco contas local-demo foram
+validados por HTTP; a retenção Agenda e a recuperação MongoDB foram verificadas,
+mas o cenário Payment durante falha RabbitMQ está bloqueado por um índice único.
+Não executar os guias
+históricos de stacks paralelas como configuração do ambiente principal.
+
 Para integrar os frontends, começar pela
 [entrega de desenvolvimento V1 — Fase 5.14](documentation/release-v1/README.md):
 [instalação independente](documentation/release-v1/local-setup.md),
 [referência central de API](documentation/api/backend-release-v1.md) e
 [guia web/Android/iPhone](documentation/release-v1/frontend.md).
-Gateway local por defeito em `http://127.0.0.1:64344`, MongoDB replica set,
+O Gateway oficial atual está em `http://127.0.0.1:3000`, com MongoDB replica set,
 RabbitMQ e 11 microserviços, com segredos e dados fictícios próprios por instalação.
 Os [12 bloqueios conhecidos](documentation/release-v1/readiness.md) continuam abertos.
 Não é uma entrega de produção. A CLI histórica pressupõe a stack principal;
 o novo guia explica o arranque independente. Não executar `integration.cjs test`
 como simples verificação de conectividade: inclui paragens de dependências.
 
-A [demonstração local isolada](documentation/api/isolated-demo.md) usa cinco componentes reais e dados fictícios em MongoDB temporário. Arranque explícito com `node scripts/demo.cjs init`, `up` e `prepare`; a aprovação profissional permanece bloqueada no servidor real.
+A [demonstração local isolada histórica](documentation/api/isolated-demo.md) usa cinco componentes e não é o ambiente oficial atual. Não a iniciar para consolidar o projeto `goleve`. Os guias antigos que referem `64344` descrevem a stack paralela preservada e parada.
 
 Monorepo local com API Gateway, 11 microserviços TypeScript/Express, MongoDB e RabbitMQ.
 Pagamentos: apenas simulados, nunca reais.
 
 ## Arranque
 
-**Configuração principal legada:** os comandos seguintes descrevem o Compose
-anterior. Não reconstruir/reiniciar esse ambiente para testar a entrega;
-usar o guia independente acima. O Compose principal ainda requer uma atualização
-e migração aprovadas para executar todas as funcionalidades atuais.
+O arranque oficial usa apenas ficheiros operacionais chamados `.env`, carregados
+explicitamente pelo Compose. `.env.example` existentes são referências
+históricas, sem dependência de execução. Preparar sem substituir configurações:
+
+~~~powershell
+node scripts/local-runtime.cjs prepare
+node scripts/local-demo.cjs plan
+docker compose -f compose.yaml -p goleve config --quiet
+~~~
+
+O preparador requer as dependências Node.js já instaladas em `backend/`, conserva
+valores existentes, gera apenas segredos ausentes e nunca os imprime. Os `.env`
+por serviço, `.secrets/` e artefactos locais estão excluídos do Git. Não partilhar
+estes ficheiros nem usar esta configuração local numa implantação pública.
+
+### Mongo Express opcional
+
+O Compose inclui o Mongo Express apenas no perfil local `tools`. Ele liga-se ao
+MongoDB oficial (`mongodb:27017`, replica set `goleveV1`) e publica a interface
+somente em `http://127.0.0.1:8081`, protegida por autenticação Web. Defina
+`MONGO_EXPRESS_USERNAME` e `MONGO_EXPRESS_PASSWORD` no `.env` local; nunca os
+adicione ao Git.
+
+Iniciar sem reiniciar ou recriar os 14 serviços oficiais:
+
+~~~powershell
+docker compose --profile tools -f compose.yaml -p goleve-tools up -d --no-deps mongo-express
+~~~
+
+Abrir `http://127.0.0.1:8081` e, após consultar as bases, parar apenas a
+ferramenta:
+
+~~~powershell
+docker compose --profile tools -f compose.yaml -p goleve-tools stop mongo-express
+~~~
+
+O perfil não é iniciado por `docker compose up` sem `--profile tools` e não
+deve ser ativado numa implantação pública. O Mongo Express não cria outro
+MongoDB nem altera índices, volumes ou dados.
+
+O replica set existente já está validado; não o reinicializar. Arranque habitual:
+
+~~~powershell
+docker compose -f compose.yaml -p goleve up -d
+docker compose -f compose.yaml -p goleve ps
+~~~
+
+Não acrescentar `--build` indiscriminadamente. Construir explicitamente apenas
+as imagens identificadas como desatualizadas, preservando volumes e credenciais.
+Os dois volumes oficiais são externos e obrigatórios: a sua ausência faz falhar
+o Compose em vez de criar bases vazias. Não usar `--remove-orphans`: contentores
+da instalação antiga partilham o nome de projeto e exigem análise separada.
+
+As cinco identidades fictícias, preparação manual idempotente dos dados,
+consulta local das passwords sem as imprimir, políticas MFA/step-up e comandos
+de testes estão no [relatório de consolidação](documentation/consolidation-v1.md).
+Só essas identidades têm autoridade `local-demo` sem MFA; contas reais e produção
+mantêm as proteções administrativas. A Web usa `frontend/web/.env`; o Mobile
+usa `frontend/mobile/.env`, com endereço adequado ao dispositivo. O Coach IA
+continua desativado. Não publicar este ambiente nem partilhar os seus segredos.
+
+### Instruções históricas da configuração anterior
+
+Os parágrafos seguintes são mantidos como histórico de instalação. Não executar
+a sua geração manual de segredos ou o arranque com build global para consolidar
+o ambiente atual; usar o preparador e o registo de execução acima.
 
 Requisitos: Docker Engine com contentores Linux e Docker Compose v2 ou superior.
 Antes do primeiro arranque, definir `JWT_SECRET` no `.env` local. Se o ficheiro ainda não existir, criá-lo a partir de `.env.example`. Para gerar uma chave aleatória de 32 bytes:

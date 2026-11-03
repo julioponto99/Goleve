@@ -1,6 +1,16 @@
 node_modules/
 dist/
 .env
+.env.*
+!.env.example
+.local/
+*.key
+*.pem
+*.p12
+*.pfx
+*.archive
+*.archive.gz
+*.bson
 .secrets/
 .demo/
 .integration/

@@ -1,5 +1,7 @@
+import { localDemo } from './local-demo';
 import express from 'express';
 import 'dotenv/config';
+localDemo.policy();
 import { openDatabase, isDatabaseHealthy } from './config/database';
 import { ApiError } from './config/errors';
 import { authenticate } from './middlewares/auth.middleware';

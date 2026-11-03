@@ -14,26 +14,26 @@ As condições indicam limites de runtime; não implicam que os fluxos bloqueado
 | PATCH | `/agenda/activities/{activityId}` | ActivityPatch | local-fictional-data | [agenda.routes.ts:9](../../backend/services/agenda-service/src/routes/agenda.routes.ts) |
 | POST | `/agenda/activities/{activityId}/cancel` | Empty | local-fictional-data | [agenda.routes.ts:11](../../backend/services/agenda-service/src/routes/agenda.routes.ts) |
 | POST | `/agenda/activities/{activityId}/complete` | Empty | local-fictional-data | [agenda.routes.ts:10](../../backend/services/agenda-service/src/routes/agenda.routes.ts) |
-| GET | `/agenda/professional-appointments` | —; query: `from`, `to`, `limit`, `before`, `status`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:21](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional-appointments` | Booking; headers: `Idempotency-Key*` | professional-eligibility-required | [professional-agenda.routes.ts:20](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| GET | `/agenda/professional-appointments/{id}` | — | professional-eligibility-required | [professional-agenda.routes.ts:24](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional-appointments/{id}/cancel` | Empty; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:26](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| GET | `/agenda/professional-appointments/{id}/history` | — | professional-eligibility-required | [professional-agenda.routes.ts:23](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional-appointments/{id}/reschedule` | Booking; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:27](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| GET | `/agenda/professional-appointments` | —; query: `from`, `to`, `limit`, `before`, `status`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:23](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional-appointments` | Booking; headers: `Idempotency-Key*` | professional-eligibility-required | [professional-agenda.routes.ts:22](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| GET | `/agenda/professional-appointments/{id}` | — | professional-eligibility-required | [professional-agenda.routes.ts:26](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional-appointments/{id}/cancel` | Empty; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:28](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| GET | `/agenda/professional-appointments/{id}/history` | — | professional-eligibility-required | [professional-agenda.routes.ts:25](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional-appointments/{id}/reschedule` | Booking; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:29](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
 | POST | `/agenda/professional-appointments/{id}/service` | ServiceAssociation; headers: `If-Match*` | payment-agenda-demo-blocked | [routes.ts:22](../../backend/services/agenda-service/src/payment-demo/routes.ts) |
-| GET | `/agenda/professional/appointments` | —; query: `from`, `to`, `limit`, `before`, `status`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:22](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional/appointments/{id}/accept` | Empty; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:25](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional/appointments/{id}/cancel` | Review; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:25](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional/appointments/{id}/complete` | Empty; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:25](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional/appointments/{id}/decline` | Review; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:25](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| GET | `/agenda/professional/availability-exceptions` | —; query: `limit`, `before`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:17](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional/availability-exceptions` | AvailabilityException; headers: `Idempotency-Key*` | professional-eligibility-required | [professional-agenda.routes.ts:16](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| DELETE | `/agenda/professional/availability-exceptions/{id}` | —; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:18](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| GET | `/agenda/professional/availability-rules` | —; query: `limit`, `before`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:13](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| POST | `/agenda/professional/availability-rules` | AvailabilityRule; headers: `Idempotency-Key*` | professional-eligibility-required | [professional-agenda.routes.ts:12](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| DELETE | `/agenda/professional/availability-rules/{id}` | —; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:15](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| PATCH | `/agenda/professional/availability-rules/{id}` | AvailabilityRule; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:14](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
-| GET | `/agenda/professionals/{professionalId}/availability` | —; query: `capabilityId`, `from`, `to`, `mode`, `environment` | professional-eligibility-required | [professional-agenda.routes.ts:19](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| GET | `/agenda/professional/appointments` | —; query: `from`, `to`, `limit`, `before`, `status`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:24](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional/appointments/{id}/accept` | Empty; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:27](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional/appointments/{id}/cancel` | Review; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:27](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional/appointments/{id}/complete` | Empty; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:27](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional/appointments/{id}/decline` | Review; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:27](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| GET | `/agenda/professional/availability-exceptions` | —; query: `limit`, `before`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:19](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional/availability-exceptions` | AvailabilityException; headers: `Idempotency-Key*` | professional-eligibility-required | [professional-agenda.routes.ts:18](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| DELETE | `/agenda/professional/availability-exceptions/{id}` | —; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:20](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| GET | `/agenda/professional/availability-rules` | —; query: `limit`, `before`, `capabilityId` | professional-eligibility-required | [professional-agenda.routes.ts:15](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| POST | `/agenda/professional/availability-rules` | AvailabilityRule; headers: `Idempotency-Key*` | professional-eligibility-required | [professional-agenda.routes.ts:14](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| DELETE | `/agenda/professional/availability-rules/{id}` | —; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:17](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| PATCH | `/agenda/professional/availability-rules/{id}` | AvailabilityRule; headers: `Idempotency-Key*`, `If-Match*` | professional-eligibility-required | [professional-agenda.routes.ts:16](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
+| GET | `/agenda/professionals/{professionalId}/availability` | —; query: `capabilityId`, `from`, `to`, `mode`, `environment` | professional-eligibility-required | [professional-agenda.routes.ts:21](../../backend/services/agenda-service/src/routes/professional-agenda.routes.ts) |
 
 ## coach
 
@@ -57,29 +57,29 @@ As condições indicam limites de runtime; não implicam que os fluxos bloqueado
 
 | Método | Caminho | Payload / query / headers | Disponibilidade | Fonte |
 |---|---|---|---|---|
-| POST | `/auth/admin/step-up` | StepUp | privileged-no-provisioned-admin | [routes.ts:16](../../backend/services/auth-service/src/administration/routes.ts) |
-| GET | `/auth/administration/audit` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [routes.ts:32](../../backend/services/auth-service/src/administration/routes.ts) |
-| GET | `/auth/administration/role-requests` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [routes.ts:29](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/administration/role-requests/{id}/approve` | Mutation | privileged-no-provisioned-admin | [routes.ts:30](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/administration/role-requests/{id}/reject` | Mutation | privileged-no-provisioned-admin | [routes.ts:30](../../backend/services/auth-service/src/administration/routes.ts) |
-| GET | `/auth/administration/users` | —; query: `limit`, `before`, `q`, `role`, `status` | privileged-no-provisioned-admin | [routes.ts:25](../../backend/services/auth-service/src/administration/routes.ts) |
-| GET | `/auth/administration/users/{id}` | — | privileged-no-provisioned-admin | [routes.ts:26](../../backend/services/auth-service/src/administration/routes.ts) |
-| GET | `/auth/administration/users/{id}/history` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [routes.ts:31](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/administration/users/{id}/reactivate` | Mutation | privileged-no-provisioned-admin | [routes.ts:27](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/administration/users/{id}/revoke` | Mutation | privileged-no-provisioned-admin | [routes.ts:27](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/administration/users/{id}/role-requests` | RoleMutation | privileged-no-provisioned-admin | [routes.ts:28](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/administration/users/{id}/suspend` | Mutation | privileged-no-provisioned-admin | [routes.ts:27](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/initial-admin-invitation/accept` | contrato proprietário | privileged-no-provisioned-admin | [routes.ts:15](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/admin/step-up` | StepUp | privileged-no-provisioned-admin | [routes.ts:17](../../backend/services/auth-service/src/administration/routes.ts) |
+| GET | `/auth/administration/audit` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [routes.ts:33](../../backend/services/auth-service/src/administration/routes.ts) |
+| GET | `/auth/administration/role-requests` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [routes.ts:30](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/administration/role-requests/{id}/approve` | Mutation | privileged-no-provisioned-admin | [routes.ts:31](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/administration/role-requests/{id}/reject` | Mutation | privileged-no-provisioned-admin | [routes.ts:31](../../backend/services/auth-service/src/administration/routes.ts) |
+| GET | `/auth/administration/users` | —; query: `limit`, `before`, `q`, `role`, `status` | privileged-no-provisioned-admin | [routes.ts:26](../../backend/services/auth-service/src/administration/routes.ts) |
+| GET | `/auth/administration/users/{id}` | — | privileged-no-provisioned-admin | [routes.ts:27](../../backend/services/auth-service/src/administration/routes.ts) |
+| GET | `/auth/administration/users/{id}/history` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [routes.ts:32](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/administration/users/{id}/reactivate` | Mutation | privileged-no-provisioned-admin | [routes.ts:28](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/administration/users/{id}/revoke` | Mutation | privileged-no-provisioned-admin | [routes.ts:28](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/administration/users/{id}/role-requests` | RoleMutation | privileged-no-provisioned-admin | [routes.ts:29](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/administration/users/{id}/suspend` | Mutation | privileged-no-provisioned-admin | [routes.ts:28](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/initial-admin-invitation/accept` | contrato proprietário | privileged-no-provisioned-admin | [routes.ts:16](../../backend/services/auth-service/src/administration/routes.ts) |
 | POST | `/auth/login` | contrato proprietário | local-fictional-data | [auth.routes.ts:12](../../backend/services/auth-service/src/routes/auth.routes.ts) |
-| POST | `/auth/logout` | contrato proprietário | local-fictional-data | [routes.ts:17](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/manager-invitations` | InvitationIssue; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [manager-invitations.ts:24](../../backend/services/auth-service/src/manager-invitations.ts) |
-| POST | `/auth/manager-invitations/{id}/revoke` | Empty; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [manager-invitations.ts:29](../../backend/services/auth-service/src/manager-invitations.ts) |
-| POST | `/auth/manager-invitations/accept` | InvitationAccept | privileged-no-provisioned-admin | [manager-invitations.ts:31](../../backend/services/auth-service/src/manager-invitations.ts) |
+| POST | `/auth/logout` | contrato proprietário | local-fictional-data | [routes.ts:18](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/manager-invitations` | InvitationIssue; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [manager-invitations.ts:25](../../backend/services/auth-service/src/manager-invitations.ts) |
+| POST | `/auth/manager-invitations/{id}/revoke` | Empty; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [manager-invitations.ts:30](../../backend/services/auth-service/src/manager-invitations.ts) |
+| POST | `/auth/manager-invitations/accept` | InvitationAccept | privileged-no-provisioned-admin | [manager-invitations.ts:32](../../backend/services/auth-service/src/manager-invitations.ts) |
 | GET | `/auth/me` | — | local-fictional-data | [auth.routes.ts:13](../../backend/services/auth-service/src/routes/auth.routes.ts) |
-| POST | `/auth/mfa/complete` | MfaFactor | local-fictional-data | [routes.ts:14](../../backend/services/auth-service/src/administration/routes.ts) |
-| POST | `/auth/mfa/enroll` | contrato proprietário | local-fictional-data | [routes.ts:13](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/mfa/complete` | MfaFactor | local-fictional-data | [routes.ts:15](../../backend/services/auth-service/src/administration/routes.ts) |
+| POST | `/auth/mfa/enroll` | contrato proprietário | local-fictional-data | [routes.ts:14](../../backend/services/auth-service/src/administration/routes.ts) |
 | POST | `/auth/register` | Register | local-fictional-data | [auth.routes.ts:11](../../backend/services/auth-service/src/routes/auth.routes.ts) |
-| GET | `/auth/sessions` | — | local-fictional-data | [routes.ts:18](../../backend/services/auth-service/src/administration/routes.ts) |
+| GET | `/auth/sessions` | — | local-fictional-data | [routes.ts:19](../../backend/services/auth-service/src/administration/routes.ts) |
 
 ## professional
 
@@ -99,8 +99,8 @@ As condições indicam limites de runtime; não implicam que os fluxos bloqueado
 | GET | `/management/professional-applications/{applicationId}/history` | — | legacy-review-disabled | [application.routes.ts:8](../../backend/services/professional-service/src/routes/application.routes.ts) |
 | POST | `/management/professional-applications/{applicationId}/reject` | LegacyReviewReason; headers: `If-Match*`, `Idempotency-Key*` | legacy-review-disabled | [application.routes.ts:10](../../backend/services/professional-service/src/routes/application.routes.ts) |
 | POST | `/management/professional-applications/{applicationId}/suspend` | LegacyReviewReason; headers: `If-Match*`, `Idempotency-Key*` | legacy-review-disabled | [application.routes.ts:11](../../backend/services/professional-service/src/routes/application.routes.ts) |
-| GET | `/professionals/catalog` | —; query: `limit`, `before` | local-fictional-data | [app.ts:53](../../backend/services/professional-service/src/app.ts) |
-| GET | `/professionals/eligible-capabilities` | —; query: `limit`, `before` | professional-eligibility-required | [app.ts:59](../../backend/services/professional-service/src/app.ts) |
+| GET | `/professionals/catalog` | —; query: `limit`, `before` | local-fictional-data | [app.ts:54](../../backend/services/professional-service/src/app.ts) |
+| GET | `/professionals/eligible-capabilities` | —; query: `limit`, `before` | professional-eligibility-required | [app.ts:60](../../backend/services/professional-service/src/app.ts) |
 | GET | `/professionals/me` | — | local-fictional-data | [professional.routes.ts:17](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | PATCH | `/professionals/me` | ProfessionalProfilePatch; headers: `If-Match*` | local-fictional-data | [professional.routes.ts:19](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | PUT | `/professionals/me` | ProfessionalProfile; headers: `If-None-Match*` | local-fictional-data | [professional.routes.ts:18](../../backend/services/professional-service/src/routes/professional.routes.ts) |
@@ -112,7 +112,7 @@ As condições indicam limites de runtime; não implicam que os fluxos bloqueado
 | POST | `/professionals/me/capabilities` | Capability | local-fictional-data | [professional.routes.ts:21](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | GET | `/professionals/me/capabilities/{capabilityId}` | — | local-fictional-data | [professional.routes.ts:22](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | PATCH | `/professionals/me/capabilities/{capabilityId}` | CapabilityPatch; headers: `If-Match*` | local-fictional-data | [professional.routes.ts:23](../../backend/services/professional-service/src/routes/professional.routes.ts) |
-| GET | `/professionals/me/care-relationships` | —; query: `limit`, `before`, `status` | professional-eligibility-required | [app.ts:60](../../backend/services/professional-service/src/app.ts) |
+| GET | `/professionals/me/care-relationships` | —; query: `limit`, `before`, `status` | professional-eligibility-required | [app.ts:61](../../backend/services/professional-service/src/app.ts) |
 | GET | `/professionals/me/qualifications` | —; query: `limit`, `before` | local-fictional-data | [professional.routes.ts:24](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | POST | `/professionals/me/qualifications` | Qualification; headers: `Idempotency-Key*` | local-fictional-data | [professional.routes.ts:25](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | GET | `/professionals/me/qualifications/{qualificationId}` | — | local-fictional-data | [professional.routes.ts:26](../../backend/services/professional-service/src/routes/professional.routes.ts) |
@@ -124,7 +124,7 @@ As condições indicam limites de runtime; não implicam que os fluxos bloqueado
 | PATCH | `/professionals/me/services/{serviceId}` | ProfessionalServicePatch; headers: `If-Match*` | local-fictional-data | [professional.routes.ts:34](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | POST | `/professionals/me/services/{serviceId}/deactivate` | Empty; headers: `If-Match*` | local-fictional-data | [professional.routes.ts:35](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 | POST | `/professionals/me/submit` | ApplicationSubmit; headers: `If-Match*`, `Idempotency-Key*` | local-fictional-data | [professional.routes.ts:14](../../backend/services/professional-service/src/routes/professional.routes.ts) |
-| GET | `/professionals/services` | —; query: `limit`, `before`, `q`, `category`, `capabilityId` | local-fictional-data | [app.ts:54](../../backend/services/professional-service/src/app.ts) |
+| GET | `/professionals/services` | —; query: `limit`, `before`, `q`, `category`, `capabilityId` | local-fictional-data | [app.ts:55](../../backend/services/professional-service/src/app.ts) |
 | GET | `/professionals/specializations` | — | local-fictional-data | [professional.routes.ts:13](../../backend/services/professional-service/src/routes/professional.routes.ts) |
 
 ## gateway
@@ -160,30 +160,30 @@ As condições indicam limites de runtime; não implicam que os fluxos bloqueado
 | POST | `/management/administration/professionals/{id}/suspend` | contrato proprietário; headers: `If-Match*` | privileged-no-provisioned-admin | [administration.routes.ts:19](../../backend/services/management-service/src/routes/administration.routes.ts) |
 | GET | `/management/administration/services` | —; query: `limit`, `before`, `q`, `status` | privileged-no-provisioned-admin | [administration.routes.ts:17](../../backend/services/management-service/src/routes/administration.routes.ts) |
 | POST | `/management/administration/services/{id}/suspend` | contrato proprietário; headers: `If-Match*` | privileged-no-provisioned-admin | [administration.routes.ts:19](../../backend/services/management-service/src/routes/administration.routes.ts) |
-| GET | `/management/appointments` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/assignments` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [management.routes.ts:18](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/assignments` | AssignmentRequest; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:17](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/assignments/{id}/approve` | Empty; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:19](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/assignments/{id}/approve-revocation` | Reason; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:19](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/assignments/{id}/history` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:13](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/assignments/{id}/reject` | contrato proprietário; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:19](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/assignments/{id}/request-revocation` | Reason; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:19](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/audit` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:26](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/cases` | —; query: `limit`, `before`, `status`, `q` | privileged-no-provisioned-admin | [management.routes.ts:23](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/cases` | CaseCreate | privileged-no-provisioned-admin | [management.routes.ts:22](../../backend/services/management-service/src/routes/management.routes.ts) |
-| PATCH | `/management/cases/{id}` | CaseTransition; headers: `If-Match*` | privileged-no-provisioned-admin | [management.routes.ts:24](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/cases/{id}/history` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:25](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/dashboard` | —; query: `from`, `to` | privileged-no-provisioned-admin | [management.routes.ts:27](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/me` | — | privileged-no-provisioned-admin | [management.routes.ts:11](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/operators` | —; query: `limit`, `before`, `q`, `status` | privileged-no-provisioned-admin | [management.routes.ts:12](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/operators` | OperatorCreate; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:14](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/payments` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/professionals` | —; query: `limit`, `before`, `status`, `q` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/scopes` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:16](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/scopes` | ScopeCreate; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:15](../../backend/services/management-service/src/routes/management.routes.ts) |
-| GET | `/management/services` | —; query: `limit`, `before`, `status`, `q` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/services/{id}/reactivate` | Reason; headers: `If-Match*` | privileged-no-provisioned-admin | [management.routes.ts:21](../../backend/services/management-service/src/routes/management.routes.ts) |
-| POST | `/management/services/{id}/suspend` | Reason; headers: `If-Match*` | privileged-no-provisioned-admin | [management.routes.ts:21](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/appointments` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [management.routes.ts:21](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/assignments` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [management.routes.ts:19](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/assignments` | AssignmentRequest; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:18](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/assignments/{id}/approve` | Empty; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/assignments/{id}/approve-revocation` | Reason; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/assignments/{id}/history` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:14](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/assignments/{id}/reject` | contrato proprietário; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/assignments/{id}/request-revocation` | Reason; headers: `If-Match*`, `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:20](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/audit` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:27](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/cases` | —; query: `limit`, `before`, `status`, `q` | privileged-no-provisioned-admin | [management.routes.ts:24](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/cases` | CaseCreate | privileged-no-provisioned-admin | [management.routes.ts:23](../../backend/services/management-service/src/routes/management.routes.ts) |
+| PATCH | `/management/cases/{id}` | CaseTransition; headers: `If-Match*` | privileged-no-provisioned-admin | [management.routes.ts:25](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/cases/{id}/history` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:26](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/dashboard` | —; query: `from`, `to` | privileged-no-provisioned-admin | [management.routes.ts:28](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/me` | — | privileged-no-provisioned-admin | [management.routes.ts:12](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/operators` | —; query: `limit`, `before`, `q`, `status` | privileged-no-provisioned-admin | [management.routes.ts:13](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/operators` | OperatorCreate; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:15](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/payments` | —; query: `limit`, `before`, `status` | privileged-no-provisioned-admin | [management.routes.ts:21](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/professionals` | —; query: `limit`, `before`, `status`, `q` | privileged-no-provisioned-admin | [management.routes.ts:21](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/scopes` | —; query: `limit`, `before` | privileged-no-provisioned-admin | [management.routes.ts:17](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/scopes` | ScopeCreate; headers: `X-Admin-Step-Up*` | privileged-no-provisioned-admin | [management.routes.ts:16](../../backend/services/management-service/src/routes/management.routes.ts) |
+| GET | `/management/services` | —; query: `limit`, `before`, `status`, `q` | privileged-no-provisioned-admin | [management.routes.ts:21](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/services/{id}/reactivate` | Reason; headers: `If-Match*` | privileged-no-provisioned-admin | [management.routes.ts:22](../../backend/services/management-service/src/routes/management.routes.ts) |
+| POST | `/management/services/{id}/suspend` | Reason; headers: `If-Match*` | privileged-no-provisioned-admin | [management.routes.ts:22](../../backend/services/management-service/src/routes/management.routes.ts) |
 
 ## notification
 

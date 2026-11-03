@@ -1,3 +1,4 @@
+import { localDemo } from './local-demo';
 import { Router } from 'express';
 import { createHash,randomBytes,randomUUID } from 'node:crypto';
 import bcrypt from 'bcrypt';
@@ -36,6 +37,6 @@ export function managerInvitationRoutes(security=new SecurityService()){
 }
 export function managementIdentityRoutes(config:ContractConfig,security=new SecurityService()){
  const r=Router();r.post('/identity',async(req,res,next)=>{try{const bearer=req.get('x-management-user-authorization')||'';await verifyService(AuthUser.db,config,'management','/internal/v1/management/identity',req.body,bearer,req.get('authorization'));const b=body(req.body,['authUserId']);if(typeof b.authUserId!=='string'||!/^[a-f0-9]{24}$/.test(b.authUserId))throw new ApiError(400,'VALIDATION_ERROR','Identity required');
-   const context=await security.context(bearer);await security.admin(context);const target=await AuthUser.findById(b.authUserId).select('_id userType roleVersion accountStatus');if(!target)throw new ApiError(404,'NOT_FOUND','Identity not found');res.set('Cache-Control','no-store').json({id:String(target._id),userType:target.userType,roleVersion:target.roleVersion||0,accountStatus:target.accountStatus||'active'});
+   const context=await security.context(bearer);await security.admin(context);if(localDemo.account(context.user)&&!localDemo.policy().accounts.some((a:any)=>a.id===b.authUserId))throw new ApiError(404,'NOT_FOUND','Identity not found');const target=await AuthUser.findById(b.authUserId).select('_id userType roleVersion accountStatus');if(!target)throw new ApiError(404,'NOT_FOUND','Identity not found');res.set('Cache-Control','no-store').json({id:String(target._id),userType:target.userType,roleVersion:target.roleVersion||0,accountStatus:target.accountStatus||'active'});
  }catch(e){next(e);}});return r;
 }
