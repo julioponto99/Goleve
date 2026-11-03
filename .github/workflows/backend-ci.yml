@@ -1,0 +1,84 @@
+name: GoLeve V1 CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - develop
+      - development
+      - integration/**
+      - release/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: goleve-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate backend, frontend and contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend --no-audit --no-fund
+
+      - name: Build backend workspaces
+        run: npm run build --prefix backend --workspaces --if-present
+
+      - name: Run backend tests
+        run: npm run test --prefix backend --workspaces --if-present
+
+      - name: Validate complete OpenAPI and Swagger contract
+        run: npm run test:docs --prefix backend --workspace=@goleve/api-gateway
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend --no-audit --no-fund
+
+      - name: Validate generated frontend contracts
+        run: npm run contracts:check --prefix frontend
+
+      - name: Typecheck Web, Mobile, Shared and tests
+        run: npm run typecheck --prefix frontend
+
+      - name: Build Web
+        run: npm run build:web --prefix frontend
+
+      - name: Validate Mobile export
+        run: npm run check:mobile --prefix frontend
+
+      - name: Run frontend tests
+        run: npm run test --prefix frontend
+
+      - name: Scan tracked files for operational secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(git grep -IlE \
+            '-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9_]+|xox[baprs]-[A-Za-z0-9-]+|AKIA[0-9A-Z]{16}|mongodb(\+srv)?://[^[:space:]"]+:[^[:space:]"]+@' \
+            -- \
+            ':!backend/api-gateway/tests/api-docs.test.cjs' \
+            ':!backend/services/ai-coach-service/tests/unit.test.cjs' \
+            ':!backend/services/auth-service/tests/security.test.cjs' \
+            ':!*.md' || true)"
+          if [[ -n "$matches" ]]; then
+            printf 'Potential operational secret patterns found in tracked files:\n%s\n' "$matches"
+            exit 1
+          fi
