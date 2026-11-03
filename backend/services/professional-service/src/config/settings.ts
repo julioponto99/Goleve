@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import { DemoIdentityConfig, loadDemoIdentityConfig } from '../demo/identity-client';
 import { ServiceKeys, loadServiceKeys } from '../internal/agenda-service-auth';
 import { DemoConfig, loadDemo } from '../payment-demo/protocol';
@@ -43,7 +44,7 @@ export function loadSettings(): ProfessionalSettings {
     throw new Error('Demo eligibility requires explicit isolated synthetic Agenda configuration');
   }
   const paymentDemo=loadDemo('professional');
-  if(paymentDemo&&(dataMode!=='synthetic'||reviewMode!=='synthetic'))throw new Error('Payment demonstration requires synthetic Professional data and review');
+  if(paymentDemo&&(dataMode!=='synthetic'||reviewMode!=='synthetic'&&!localDemo.policy()))throw new Error('Payment demonstration requires synthetic Professional data and review');
   return { paymentDemo,authServiceUrl: url.origin, dataMode, reviewMode: reviewMode as 'disabled' | 'synthetic', reviewerIds,
     careInvitationTtlDays: Number(ttl), demoEligibilityEnabled: demoEligibility === 'true',
     ...(demoIdentity ? { demoIdentity } : {}), ...(agendaServiceKeys ? { agendaServiceKeys } : {}) };

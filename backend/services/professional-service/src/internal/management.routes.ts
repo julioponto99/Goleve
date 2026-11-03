@@ -1,3 +1,5 @@
+import { localDemo } from '../local-demo';
+import { fixtureEligible } from '../local-demo-fixtures';
 import { Connection,Types } from 'mongoose';
 import { ProfessionalModels } from '../models';
 import { ContractConfig } from '../management-contract';
@@ -16,9 +18,12 @@ export function createManagementRoutes(connection:Connection,models:Professional
    const current=await models.Service.findOne({_id:b.serviceId,version:b.version});if(!current)throw new ApiError(412,'VERSION_CONFLICT','Service version changed');if((current.managementHistory?.length||0)>=128)throw new ApiError(409,'SERVICE_AUDIT_LIMIT','Preserved operational history requires archival policy before another transition');
    if(op==='reactivate'){
     if(current.administrativelySuspended)throw new ApiError(409,'ADMINISTRATIVE_SUSPENSION','A manager cannot lift an administrative suspension');
+    const local=localDemo.policy(),profileForDemo=local?await models.Profile.findById(current.professionalId):undefined,capForDemo=local?await models.Capability.findById(current.capabilityId):undefined;const demoEligible=local&&await fixtureEligible(models,profileForDemo,capForDemo,{...current.toObject(),active:true,managementSuspended:false});
+    if(!demoEligible){
     const proof=authorityForTests?await authorityForTests.verify(b.serviceId):null,now=Date.now();
     if(!proof||proof.authority!=='real'||!proof.eligible||proof.serviceId!==b.serviceId||proof.professionalId!==String(current.professionalId)||proof.capabilityId!==String(current.capabilityId)||!Number.isFinite(Date.parse(proof.checkedAtUtc))||!Number.isFinite(Date.parse(proof.validUntilUtc))||Date.parse(proof.checkedAtUtc)>now+1000||Date.parse(proof.checkedAtUtc)<now-15000||Date.parse(proof.validUntilUtc)<=now||Date.parse(proof.validUntilUtc)-Date.parse(proof.checkedAtUtc)>15000)throw new ApiError(503,'REAL_ELIGIBILITY_UNAVAILABLE','Authoritative real eligibility required; simulated approval is insufficient');
     const profile=await models.Profile.findOne({_id:current.professionalId,profileStatus:'active'}),cap=await models.Capability.findOne({_id:current.capabilityId,professionalId:current.professionalId,status:'verified'});if(!profile||!cap)throw new ApiError(409,'PROFESSIONAL_INELIGIBLE','Administrative status prevents reactivation');
+    }
     if(!current.managementSuspended)throw new ApiError(409,'NOT_MANAGEMENT_SUSPENDED','Only a management suspension can be lifted');
     if(!current.managementWasActive)throw new ApiError(409,'SERVICE_OWNER_INACTIVE','Management cannot reactivate a service already inactive before its suspension');
    }else if(current.managementSuspended)throw new ApiError(409,'ALREADY_SUSPENDED','Service already suspended');

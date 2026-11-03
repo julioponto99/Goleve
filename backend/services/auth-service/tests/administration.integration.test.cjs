@@ -2,7 +2,7 @@ const {describe,test,before,after,beforeEach}=require('node:test'),assert=requir
 const pro=createRequire(path.resolve(__dirname,'../../professional-service/package.json')),management=createRequire(path.resolve(__dirname,'../../management-service/package.json'));
 const {AuthUser}=require('../dist/models/auth-user.model'),{SecurityService}=require('../dist/administration/security.service'),{initializeSecurityModels}=require('../dist/administration/models'),crypto=require('../dist/administration/crypto');
 const password='Fictitious-Only-Password-123',oid=()=>new mongoose.Types.ObjectId().toHexString(),realNow=Date.now;
-describe('Administration V1: real TOTP, transactional Auth and isolated owners',()=>{
+describe('Administration V1: real TOTP, transactional Auth and isolated owners',{skip:!process.env.ADMINISTRATION511_TEST_MONGO_URI},()=>{
  const root=new URL(process.env.ADMINISTRATION511_TEST_MONGO_URI||'http://missing.invalid'),instance=randomBytes(6).toString('hex');assert.equal(root.protocol,'mongodb:');assert(['127.0.0.1','localhost'].includes(root.hostname));assert.equal(root.searchParams.get('replicaSet'),'administration511');
  const uri=s=>{const u=new URL(root);u.pathname='/goleve_administration511_'+instance+'_'+s;return u.toString();},installation=Buffer.from(fs.readFileSync(process.env.AUTH_INSTALLATION_CREDENTIAL_FILE,'utf8').trim(),'hex'),origins={},keys={auth:randomBytes(32),professional:randomBytes(32),agenda:randomBytes(32),payment:randomBytes(32)},config=s=>({peer:s,origins,keys:s==='management'?keys:{management:keys[s]}}),servers=[];
  let clock,service,sm,mc,pc,mm,pm,managerService,authBase,managementBase,professionalBase,gatewayBase;

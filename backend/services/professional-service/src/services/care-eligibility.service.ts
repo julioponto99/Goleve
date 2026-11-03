@@ -1,3 +1,5 @@
+import { localDemo } from '../local-demo';
+import { fixtureEligible } from '../local-demo-fixtures';
 import { ProfessionalModels } from '../models';
 import { ProfessionalSettings } from '../config/settings';
 import { PageOptions } from '../config/http';
@@ -16,6 +18,7 @@ export interface CareEligibilityProvider {
 export class ProfessionalCareEligibility implements CareEligibilityProvider {
   constructor(private readonly models: ProfessionalModels, private readonly settings: ProfessionalSettings, private readonly demoIdentity?: DemoIdentityReader) {}
   async check(professionalId: string, capabilityId: string): Promise<CareEligibilityDecision> {
+    if(localDemo.policy()){try{const profile=await this.models.Profile.findById(professionalId),cap=await this.models.Capability.findById(capabilityId),offering=await this.models.Service.findOne({professionalId,capabilityId,active:true});if(await fixtureEligible(this.models,profile,cap,offering))return{status:'eligible',capability:{professionalId,capabilityId,professionalAuthUserId:profile!.authUserId,professionalName:profile!.professionalName,relationshipKind:cap!.kind==='personal_trainer'?'personal_training':'nutrition'}};return{status:'ineligible'};}catch{return{status:'unavailable'};}}
     if (this.settings.dataMode !== 'synthetic' || (!this.demoIdentity && this.settings.reviewMode !== 'synthetic')) return { status: 'ineligible' };
     const [profile, capability, application] = await Promise.all([
       this.models.Profile.findById(professionalId),
@@ -37,8 +40,9 @@ export class ProfessionalCareEligibility implements CareEligibilityProvider {
     return { status: 'unavailable' };
   }
   async list(_page: PageOptions) {
+    if(localDemo.policy()){const docs=await this.models.Service.find({active:true,...(_page.before?{_id:{$lt:_page.before}}:{})}).sort({_id:-1}).limit(_page.limit+1),items:EligibleCareCapability[]=[];for(const d of docs){const c=await this.check(String(d.professionalId),String(d.capabilityId));if(c.status==='eligible')items.push(c.capability);}return{items:items.slice(0,_page.limit),nextBefore:docs.length>_page.limit?String(docs[_page.limit-1]._id):null};}
     // The simulated public catalog is not an eligibility authority. No real positive decision is possible yet.
     return { items: [] as EligibleCareCapability[], nextBefore: null };
   }
-  async authorizedCapabilities(_identity: { id: string; userType: string }): Promise<string[]> { return []; }
+  async authorizedCapabilities(identity: { id: string; userType: string }): Promise<string[]> { if(!localDemo.policy()||identity.userType!=='profissional')return[];const caps=await this.models.Capability.find({authUserId:identity.id}),out:string[]=[];for(const cap of caps){if((await this.check(String(cap.professionalId),String(cap._id))).status==='eligible')out.push(String(cap._id));}return out; }
 }

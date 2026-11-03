@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import jwt from 'jsonwebtoken';
 import { isObjectIdOrHexString } from 'mongoose';
 import { randomBytes } from 'node:crypto';
@@ -21,8 +22,8 @@ export function getJwtSecret(): string {
   return secret;
 }
 
-export function signAccessToken(userId: string,sessionId=randomBytes(32).toString('hex'),securityVersion=0): string {
-  return jwt.sign({sid:sessionId,sv:securityVersion}, getJwtSecret(), {
+export function signAccessToken(userId: string,sessionId=randomBytes(32).toString('hex'),securityVersion=0, demoInstanceId?:string): string {
+  return jwt.sign({sid:sessionId,sv:securityVersion,...(demoInstanceId?{authority:'local-demo',di:demoInstanceId}:{})}, getJwtSecret(), {
     algorithm: 'HS256',
     subject: userId,
     issuer,
@@ -34,7 +35,7 @@ export function signAccessToken(userId: string,sessionId=randomBytes(32).toStrin
 export function verifyAccessToken(token: string): string {
   return verifyTokenClaims(token).userId;
 }
-export function verifyTokenClaims(token:string):{userId:string;sessionId:string;securityVersion:number}{
+export function verifyTokenClaims(token:string):{userId:string;sessionId:string;securityVersion:number;demoInstanceId?:string}{
   const payload = jwt.verify(token, getJwtSecret(), {
     algorithms: ['HS256'],
     issuer,
@@ -45,5 +46,6 @@ export function verifyTokenClaims(token:string):{userId:string;sessionId:string;
     || typeof payload.exp !== 'number'||typeof payload.sid!=='string'||!/^[a-f0-9]{64}$/.test(payload.sid)||!Number.isSafeInteger(payload.sv)||Number(payload.sv)<0) {
     throw new Error('Invalid token claims');
   }
-  return{userId:payload.sub as string,sessionId:payload.sid,securityVersion:payload.sv as number};
+  if(payload.authority!==undefined&&(payload.authority!=='local-demo'||!localDemo.policy()||payload.di!==localDemo.policy().instance))throw new Error('Invalid authentication authority');
+  return{...(payload.authority==='local-demo'?{demoInstanceId:payload.di as string}:{}),userId:payload.sub as string,sessionId:payload.sid,securityVersion:payload.sv as number};
 }

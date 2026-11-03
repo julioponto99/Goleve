@@ -1,5 +1,7 @@
+import { localDemo } from './local-demo';
 import express from 'express';
 import 'dotenv/config';
+localDemo.policy();
 import { openDatabase, isDatabaseHealthy } from './config/database';
 import { loadPaymentFixtures } from './config/fixtures';
 import { authenticate } from './middlewares/auth.middleware';
@@ -20,9 +22,10 @@ export async function createApp(authServiceUrl: string, connection: import('mong
   const app = express(); app.disable('x-powered-by'); app.disable('etag');
   const management=loadContract('payment');if(management)app.use('/internal/v1/management',createManagementRoutes(connection,management));
   app.get('/health', async (_req, res) => { const healthy = await isDatabaseHealthy(connection); res.status(healthy ? 200 : 503).json({ service: 'payment-service', status: healthy ? 'ok' : 'unavailable', database: healthy ? 'connected' : 'unavailable', mode: 'demo' }); });
+  const demoActor:import('express').RequestHandler=(_req,res,next)=>{const p=localDemo.policy();if(p&&!p.accounts.some((a:any)=>a.id===res.locals.context?.identity.id)){res.status(403).json({error:{code:'LOCAL_DEMO_IDENTITIES_ONLY'}});return;}next();};
   if(bank&&(process.env.NODE_ENV!=='test'||!demo))throw new Error('Bank override requires an isolated integration test');
-  if(demo){const service=new IntegratedPaymentService(connection,demo,bank);await service.Model.init();app.use('/payments',authenticate(authServiceUrl),express.json({limit:'16kb'}),integratedPaymentRoutes(service));}
-  app.use('/payments', authenticate(authServiceUrl), express.json({ limit: '16kb' }), createPaymentRoutes(new PaymentService(models, loadPaymentFixtures())));
+  if(demo){const service=new IntegratedPaymentService(connection,demo,bank);await service.Model.init();app.use('/payments',authenticate(authServiceUrl),demoActor,express.json({limit:'16kb'}),integratedPaymentRoutes(service));}
+  app.use('/payments', authenticate(authServiceUrl), demoActor, express.json({ limit: '16kb' }), createPaymentRoutes(new PaymentService(models, loadPaymentFixtures())));
   app.use((_req, _res, next) => next(new Error('Endpoint not found')));
   app.use(errorHandler); return app;
 }

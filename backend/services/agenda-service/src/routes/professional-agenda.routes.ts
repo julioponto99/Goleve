@@ -1,9 +1,11 @@
+import { localDemo } from '../local-demo';
 import { Router } from 'express';
 import { ProfessionalAgendaService } from '../professional/service';
 import { createProfessionalAgendaController } from '../controllers/professional-agenda.controller';
 export function createProfessionalAgendaRoutes(service?:ProfessionalAgendaService) {
   const router=Router();
   router.use(['/professional','/professional-appointments','/professionals'],(_req,res,next)=>{
+    const p=localDemo.policy();if(p&&!p.accounts.some((a:any)=>a.id===res.locals.context?.identity.id)){res.status(403).json({error:{code:'LOCAL_DEMO_IDENTITIES_ONLY'}});return;}
     res.set('Cache-Control','no-store');res.set('X-Agenda-Professional-Mode',service?'isolated':'disabled');
     if(!service){res.status(503).json({error:{code:'PROFESSIONAL_AGENDA_DISABLED',message:'Professional Agenda is disabled'}});return;}next();
   });

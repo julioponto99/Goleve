@@ -29,6 +29,7 @@ ARG SERVICE_PATH=services/auth-service
 RUN npm ci --omit=dev --workspace="${SERVICE_PATH}" --include-workspace-root --no-audit --no-fund
 
 FROM node:22-alpine AS runtime
+COPY runtime/ /app/runtime/
 ENV NODE_ENV=production
 ARG SERVICE_PATH=services/auth-service
 WORKDIR /app

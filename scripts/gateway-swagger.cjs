@@ -74,7 +74,7 @@ function bundle() {
   }
   check(document);
   const hash = createHash('sha256');
-  for (const [file] of [...documents].sort(([a], [b]) => a.localeCompare(b))) hash.update(path.basename(file)).update(fs.readFileSync(file));
+  for (const [file] of [...documents].sort(([a], [b]) => a.localeCompare(b))) hash.update(path.basename(file)).update(Buffer.from(fs.readFileSync(file,'utf8').replace(/\r\n/g,'\n')));
   const sourceHash = hash.digest('hex');
   const content = '// Generated from documentation/api/backend-release-v1.openapi.json and its local component references.\n'
     + '// Do not edit. Regenerate: node scripts/gateway-swagger.cjs --write\n'
@@ -90,7 +90,7 @@ function main() {
   if (args[0] === '--write') {
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, generated.content);
-  } else assert.equal(fs.readFileSync(output, 'utf8'), generated.content, 'Bundled Swagger document drift; run docs:generate');
+  } else assert.equal(fs.readFileSync(output, 'utf8').replace(/\r\n/g,'\n'), generated.content, 'Bundled Swagger document drift; run docs:generate');
   console.log(JSON.stringify({ mode: args[0] || 'check', operations: generated.operations, paths: Object.keys(generated.document.paths).length, externalRefs: 0, sourceHash: generated.sourceHash }));
 }
 module.exports = { bundle };

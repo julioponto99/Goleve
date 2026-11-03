@@ -2,6 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { EventEmitter, once } = require('node:events');
 const amqp = require('amqplib');
+process.env.GOLEVE_LOCAL_DEMO_ENABLED = 'false';
 const { createApp } = require('../dist/server');
 const { NotificationConsumer } = require('../dist/messaging/rabbitmq');
 

@@ -1,3 +1,4 @@
+import { localDemo } from '../local-demo';
 import { NextFunction, Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { ApiError } from '../config/errors';
@@ -20,6 +21,7 @@ export function authenticate(authServiceUrl: string) {
       }
       if (!response.ok) throw new Error('Identity service unavailable');
       const body = await response.json() as { user?: { id?: unknown; name?: unknown; email?: unknown } };
+      localDemo.identityEnvelope(body);
       if (!body.user || typeof body.user.id !== 'string' || !/^[a-f0-9]{24}$/.test(body.user.id)
         || typeof body.user.name !== 'string' || typeof body.user.email !== 'string') {
         throw new Error('Invalid identity response');
