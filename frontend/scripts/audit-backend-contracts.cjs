@@ -3,7 +3,12 @@
 const fs=require('node:fs'),path=require('node:path'),Module=require('node:module'),assert=require('node:assert/strict'),{createHash}=require('node:crypto');
 const root=path.resolve(__dirname,'../..');
 const normalize=value=>value.replace(/\r\n/g,'\n');
-function replaceOnce(source,from,to){assert.equal(source.split(from).length,2,'Candidate patch no longer matches source');return source.replace(from,to);}
+function replaceOnce(source,from,to){
+ // The approved normalization can now be present in the real backend scripts.
+ // Preserve the exact source/content/hash assertions below in either state.
+ if(!source.includes(from)&&source.split(to).length===2)return source;
+ assert.equal(source.split(from).length,2,'Candidate patch no longer matches source');return source.replace(from,to);
+}
 function proposedReleasePatch(source){
  return replaceOnce(source,"const read=f=>fs.readFileSync(path.join(root,f),'utf8');","const read=f=>fs.readFileSync(path.join(root,f),'utf8').replace(/\\r\\n/g,'\\n');");
 }
@@ -50,7 +55,7 @@ function audit(){
  const normalizedHash=hashSources(f=>normalize(fs.readFileSync(f,'utf8')));
  const candidates=[proveCandidate('lf'),proveCandidate('crlf')];
  assert(candidates.every(c=>c.sourceHash===stored));
- return {mode:'read-only candidate proof; original scripts unchanged',storedHash:stored,workingHash,normalizedHash,workingMatchesStored:workingHash===stored,normalizedMatchesStored:normalizedHash===stored,candidates};
+ return {mode:'read-only contract proof; applied or proposed newline normalization',storedHash:stored,workingHash,normalizedHash,workingMatchesStored:workingHash===stored,normalizedMatchesStored:normalizedHash===stored,candidates};
 }
 module.exports={normalize,proposedReleasePatch,proposedSwaggerPatch,proveCandidate,audit};
 if(require.main===module)console.log(JSON.stringify(audit()));

@@ -6,6 +6,10 @@ const valid:RegisterInput={name:'Pessoa fictícia',email:'fictional@unit.invalid
 void valid;
 function publicContractChecks(){
  void api.request('get','/auth/me');
+ // @ts-expect-error The reviewed step-up binding cannot request an arbitrary action.
+ void api.request('post','/auth/admin/step-up',{body:{password:'synthetic-input',otp:'123456',action:'arbitrary.operation',targetId:'a'.repeat(24),parameters:{version:1,reasonCode:'test_reason'}}});
+ // @ts-expect-error Step-up parameters are a closed DTO, not arbitrary HTTP commands.
+ void api.request('post','/auth/admin/step-up',{body:{password:'synthetic-input',otp:'123456',action:'user.revoke',targetId:'a'.repeat(24),parameters:{url:'https://example.invalid'}}});
  // @ts-expect-error Technical APIs are not part of the public contract.
  void api.request('get','/internal/v1/management');
  // @ts-expect-error No refresh endpoint exists.

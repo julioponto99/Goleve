@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { AppState, BackHandler, Image, Modal, Platform, Pressable, ScrollView, StatusBar, StyleSheet, Text, View, useColorScheme } from 'react-native';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular';
 import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold';
 import { Inter_700Bold } from '@expo-google-fonts/inter/700Bold';
-import { ApiError, colors, createRuntime, errorMessage, navigationDecision, resolveTheme, routes } from '@goleve/shared';
-import type { AppRoute, SessionSnapshot } from '@goleve/shared';
+import { colors, createRuntime, dashboardFor, dashboardModules, entryDestination, errorMessage, isAuthRoute, isDashboardRoute, navigationDecision, navigationFor, resolveTheme, roleLabels, routes, webRouteForPath } from '@goleve/shared';
+import type { AppRoute, SessionSnapshot, WebRoute } from '@goleve/shared';
 import { deviceSessionStorage } from './src/session-storage';
 import { brandIcons } from './src/assets';
 import { BottomNavigation, navigationFont } from './src/BottomNavigation';
 import { createDeviceThemeStore } from './src/theme';
 import { Button, Card, LoadingState, MessageState } from './src/ui';
+import { AuthScreen } from './src/AuthScreen';
+import { SecurityScreen } from './src/SecurityScreen';
+import { DomainScreen } from './src/DomainScreen';
 const anonymous:SessionSnapshot={status:'anonymous'},noSubscribe=()=>()=>{};
 function createMobileRuntime(){
  try{
@@ -22,24 +25,30 @@ function createMobileRuntime(){
 function Shell({iconsLoaded}:{iconsLoaded:boolean}){
  const system=useColorScheme()==='dark'?'dark':'light';
  const themeStore=useMemo(createDeviceThemeStore,[]),preference=useSyncExternalStore(themeStore.subscribe,themeStore.getSnapshot);
- const [history,setHistory]=useState<readonly AppRoute[]>([routes[0]]),[themeWarning,setThemeWarning]=useState(false),[barHeight,setBarHeight]=useState(64);
- const [menu,setMenu]=useState(false),[connection,setConnection]=useState<'idle'|'loading'|'connected'|'unavailable'>('idle'),[notice,setNotice]=useState('');
+ const [history,setHistory]=useState<readonly WebRoute[]>([routes[0]]),[themeWarning,setThemeWarning]=useState(false),[barHeight,setBarHeight]=useState(64);
+ const [menu,setMenu]=useState(false),[notice,setNotice]=useState(''),[booting,setBooting]=useState(true),[transition,setTransition]=useState(false);
+ const timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
  const runtime=useMemo(createMobileRuntime,[]);
  const snapshot=useSyncExternalStore(runtime?.session.subscribe??noSubscribe,runtime?.session.getSnapshot??(()=>anonymous));
  const theme=resolveTheme(preference,system),c=colors[theme],route=history[history.length-1]??routes[0],insets=useSafeAreaInsets();
  useEffect(()=>{void themeStore.restore().then(saved=>setThemeWarning(!saved));},[themeStore]);
  const toggleTheme=()=>{void themeStore.set(theme==='dark'?'light':'dark').then(saved=>setThemeWarning(!saved));};
- useEffect(()=>{void runtime?.session.restore();const subscription=AppState.addEventListener('change',state=>{if(state==='active'&&runtime?.session.getSnapshot().status==='authenticated')void runtime.session.restore();});return()=>subscription.remove();},[runtime]);
- useEffect(()=>{const listener=BackHandler.addEventListener('hardwareBackPress',()=>{if(history.length<=1)return false;setHistory(value=>value.slice(0,-1));return true;});return()=>listener.remove();},[history.length]);
- const go=(next:AppRoute)=>{setMenu(false);setNotice('');setHistory(value=>value[value.length-1]?.id===next.id?value:[...value,next]);};
- const check=async()=>{if(!runtime){setConnection('unavailable');return;}setConnection('loading');try{await runtime.api.request('get','/health',{authenticated:false});setConnection('connected');}catch{setConnection('unavailable');}};
- const logout=async()=>{try{await runtime?.session.signOut();setNotice('Sessão terminada.');}catch(error){setNotice(error instanceof ApiError&&error.code==='SECURE_STORAGE_UNAVAILABLE'?'O acesso foi bloqueado neste dispositivo, mas não foi possível confirmar a remoção da sessão guardada.':'Sessão removida deste dispositivo. Não foi possível confirmar a revogação no servidor.');}};
+ useEffect(()=>{void (runtime?.session.restore()??Promise.resolve()).finally(()=>setBooting(false));const subscription=AppState.addEventListener('change',state=>{if(state==='active'&&runtime?.session.getSnapshot().status==='authenticated')void runtime.session.restore();});return()=>{subscription.remove();clearTimeout(timer.current);};},[runtime]);
+ useEffect(()=>{if(booting)return;const destination=entryDestination(snapshot,route.path,route.private);if(destination)setHistory([webRouteForPath(destination)!]);},[snapshot,route.path,booting]);
+ useEffect(()=>{const listener=BackHandler.addEventListener('hardwareBackPress',()=>{if(menu){setMenu(false);return true;}if(history.length<=1)return false;setHistory(value=>value.slice(0,-1));return true;});return()=>listener.remove();},[history.length,menu]);
+ const go=(next:WebRoute)=>{setMenu(false);setNotice('');setHistory(value=>value[value.length-1]?.id===next.id?value:[...value,next]);};
+ const navigate=(path:string)=>{const next=webRouteForPath(path);if(next)go(next);};
+ const authenticated=()=>{const current=runtime?.session.getSnapshot();if(current?.status!=='authenticated')return;setTransition(true);setHistory([dashboardFor(current.user.userType)]);timer.current=setTimeout(()=>setTransition(false),180);};
+ const logout=async()=>{const pending=runtime?.session.signOut();setMenu(false);setHistory([webRouteForPath('/entrar')!]);try{await pending;setNotice('Sessão terminada.');}catch{setNotice('Acesso local bloqueado. Não foi possível confirmar a remoção da sessão guardada ou a revogação no servidor.');}};
  const gate=navigationDecision(route,snapshot);
  const name=snapshot.status==='authenticated'?snapshot.user.name:undefined;
+ const navigation=snapshot.status==='authenticated'?navigationFor(snapshot.user.userType):[];
+ if(booting||transition)return <View accessibilityRole="progressbar" accessibilityLabel="A verificar a sessão" style={[styles.fontLoading,{backgroundColor:c.background}]}><Image source={brandIcons[theme]} style={styles.launchIcon}/><Text style={[styles.brandName,{color:c.text}]}>GoLeve</Text><LoadingState theme={theme} label={transition?'A abrir o teu espaço…':'A verificar a sessão…'}/></View>;
+ if(isAuthRoute(route))return <SafeAreaView style={[styles.screen,{backgroundColor:c.background}]} edges={['top','left','right']}><StatusBar barStyle={theme==='dark'?'light-content':'dark-content'}/><AuthScreen key={route.id} mode={route.id} runtime={runtime} session={snapshot} theme={theme} onNavigate={navigate} onAuthenticated={authenticated} toggleTheme={toggleTheme} notice={notice}/></SafeAreaView>;
  return <SafeAreaView style={[styles.screen,{backgroundColor:c.background}]} edges={['top','left','right']}>
   <StatusBar barStyle={theme==='dark'?'light-content':'dark-content'}/>
   <View style={styles.header}>
-   <Pressable accessibilityRole="button" accessibilityLabel="Abrir menu" onPress={()=>setMenu(true)} style={styles.touch}><Text style={[styles.link,{color:c.text}]}>Menu</Text></Pressable>
+   <Pressable accessibilityRole="button" accessibilityLabel="Abrir menu" accessibilityState={{expanded:menu}} onPress={()=>setMenu(true)} style={styles.touch}><View style={{gap:4}}>{[0,1,2].map(line=><View key={line} style={{width:20,height:2,backgroundColor:c.text,borderRadius:1}}/>)}</View></Pressable>
    <View style={styles.brand}>{brandIcons[theme]&&<Image source={brandIcons[theme]!} style={styles.brandIcon} resizeMode="contain"/>}<Text style={[styles.brandName,{color:c.text}]}>GoLeve</Text></View>
    <Pressable accessibilityRole="button" accessibilityLabel="Alterar tema" accessibilityState={{selected:theme==='dark'}} onPress={toggleTheme} style={styles.touch}><Text style={[styles.link,{color:c.text}]}>{theme==='dark'?'Claro':'Escuro'}</Text></Pressable>
   </View>
@@ -48,29 +57,21 @@ function Shell({iconsLoaded}:{iconsLoaded:boolean}){
    <Text style={[styles.eyebrow,{color:c.muted}]}>{name?'Olá, '+name:'O teu progresso, ao teu ritmo.'}</Text>
    <Text accessibilityRole="header" style={[styles.heading,{color:c.text}]}>{route.id==='home'?'O teu ritmo.\nO teu bem-estar.':route.label}</Text>
    {!!notice&&<Text accessibilityRole="alert" style={[styles.body,{color:c.muted}]}>{notice}</Text>}
-   {route.id==='home'?<Card theme={theme}>
-    <View style={[styles.badge,{backgroundColor:c.raised}]}><Text style={[styles.badgeLabel,{color:c.selectedText}]}>Ao teu ritmo</Text></View>
-    <Text accessibilityRole="header" style={[styles.title,{color:c.text}]}>Há espaço para os teus objetivos.</Text>
-    <Text style={[styles.body,{color:c.muted}]}>Um espaço para cuidares de ti, com ou sem acompanhamento profissional.</Text>
-    <View style={styles.chips}>{['Casa','Ginásio','Exterior'].map(label=><View key={label} style={[styles.chip,{backgroundColor:c.background}]}><Text style={[styles.link,{color:c.text}]}>{label}</Text></View>)}</View>
-    <Button theme={theme} disabled={connection==='loading'} onPress={()=>void check()}>Verificar ligação</Button>
-    {connection==='loading'?<LoadingState theme={theme} label="A verificar a ligação…"/>:connection==='connected'?<Text accessibilityRole="text" style={[styles.body,{color:c.selectedText}]}>Ligação verificada.</Text>:connection==='unavailable'?<MessageState theme={theme} title="Ligação indisponível" error>{runtime?'Não foi possível contactar o GoLeve. Tenta verificar a ligação mais tarde.':'A ligação ao GoLeve ainda não está configurada para este ambiente.'}</MessageState>:<Text style={[styles.body,{color:c.muted}]}>Ligação por verificar</Text>}
-   </Card>:<Card theme={theme}>
+   {route.id==='security'&&runtime&&gate==='allowed'?<SecurityScreen runtime={runtime} theme={theme} onLogout={()=>void logout()}/>:gate==='allowed'&&snapshot.status==='authenticated'&&runtime?<DomainScreen key={snapshot.user.id+':'+route.id} runtime={runtime} user={snapshot.user} page={route.id} theme={theme}/>:<Card theme={theme}>
     {gate==='identity-unavailable'?snapshot.status==='restoring'?<LoadingState theme={theme} label="A verificar a sessão…"/>:<MessageState theme={theme} title="Sessão por verificar" error>{snapshot.status==='unavailable'?errorMessage(snapshot.error):'Não foi possível confirmar a identidade.'}</MessageState>
      :gate==='authentication-required'?<MessageState theme={theme} title="Sessão necessária">Esta área é privada. O acesso exige uma sessão válida.</MessageState>
      :gate==='forbidden'?<MessageState theme={theme} title="Acesso não autorizado" error>O teu perfil não permite aceder a esta área.</MessageState>
      :<MessageState theme={theme} title={route.id==='coach'?'Coach IA indisponível':'Área ainda indisponível'}>{route.id==='coach'?'O Coach IA está desativado neste ambiente. Podes continuar a utilizar o GoLeve sem IA.':'Esta funcionalidade ainda não está disponível nesta aplicação.'}</MessageState>}
     {route.id==='coach'&&gate!=='allowed'&&<Text style={[styles.body,{color:c.muted}]}>O Coach IA permanece desativado neste ambiente.</Text>}
-    {route.availability==='planned'&&gate!=='allowed'&&<Text style={[styles.body,{color:c.muted}]}>Esta funcionalidade ainda não está disponível nesta aplicação.</Text>}
     <Button theme={theme} secondary onPress={()=>go(routes[0])}>Voltar ao início</Button>
    </Card>}
    <Text style={[styles.footnote,{color:c.muted}]}>As funcionalidades de cada área serão disponibilizadas progressivamente. Não são apresentados resultados pessoais fictícios.</Text>
   </ScrollView>
-  <BottomNavigation theme={theme} selected={route.id} onNavigate={go} iconsLoaded={iconsLoaded} onHeightChange={setBarHeight}/>
+  {snapshot.status==='authenticated'&&snapshot.user.userType==='utilizador'&&<BottomNavigation theme={theme} selected={(routes.find(item=>item.id===route.id)??routes[0]).id} onNavigate={(next:AppRoute)=>go(next.id==='home'?dashboardFor(snapshot.user.userType):next)} iconsLoaded={iconsLoaded} onHeightChange={setBarHeight}/>}
   <Modal visible={menu} transparent animationType="fade" onRequestClose={()=>setMenu(false)}>
    <View style={styles.modalBackdrop}><SafeAreaView style={[styles.drawer,{backgroundColor:c.surface}]} accessibilityViewIsModal>
     <View style={styles.drawerHeading}><Text style={[styles.title,{color:c.text}]}>GoLeve</Text><Pressable accessibilityRole="button" accessibilityLabel="Fechar menu" style={styles.touch} onPress={()=>setMenu(false)}><Text style={[styles.link,{color:c.text}]}>Fechar</Text></Pressable></View>
-    <ScrollView>{routes.map(item=><Pressable key={item.id} accessibilityRole="button" accessibilityState={{selected:route.id===item.id}} style={[styles.menuItem,route.id===item.id&&{backgroundColor:c.selection}]} onPress={()=>go(item)}><Text style={[styles.body,{color:route.id===item.id?c.selectedText:c.text}]}>{item.label}{item.availability==='blocked'?' · Indisponível':''}</Text></Pressable>)}</ScrollView>
+    <ScrollView>{navigation.map(item=><Pressable key={item.id} accessibilityRole="button" accessibilityState={{selected:route.id===item.id}} style={[styles.menuItem,route.id===item.id&&{backgroundColor:c.selection}]} onPress={()=>go(item)}><Text style={[styles.body,{color:route.id===item.id?c.selectedText:c.text}]}>{item.label}{item.availability==='blocked'?' · Indisponível':''}</Text></Pressable>)}</ScrollView>
     {snapshot.status==='authenticated'?<Button theme={theme} secondary onPress={()=>{setMenu(false);void logout();}}>Terminar sessão</Button>:<Text style={[styles.body,{color:c.muted}]}>Sessão não iniciada</Text>}
    </SafeAreaView></View>
   </Modal>

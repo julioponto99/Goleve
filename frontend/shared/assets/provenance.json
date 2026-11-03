@@ -196,5 +196,38 @@
     },
     "license": "assets/licenses/fontawesome-free-6.7.2.txt",
     "sourcePngsModified": false
+  },
+  "webAuthentication": {
+    "phase": "6.2 dependency for 6.3",
+    "fileKey": "dseqmbo4hzK6sFcOQl5hld",
+    "frames": {
+      "light": "2031:3128",
+      "dark": "2023:36509",
+      "registerLight": "2031:3085"
+    },
+    "files": [
+      "assets/figma/auth/activity-light.svg",
+      "assets/figma/auth/activity-dark.svg",
+      "assets/figma/auth/progress-light.svg",
+      "assets/figma/auth/progress-dark.svg",
+      "assets/figma/auth/ring-light.svg",
+      "assets/figma/auth/ring-dark.svg"
+    ],
+    "source": "Original Figma MCP SVG downloads, unmodified; existing GoLeve PNGs replace the old symbol as approved by the owner."
+  },
+  "recoveryScreens": {
+    "fileKey": "dseqmbo4hzK6sFcOQl5hld",
+    "sessionId": "b2332685-3274-44f9-b464-c351e1a29570",
+    "frames": {
+      "webLight": "2031:3052",
+      "webDark": "2023:36588",
+      "mobileLogin": "89:42",
+      "mobileRecovery": "118:64"
+    },
+    "files": [
+      "assets/figma/auth/mail-light.svg",
+      "assets/figma/auth/mail-dark.svg"
+    ],
+    "source": "Original Figma MCP SVG exports, unmodified. Existing approved GoLeve PNGs retained."
   }
 }

@@ -1,8 +1,52 @@
 # GoLeve — fundações frontend V1
 
-Branch de trabalho: `integration/frontend-v1`. Fundações 6.1 e refinamento 6.1.1.
+## Ambiente oficial local-demo — 2026-11-03
+
+Gateway atual: `http://127.0.0.1:3000`. Usar os ficheiros operacionais
+`web/.env` e `mobile/.env`, preservados e ignorados pelo Git; referências antigas
+a `64344` correspondem à stack paralela histórica. Não copiar segredos para o
+frontend: `VITE_*` e `EXPO_PUBLIC_*` são configuração pública.
+Consultar o [relatório de consolidação](../documentation/consolidation-v1.md)
+para as cinco contas fictícias e consulta interativa das passwords.
+
+```powershell
+cd frontend
+npm run dev:web
+```
+
+Os cinco perfis foram testados por Chrome com APIs reais, sem alterar o design.
+O token Web continua apenas em memória, pelo que recarregar toda a página pode
+exigir novo login. A indicação `local-demo` vem do Auth, nunca de uma opção da
+interface; administradores reais continuam sujeitos a MFA. O step-up por password
+isolada só é utilizado quando explicitamente autorizado pelo backend para a
+sessão de demonstração e a operação exata. Recuperação de password continua
+indisponível enquanto não existir o contrato real aprovado.
+
+Expo gerou bundles Android/iOS. Ainda não se validou execução em dispositivos
+físicos: Android Emulator usa `10.0.2.2:3000`; em dispositivos físicos é necessário
+encaminhamento de desenvolvimento autorizado, pois o Gateway oficial só publica
+em loopback. Não expor MongoDB/RabbitMQ para resolver conectividade Mobile.
+
+Validações: 107 testes unitários, 98 testes Playwright com API simulada e cinco
+percursos Chrome com API real. A configuração `playwright.local-demo.config.ts`
+exige ACK explícito e não grava traces com credenciais; a regressão simulada
+interceta uma origem distinta para não enviar credenciais fictícias de teste
+ao backend real. Os 12 bloqueios históricos não foram declarados resolvidos.
+
+[UI-1 — redesign Web, validação e capturas antes/depois](../documentation/frontend/ui-1-web-redesign.md).
+A Web usa agora header/sidebar fixos, rail recolhido e scroll central, mantendo
+os temas, os contratos e os fluxos de autenticação existentes. O redesign não
+modifica o Mobile nem ativa funcionalidades bloqueadas do backend.
+
+Branch de trabalho: `integration/frontend-v1`. Fundações 6.1/6.1.1, autenticação
+Web/Mobile e painéis ligados aos contratos existentes.
+[Entrega atual e limitações](../documentation/frontend/navigation-auth-dashboards.md) ·
+[Recuperação futura aprovada](../documentation/frontend/password-recovery-proposal.md) ·
+[Política MFA atual/futura](../documentation/frontend/mfa-policy-review.md) ·
+[Acesso administrativo](../documentation/frontend/administrator-access.md).
 [Estado e validação](../documentation/frontend/phase-6.1-foundations.md) ·
 [Refinamento e testes 6.1.1](../documentation/frontend/phase-6.1.1-refinement.md) ·
+[Etapa A e autenticação Web](../documentation/frontend/phase-6.3-stage-a-auth-validation.md) ·
 [92 frames Figma](../documentation/frontend/figma-inventory.md) ·
 [42 interações e contratos](../documentation/frontend/figma-backend-matrix.md).
 
@@ -23,9 +67,17 @@ O TypeScript 5.9.3 do tooling satisfaz o peer do openapi-typescript; Mobile mant
 a versão 6.0.3 do template Expo. Não substituir as versões por latest.
 
 A shell tem Light/Dark, navegação, estados de carregamento/erro/indisponibilidade
-e consulta de conectividade ao Gateway por ação explícita. Não há dashboards,
-estatísticas de exemplo, formulários de negócio ou áreas administrativas operacionais.
-A UI de login/registo/MFA é da Fase 6.2; a infraestrutura de sessão já está preparada.
+e consulta de conectividade ao Gateway por ação explícita. A Web acrescenta
+login/registo/MFA, sessões próprias e quatro painéis por perfil. Mobile usa agora
+a mesma sessão e os mesmos contratos, com SecureStore e formulários nativos.
+Os painéis consultam dados de domínio; registos pessoais, operações de Gestor e
+as seis operações Auth administrativas têm comandos fechados. O relatório atual
+distingue leituras, escritas, capacidades ainda sem interface e bloqueios reais.
+Não há estatísticas de exemplo ou operações administrativas fictícias.
+Consultar o [guia de autenticação Web](../documentation/frontend/web-authentication.md)
+e o [plano por perfil](../documentation/frontend/phase-6.3-plan.md).
+As verificações HTTP automatizadas usam mocks. Não comprovam operações com contas
+reais, nem substituem testes num iPhone/Android. Não foi alterado o backend.
 
 A Web inicia em Light, independentemente do tema do sistema. A escolha explícita
 Light/Dark persiste entre navegações e reloads em `goleve.ui.theme.v1` (apenas o
@@ -55,6 +107,28 @@ npm.cmd run dev:web
 Web em http://127.0.0.1:5173. A porta é estrita: se estiver ocupada, o comando falha;
 não interrompe outro processo. Terminar com Ctrl+C.
 Não arranca, reconstrói nem reinicia Docker.
+
+Para testar a autenticação Web, abre http://127.0.0.1:5173/entrar. O registo está
+em `/criar-conta`, recuperação indisponível em `/recuperar-acesso`, MFA em `/autenticacao/mfa` e sessões próprias em
+`/conta/seguranca`. O MFA exige um desafio válido; abrir a URL não concede acesso.
+Usa apenas contas autorizadas. Não cries contas na base existente só para testar.
+O JWT Web permanece em memória: navegar mantém a sessão, recarregar exige novo login.
+O arranque verifica a sessão e abre o login ou o painel do papel validado. Logout
+regressa imediatamente ao login, mesmo enquanto a revogação remota está pendente.
+Administradores continuam obrigados a MFA; o planeamento futuro não o desativa.
+
+Para validar sem criar contas ou alterar dados, executa a partir de `frontend/`:
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build:web
+npm.cmd test
+npm.cmd run test:web -- --output=.cache/phase-6.2-resume/final
+```
+
+Playwright usa um servidor de teste em 127.0.0.1:5174, um browser isolado e respostas
+HTTP simuladas. Não usa contas ou bases existentes. Termina o servidor de teste
+automaticamente; não interrompe um servidor Web já aberto em 5173.
 
 Mobile:
 
@@ -114,9 +188,17 @@ A aplicação não faz escritas de domínio automaticamente.
   Não se duplicam dados User/Performance: medições são de Performance; perfil/
   preferências são de User.
 
-O adaptador MFA está testado com mocks. Não foi criado Administrador nem executado
-bootstrap. Step-up continua específico da operação; o transporte suporta o header
-público autorizado, sem persistir provas ou credenciais.
+Web: `/entrar`, `/criar-conta`, `/autenticacao/mfa`, `/conta/seguranca` e
+`/painel/<papel>`. O registo público continua exclusivamente `utilizador`.
+MFA usa o desafio em memória, enrolment TOTP manual e recuperação de uso único;
+não existe recuperação de palavra-passe. Sair de um pedido de autenticação
+pendente invalida a tentativa local e impede redirecionamentos tardios.
+
+O adaptador e o diálogo step-up têm seis vínculos Auth fechados, sem formulário
+genérico de comandos. A ligação às operações das páginas administrativas fica
+para a Etapa E. Não foi criado Administrador nem executado bootstrap.
+Os testes autenticados usam respostas simuladas isoladas, não contas existentes
+nem a base de desenvolvimento. Não equivalem a validação autenticada com API real.
 
 ## Identidade visual
 

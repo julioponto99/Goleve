@@ -7,9 +7,14 @@ export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 export type PublicPath = keyof paths;
 type Method<P extends PublicPath> = { [M in HttpMethod]: M extends keyof paths[P] ? NonNullable<paths[P][M]> extends never ? never : M : never }[HttpMethod];
 type Op<P extends PublicPath,M extends HttpMethod> = M extends keyof paths[P] ? NonNullable<paths[P][M]> : never;
-export type RequestBody<P extends PublicPath,M extends HttpMethod> =
+type SchemaRequestBody<P extends PublicPath,M extends HttpMethod> =
   Op<P,M> extends {requestBody?: infer B}
   ? NonNullable<B> extends {content: {'application/json': infer T}} ? T : never : never;
+// Source OpenAPI leaves step-up parameters generic. Keep a reviewed, closed Auth
+// binding here rather than casting away its generated Record<string, never> type.
+export type RequestBody<P extends PublicPath,M extends HttpMethod> = P extends '/auth/admin/step-up'
+ ? M extends 'post'?import('../contracts/auth-security').AuthStepUpInput:never
+ : SchemaRequestBody<P,M>;
 export interface TokenSource { current(): string | undefined; invalidate(token: string): void }
 export interface RequestOptions<B=unknown> {
   params?: Readonly<Record<string,string>>;

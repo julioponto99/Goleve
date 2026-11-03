@@ -1,0 +1,10 @@
+import activityLight from '@goleve/shared/assets/figma/auth/activity-light.svg';
+import activityDark from '@goleve/shared/assets/figma/auth/activity-dark.svg';
+import progressLight from '@goleve/shared/assets/figma/auth/progress-light.svg';
+import progressDark from '@goleve/shared/assets/figma/auth/progress-dark.svg';
+import ringLight from '@goleve/shared/assets/figma/auth/ring-light.svg';
+import ringDark from '@goleve/shared/assets/figma/auth/ring-dark.svg';
+import mailLight from '@goleve/shared/assets/figma/auth/mail-light.svg';
+import mailDark from '@goleve/shared/assets/figma/auth/mail-dark.svg';
+export const recoveryIcons={light:mailLight,dark:mailDark};
+export const authMotif={light:{activity:activityLight,progress:progressLight,ring:ringLight},dark:{activity:activityDark,progress:progressDark,ring:ringDark}};

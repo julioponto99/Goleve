@@ -8,3 +8,4 @@ export function createRuntime(options:Omit<ClientOptions,'token'>,storage:Sessio
  session=new SessionController(api,storage);
  return {api,session};
 }
+export type Runtime=ReturnType<typeof createRuntime>;

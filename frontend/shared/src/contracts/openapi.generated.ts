@@ -4179,6 +4179,14 @@ export interface components {
             targetId: string;
             /** @description Exact canonical parameters specified in administration-v1.md */
             parameters: Record<string, never>;
+        } | {
+            /** Format: password */
+            password: string;
+            /** @enum {string} */
+            action: "user.suspend" | "user.reactivate" | "user.revoke";
+            targetId: string;
+            /** @description Exact canonical parameters specified in administration-v1.md */
+            parameters: Record<string, never>;
         };
         administration_v1__Audit: {
             id: string;
@@ -4256,6 +4264,9 @@ export interface components {
             /** @constant */
             expiresIn: 3600;
             recoveryCodes?: string[];
+            /** @enum {string} */
+            authority?: "standard" | "local-demo";
+            demoInstanceId?: string;
         };
         administration_v1__MfaChallenge: {
             challenge: string;
@@ -8954,6 +8965,9 @@ export interface operations {
                 content: {
                     "application/json": {
                         user: components["schemas"]["backend_integration_v1__Identity"];
+                        /** @enum {string} */
+                        authority?: "standard" | "local-demo";
+                        demoInstanceId?: string;
                     };
                 };
             };

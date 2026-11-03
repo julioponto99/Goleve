@@ -5,8 +5,8 @@ export function Button({kind='primary',...props}:ButtonHTMLAttributes<HTMLButton
 }
 export function Card({children,className=''}:{children:ReactNode;className?:string}){return <section className={'card '+className}>{children}</section>;}
 export function Badge({children}:{children:ReactNode}){return <span className="badge">{children}</span>;}
-export function TextField({label,error,id,...props}:InputHTMLAttributes<HTMLInputElement>&{id:string;label:string;error?:string}){
- return <div className="field"><label htmlFor={id}>{label}</label><input {...props} id={id} aria-invalid={!!error} aria-describedby={error?id+'-error':undefined}/>{error&&<p role="alert" className="field-error" id={id+'-error'}>{error}</p>}</div>;
+export function TextField({label,error,id,trailing,...props}:InputHTMLAttributes<HTMLInputElement>&{id:string;label:string;error?:string;trailing?:ReactNode}){
+ return <div className="field"><label htmlFor={id}>{label}</label><div className="field-control"><input {...props} id={id} aria-invalid={!!error} aria-describedby={error?id+'-error':undefined}/>{trailing}</div>{error&&<p role="alert" className="field-error" id={id+'-error'}>{error}</p>}</div>;
 }
 export function LoadingState({label='A carregar…'}:{label?:string}){return <div className="state" role="status" aria-live="polite"><span className="spinner" aria-hidden="true"/><p>{label}</p></div>;}
 export function MessageState({title,children,error=false}:{title:string;children:ReactNode;error?:boolean}){

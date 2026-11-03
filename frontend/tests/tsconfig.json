@@ -12,13 +12,16 @@
     "noEmit": true,
     "skipLibCheck": true,
     "types": [
-      "node"
+      "node",
+      "vite/client"
     ]
   },
   "include": [
     "./*.ts",
     "./browser/*.ts",
     "./fixtures/*.tsx",
-    "../playwright.config.ts"
+    "../playwright.config.ts",
+    "../playwright.ui1.config.ts",
+    "../playwright.local-demo.config.ts"
   ]
 }
