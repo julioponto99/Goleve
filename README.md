@@ -1,196 +1,314 @@
-# GoLeve
+# GoLeve V1
 
-**Consolidação do ambiente oficial em curso (2026-11-03).** O projeto operacional
-é `goleve`, com [compose.yaml](compose.yaml), Gateway em `127.0.0.1:3000` e os
-volumes existentes preservados. Consultar o [registo de execução e recuperação](documentation/consolidation-v1.md)
-antes de iniciar serviços: os 14 componentes e cinco contas local-demo foram
-validados por HTTP; a retenção Agenda e a recuperação MongoDB foram verificadas,
-mas o cenário Payment durante falha RabbitMQ está bloqueado por um índice único.
-Não executar os guias
-históricos de stacks paralelas como configuração do ambiente principal.
+## 1. Apresentação
 
-Para integrar os frontends, começar pela
-[entrega de desenvolvimento V1 — Fase 5.14](documentation/release-v1/README.md):
-[instalação independente](documentation/release-v1/local-setup.md),
-[referência central de API](documentation/api/backend-release-v1.md) e
-[guia web/Android/iPhone](documentation/release-v1/frontend.md).
-O Gateway oficial atual está em `http://127.0.0.1:3000`, com MongoDB replica set,
-RabbitMQ e 11 microserviços, com segredos e dados fictícios próprios por instalação.
-Os [12 bloqueios conhecidos](documentation/release-v1/readiness.md) continuam abertos.
-Não é uma entrega de produção. A CLI histórica pressupõe a stack principal;
-o novo guia explica o arranque independente. Não executar `integration.cjs test`
-como simples verificação de conectividade: inclui paragens de dependências.
+O **GoLeve V1** é uma plataforma de gestão de atividade física e serviços de
+bem-estar, desenvolvida no âmbito do Mestrado em Engenharia Informática do
+Instituto Politécnico do Cávado e do Ave (IPCA).
 
-A [demonstração local isolada histórica](documentation/api/isolated-demo.md) usa cinco componentes e não é o ambiente oficial atual. Não a iniciar para consolidar o projeto `goleve`. Os guias antigos que referem `64344` descrevem a stack paralela preservada e parada.
+O repositório contém um monorepo com clientes Web e Mobile, um API Gateway,
+11 microserviços, MongoDB, RabbitMQ, contratos OpenAPI e a infraestrutura
+Docker Compose para execução local.
 
-Monorepo local com API Gateway, 11 microserviços TypeScript/Express, MongoDB e RabbitMQ.
-Pagamentos: apenas simulados, nunca reais.
+Esta documentação descreve o estado efetivamente implementado e não apresenta
+como concluídas funcionalidades que apenas existam no contrato ou no código
+sem validação suficiente.
 
-## Arranque
+## 2. Descrição e objetivos da plataforma
 
-O arranque oficial usa apenas ficheiros operacionais chamados `.env`, carregados
-explicitamente pelo Compose. `.env.example` existentes são referências
-históricas, sem dependência de execução. Preparar sem substituir configurações:
+O GoLeve pretende centralizar atividades de exercício físico, hidratação,
+medições, desempenho, agenda e serviços profissionais numa arquitetura
+modular.
 
-~~~powershell
+Os objetivos técnicos observados são:
+
+- separar os domínios de negócio em microserviços;
+- disponibilizar uma fronteira REST única através do API Gateway;
+- partilhar cliente, sessão, navegação e contratos entre Web e Mobile;
+- persistir dados em MongoDB e propagar eventos através de RabbitMQ;
+- aplicar autenticação JWT, autorização por perfis, MFA e step-up quando
+  aplicável;
+- manter pagamentos apenas no âmbito simulado do MockBank.
+
+## 3. Principais funcionalidades
+
+| Estado | Funcionalidades |
+|---|---|
+| Implementadas | Registo e login, logout, JWT, perfil próprio, treinos, hidratação, agenda pessoal, catálogo de profissionais/serviços e notificações internas |
+| Parciais | MFA/step-up administrativo, medições e evolução integradas, marcações profissionais, gestão, administração e pagamentos MockBank |
+| Não disponíveis ou não concluídas | Recuperação de password, Coach IA operacional, pagamentos reais, email/SMS/push externos e integração financeira real |
+
+A Web e o Mobile não expõem necessariamente todas as operações existentes no
+backend. A disponibilidade final depende também do perfil, da configuração e
+das pré-condições de cada serviço.
+
+## 4. Perfis de utilizador
+
+| Perfil | Âmbito principal |
+|---|---|
+| Utilizador | Perfil, treinos, hidratação, medições, agenda pessoal, catálogo, reservas condicionais e notificações |
+| Profissional | Perfil profissional, serviços, disponibilidade e agenda profissional, sujeitos a elegibilidade |
+| Gestor | Âmbitos, serviços, reservas, indicadores e casos de gestão autorizados |
+| Administrador | Utilizadores, aprovações, gestores, profissionais, supervisão e auditoria, com MFA/step-up quando exigido |
+
+O menu da aplicação não substitui a autorização do backend. Um recurso pode
+estar visível e continuar condicionado pelo papel, âmbito, estado ou
+elegibilidade da conta.
+
+## 5. Tecnologias utilizadas
+
+| Área | Tecnologias |
+|---|---|
+| Backend | Node.js 22, TypeScript e Express |
+| API | API Gateway, REST e OpenAPI 3.1 |
+| Web | React, Vite e TypeScript |
+| Mobile | React Native, Expo e TypeScript |
+| Partilha | Cliente API, sessão, tokens, navegação e contratos no pacote Shared |
+| Persistência | MongoDB 7 com replica set `goleveV1` |
+| Mensagens | RabbitMQ, outbox, retry e filas de falha |
+| Execução | Docker e Docker Compose |
+| Segurança | JWT, sessões revogáveis, MFA, step-up, CORS e rate limiting |
+
+## 6. Arquitetura do sistema
+
+Os clientes comunicam exclusivamente com o API Gateway. Este encaminha os
+pedidos para:
+
+1. Auth Service;
+2. User Service;
+3. Training Service;
+4. Hydration Service;
+5. Performance Service;
+6. Agenda Service;
+7. Professional Service;
+8. Management Service;
+9. Payment Service;
+10. Notification Service;
+11. AI Coach Service.
+
+Os microserviços usam MongoDB para persistência e RabbitMQ para comunicação
+assíncrona, eventos e outbox. O Payment Service utiliza apenas um adaptador
+MockBank local; não existe integração bancária real validada.
+
+Para a descrição completa, consultar [ARCHITECTURE.md](documentation/ARCHITECTURE.md).
+
+## 7. Estrutura do repositório
+
+| Caminho | Conteúdo |
+|---|---|
+| `backend/` | API Gateway e workspace dos 11 microserviços |
+| `backend/api-gateway/` | Fronteira HTTP, segurança, proxies e Swagger |
+| `backend/services/` | Serviços de autenticação, utilizadores, treino, hidratação, desempenho, agenda, profissionais, gestão, pagamentos, notificações e Coach IA |
+| `frontend/web/` | Aplicação Web React/Vite |
+| `frontend/mobile/` | Aplicação Mobile React Native/Expo |
+| `frontend/shared/` | Cliente, sessão, navegação e contratos partilhados |
+| `documentation/` | Documentação técnica e académica |
+| `scripts/` | Preparação local, contratos e verificações auxiliares |
+| `compose.yaml` | Configuração oficial da stack Docker local |
+
+Os README internos dos módulos podem conter instruções específicas; este
+ficheiro é a referência de entrada do repositório.
+
+## 8. Requisitos de instalação
+
+São necessários:
+
+- Node.js 22.x e npm;
+- Docker Engine/Desktop com Docker Compose v2;
+- Git;
+- navegador moderno para a Web;
+- Expo Go/development build ou emulador Android para o Mobile.
+
+Uma execução iOS local requer macOS e Xcode. A execução num dispositivo físico
+Mobile não foi validada nesta versão.
+
+Os ficheiros `.env` são locais e não devem ser publicados. A entrega utiliza
+`.env` operacionais; os `.env.example` existentes são apenas referências e
+não devem ser usados para publicar segredos.
+
+## 9. Instalação rápida
+
+Na raiz do repositório, preparar a configuração local:
+
+```powershell
 node scripts/local-runtime.cjs prepare
-node scripts/local-demo.cjs plan
+```
+
+Instalar as dependências dos dois workspaces:
+
+```powershell
+Set-Location backend
+npm.cmd ci
+Set-Location ..\frontend
+npm.cmd ci
+Set-Location ..
+```
+
+Validar o Compose sem iniciar serviços:
+
+```powershell
 docker compose -f compose.yaml -p goleve config --quiet
-~~~
+```
 
-O preparador requer as dependências Node.js já instaladas em `backend/`, conserva
-valores existentes, gera apenas segredos ausentes e nunca os imprime. Os `.env`
-por serviço, `.secrets/` e artefactos locais estão excluídos do Git. Não partilhar
-estes ficheiros nem usar esta configuração local numa implantação pública.
+O preparador preserva valores existentes e gera apenas configuração local
+ausente. Não imprimir nem partilhar os valores dos `.env`, chaves ou
+credenciais. Para o procedimento completo, consultar
+[INSTALLATION.md](documentation/INSTALLATION.md).
 
-### Mongo Express opcional
+## 10. Execução do backend e frontend
 
-O Compose inclui o Mongo Express apenas no perfil local `tools`. Ele liga-se ao
-MongoDB oficial (`mongodb:27017`, replica set `goleveV1`) e publica a interface
-somente em `http://127.0.0.1:8081`, protegida por autenticação Web. Defina
-`MONGO_EXPRESS_USERNAME` e `MONGO_EXPRESS_PASSWORD` no `.env` local; nunca os
-adicione ao Git.
+Construir e iniciar a stack oficial:
 
-Iniciar sem reiniciar ou recriar os 14 serviços oficiais:
-
-~~~powershell
-docker compose --profile tools -f compose.yaml -p goleve-tools up -d --no-deps mongo-express
-~~~
-
-Abrir `http://127.0.0.1:8081` e, após consultar as bases, parar apenas a
-ferramenta:
-
-~~~powershell
-docker compose --profile tools -f compose.yaml -p goleve-tools stop mongo-express
-~~~
-
-O perfil não é iniciado por `docker compose up` sem `--profile tools` e não
-deve ser ativado numa implantação pública. O Mongo Express não cria outro
-MongoDB nem altera índices, volumes ou dados.
-
-O replica set existente já está validado; não o reinicializar. Arranque habitual:
-
-~~~powershell
+```powershell
+docker compose -f compose.yaml -p goleve build
 docker compose -f compose.yaml -p goleve up -d
 docker compose -f compose.yaml -p goleve ps
-~~~
+```
 
-Não acrescentar `--build` indiscriminadamente. Construir explicitamente apenas
-as imagens identificadas como desatualizadas, preservando volumes e credenciais.
-Os dois volumes oficiais são externos e obrigatórios: a sua ausência faz falhar
-o Compose em vez de criar bases vazias. Não usar `--remove-orphans`: contentores
-da instalação antiga partilham o nome de projeto e exigem análise separada.
+O Gateway ficará disponível em `http://127.0.0.1:3000`.
 
-As cinco identidades fictícias, preparação manual idempotente dos dados,
-consulta local das passwords sem as imprimir, políticas MFA/step-up e comandos
-de testes estão no [relatório de consolidação](documentation/consolidation-v1.md).
-Só essas identidades têm autoridade `local-demo` sem MFA; contas reais e produção
-mantêm as proteções administrativas. A Web usa `frontend/web/.env`; o Mobile
-usa `frontend/mobile/.env`, com endereço adequado ao dispositivo. O Coach IA
-continua desativado. Não publicar este ambiente nem partilhar os seus segredos.
+Para iniciar a Web, executar a partir de `frontend/`:
 
-### Instruções históricas da configuração anterior
+```powershell
+npm.cmd run dev:web
+```
 
-Os parágrafos seguintes são mantidos como histórico de instalação. Não executar
-a sua geração manual de segredos ou o arranque com build global para consolidar
-o ambiente atual; usar o preparador e o registo de execução acima.
+O endereço esperado é `http://127.0.0.1:5173`. Para iniciar o Mobile:
 
-Requisitos: Docker Engine com contentores Linux e Docker Compose v2 ou superior.
-Antes do primeiro arranque, definir `JWT_SECRET` no `.env` local. Se o ficheiro ainda não existir, criá-lo a partir de `.env.example`. Para gerar uma chave aleatória de 32 bytes:
+```powershell
+npm.cmd run dev:mobile
+```
 
-~~~sh
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-~~~
+No Android Emulator, a origem habitual do Gateway é
+`http://10.0.2.2:3000`. As variáveis `VITE_API_BASE_URL` e
+`EXPO_PUBLIC_API_BASE_URL` devem ser configuradas nos respetivos `.env`.
 
-Guardar o valor apenas no `.env`, que está ignorado pelo Git. Inicializar também a chave local do User Service, a partir da raiz (Node.js 22; não instala dependências):
+## 11. Docker Compose
 
-~~~sh
-node backend/services/user-service/scripts/init-local-key.cjs
-~~~
+`compose.yaml` é a configuração oficial e define:
 
-O script preserva uma chave existente e nunca apresenta o seu valor. A pasta `.secrets/` está ignorada pelo Git; o Compose monta o ficheiro apenas no User Service, em modo de leitura. É necessário preservar esta chave para ler os dados fictícios já cifrados. Depois, na raiz do projeto:
+- MongoDB 7;
+- RabbitMQ com Management UI;
+- API Gateway;
+- 11 microserviços;
+- dois volumes persistentes externos: `mongo_data` e `rabbitmq_data`.
 
-~~~sh
-docker compose up -d --build
-docker compose ps
-~~~
+Portas locais principais:
 
-O build instala as dependências com `npm ci` a partir do lockfile central e compila cada workspace com `npm run build --workspace=<caminho>`. A geração inicial das chaves acima usa Node.js no anfitrião; os builds não requerem dependências instaladas no anfitrião. Os 12 Dockerfiles usam `backend/` como contexto de build, respeitam os workspaces e criam imagens Node.js 22 sem dependências de desenvolvimento, executadas pelo utilizador `node`.
+| Componente | Endereço |
+|---|---|
+| Gateway | `http://127.0.0.1:3000` |
+| MongoDB | `127.0.0.1:27019` |
+| RabbitMQ AMQP | `127.0.0.1:5672` |
+| RabbitMQ Management | `http://127.0.0.1:15672` |
 
-Os microserviços aguardam MongoDB e RabbitMQ saudáveis; o gateway aguarda os 11 microserviços. O arranque em segundo plano pode terminar antes do health check final do gateway. Para aguardar por todos:
+As portas dos serviços internos não são publicadas no anfitrião. O Mongo
+Express é opcional, pertence ao perfil `tools` e não faz parte dos 14
+contentores oficiais.
 
-~~~sh
-docker compose up -d --build --wait --wait-timeout 240
-~~~
+Consultar estado e logs:
 
-## Portas
+```powershell
+docker compose -f compose.yaml -p goleve ps
+docker compose -f compose.yaml -p goleve logs --tail=100 api-gateway
+```
 
-Todas as portas publicadas estão limitadas a `127.0.0.1`.
+Não utilizar `--remove-orphans`, não eliminar volumes e não iniciar stacks
+históricas para validar a instalação oficial.
 
-| Serviço | Porta interna | Acesso no anfitrião |
-|---|---:|---|
-| API Gateway | 3000 | http://localhost:3000/health |
-| auth-service | 3001 | Apenas rede Docker |
-| user-service | 3002 | Apenas rede Docker |
-| training-service | 3003 | Apenas rede Docker |
-| agenda-service | 3004 | Apenas rede Docker |
-| performance-service | 3005 | Apenas rede Docker |
-| hydration-service | 3006 | Apenas rede Docker |
-| professional-service | 3007 | Apenas rede Docker |
-| management-service | 3008 | Apenas rede Docker |
-| payment-service | 3009 | Apenas rede Docker |
-| notification-service | 3010 | Apenas rede Docker |
-| ai-coach-service | 3011 | Apenas rede Docker |
-| MongoDB | 27017 | localhost:27019 |
-| RabbitMQ AMQP | 5672 | localhost:5672 |
-| RabbitMQ Management | 15672 | http://localhost:15672 |
+## 12. API Gateway e Swagger
 
-As portas publicadas são configuráveis em `.env` por `API_GATEWAY_PORT`, `MONGO_PORT`, `RABBITMQ_PORT` e `RABBITMQ_MANAGEMENT_PORT`. Por exemplo, `MONGO_PORT=27020` muda apenas a porta no anfitrião. A porta local MongoDB por defeito e 27019 para evitar conflitos com instancias existentes em 27017/27018. Os contentores continuam a usar `mongodb:27017`. Os microserviços não publicam portas.
+O Gateway é a fronteira REST pública e aplica CORS, rate limiting, validação
+de fronteira e bloqueio de rotas internas.
 
-## Ambiente e comunicação
+| Interface | Endereço | Conteúdo |
+|---|---|---|
+| Swagger completo | `http://127.0.0.1:3000/api-docs` | 215 operações em 170 caminhos |
+| Swagger funcional | `http://127.0.0.1:3000/api-docs/essentials` | 30 operações em 24 caminhos no código local |
 
-`.env.example` documenta as opções. As portas e os serviços de infraestrutura têm valores locais por defeito; `JWT_SECRET` é obrigatório no auth-service e não tem fallback nesse serviço.
+A imagem Docker atualmente observada ainda serve a seleção anterior de 31
+operações em 26 caminhos. É necessária uma atualização autorizada da imagem
+do Gateway antes de considerar o runtime sincronizado com o código local.
 
-Todos os serviços partilham a rede `backend` e comunicam por DNS:
+Para a referência dos parâmetros, corpos, respostas e permissões, consultar
+[API.md](documentation/API.md).
 
-- `MONGO_URI` é configurado por microserviço: `mongodb://mongodb:27017/goleve_<serviço>`. O prefixo é alterável por `MONGO_DB_PREFIX`.
-- `RABBITMQ_URL` usa o nome `rabbitmq`, porta 5672 e as credenciais `RABBITMQ_USER` / `RABBITMQ_PASSWORD`. Usar caracteres seguros para URLs.
-- O gateway recebe as 11 variáveis `AUTH_SERVICE_URL`, `USER_SERVICE_URL`, `TRAINING_SERVICE_URL`, `AGENDA_SERVICE_URL`, `PERFORMANCE_SERVICE_URL`, `HYDRATION_SERVICE_URL`, `PROFESSIONAL_SERVICE_URL`, `MANAGEMENT_SERVICE_URL`, `PAYMENT_SERVICE_URL`, `NOTIFICATION_SERVICE_URL`, `AI_COACH_SERVICE_URL`, por exemplo `USER_SERVICE_URL=http://user-service:3002`.
-- `JWT_SECRET` é obtido de `.env`. Em produção, o auth-service rejeita valores curtos, placeholders de desenvolvimento e padrões repetidos. A rotação da chave invalida os tokens anteriores.
+## 13. Segurança e autenticação
 
-Os valores `MONGO_URI` e `RABBITMQ_URL` da raiz podem continuar a servir para execução local. O Compose fornece explicitamente os endereços dos contentores para evitar usar `localhost` do anfitrião.
+- O acesso protegido usa JWT Bearer.
+- As sessões podem ser revogadas através do Auth Service.
+- MFA e step-up são exigidos nos fluxos privilegiados quando aplicável.
+- A autorização é feita por perfil, propriedade do recurso e âmbito.
+- CORS está limitado a origens autorizadas.
+- O Gateway bloqueia rotas internas, destinos externos indevidos e credenciais
+  em URLs.
+- Os segredos devem permanecer nos `.env` ou no mecanismo local de segredos.
+- Não colocar tokens, passwords ou chaves no Git, em screenshots ou na
+  documentação.
 
-RabbitMQ Management usa `goleve / goleve-local` por defeito. As variáveis de criação do utilizador só se aplicam à primeira inicialização do volume. Num broker já inicializado, gerir as alterações de credenciais no próprio RabbitMQ.
+O Coach IA permanece desativado por defeito e a recuperação de password não
+está implementada no contrato aprovado.
 
-O gateway encaminha `/auth/*` para o auth-service, que já estabelece a ligação MongoDB e disponibiliza registo, login e consulta do utilizador autenticado. Consultar [endpoints, validação e testes de autenticação](documentation/api/authentication.md). O `/health` do auth-service verifica também o MongoDB.
+## 14. Documentação técnica
 
-O gateway encaminha `/users/*` para o User Service, que valida cada Bearer JWT através do `/auth/me` existente, sem receber a chave JWT. Disponibiliza perfil pessoal, preferências, hábitos, medições, histórico de peso e objetivos do próprio titular. O `/health` verifica o MongoDB. Consultar [contratos, configuração, testes e decisões pendentes do User Service](documentation/api/user-service.md).
+- [Estado do projeto](documentation/PROJECT_STATUS.md)
+- [Arquitetura](documentation/ARCHITECTURE.md)
+- [Instalação](documentation/INSTALLATION.md)
+- [Referência da API](documentation/API.md)
+- [Manual do utilizador](documentation/USER_GUIDE.md)
+- [Contrato OpenAPI](documentation/api/backend-release-v1.openapi.json)
 
-A fase 1 do User Service está autorizada apenas para desenvolvimento local com dados fictícios. O valor por defeito `USER_DATA_MODE=disabled` bloqueia os endpoints de dados. Para o desenvolvimento aprovado, definir `USER_DATA_MODE=synthetic` no `.env` local e recriar o User Service. Não existe modo de recolha de dados reais nesta fase.
+Estes documentos distinguem implementação, disponibilidade, validação e
+funcionalidades previstas, evitando tratar contratos como prova de execução.
 
-O gateway encaminha `/professionals/*` para o Professional Service. A fase 1 permite candidaturas privadas de PT/Nutricionista, qualificações declaradas e horários preferidos privados, sem conceder papéis ou privilégios profissionais. `PROFESSIONAL_DATA_MODE=disabled` é o valor seguro por defeito; `synthetic` permite exclusivamente dados fictícios no desenvolvimento local. A disponibilidade operacional e os agendamentos continuam a pertencer ao Agenda Service. Consultar [endpoints, decisões e testes do Professional Service](documentation/api/professional-service.md).
+## 15. Estado atual do projeto
 
-A fase 2 permite submeter candidaturas e simular aprovação, rejeição e suspensão através de `/management/professional-applications/*`. A revisão fica desativada por defeito; exige papel atual de administrador no Auth e ID explicitamente autorizado no servidor Professional. Não cria contas nem atribui papéis. `/professionals/catalog` mostra apenas resumos aprovados com publicação autorizada; os códigos fictícios estão em `/professionals/specializations`. Consultar [configuração, estados, segurança e testes da aprovação simulada](documentation/api/professional-applications.md).
+Na última auditoria operacional documentada:
 
-A fase 3 acrescenta `/care-relationships/*` no Professional, com histórico atómico, idempotência e expiração passiva de pedidos (7 dias por defeito). Não ativa elegibilidade profissional, aprovação ou acesso a dados sensíveis: os fluxos positivos são testados com dependências simuladas isoladas. O ambiente normal continua sem profissionais elegíveis confirmados. Consultar [relações, autorização, expiração e testes](documentation/api/care-relationships.md).
+- 14 contentores oficiais foram observados como saudáveis;
+- o MongoDB estava em `PRIMARY` no replica set `goleveV1`;
+- RabbitMQ estava operacional com a retenção local preservada;
+- o Gateway e os serviços estavam configurados para o modo local-demo;
+- o código local tinha Swagger essencial 30/24;
+- o runtime Docker ainda precisava de atualização para essa seleção;
+- as áreas pessoais Web/Mobile estavam implementadas, enquanto vários fluxos
+  profissionais, administrativos e de pagamento permaneciam condicionais.
 
-Os outros sete microserviços mantêm os seus endpoints de saúde iniciais; a publicação e o consumo de eventos RabbitMQ continuam por implementar.
+Este estado é local e não demonstra disponibilidade pública, TLS, alta
+disponibilidade ou adequação a produção. Os detalhes e evidências encontram-se
+em [PROJECT_STATUS.md](documentation/PROJECT_STATUS.md).
 
-O gateway limita os pedidos de registo e login. Consultar o [relatório da revisão de segurança e ficheiros para commit](documentation/api/authentication-security-review.md).
+## 16. Limitações conhecidas
 
-## Persistência e diagnóstico
+1. A recuperação de password não está disponível.
+2. O Coach IA está desativado no ambiente atual.
+3. Marcações profissionais dependem de elegibilidade e dados autorizados.
+4. Pagamentos são apenas MockBank e não constituem pagamentos reais.
+5. Email, SMS e push externos não estão implementados.
+6. A execução Mobile em dispositivo físico não foi validada.
+7. Alguns percursos administrativos positivos continuam condicionais.
+8. A instância MongoDB observada tem um único membro e não demonstra alta
+   disponibilidade.
+9. A instalação limpa noutro host, TLS, rotação de segredos e operação de
+   produção não estão demonstradas.
 
-`mongo_data:/data/db` preserva os dados MongoDB e o volume existente do projeto.
-`rabbitmq_data:/var/lib/rabbitmq` mantém os dados do broker, com hostname estável. Este novo volume não importa automaticamente dados de volumes anónimos anteriores; esses volumes não são eliminados.
+## 17. Equipa de desenvolvimento
 
-~~~sh
-docker compose logs --tail=100 api-gateway auth-service
-docker compose logs --tail=100 mongodb rabbitmq
-docker compose exec user-service node -e "fetch('http://127.0.0.1:3002/health').then(r=>r.json()).then(console.log)"
-docker compose stop
-docker compose start
-~~~
+| Elemento | Número |
+|---|---:|
+| Júlio Pereira | 29860 |
+| Juan Peixoto | 29614 |
+| Manuel Bizerra | 37725 |
 
-`docker compose down` conserva os volumes nomeados. Não usar `docker compose down -v` para preservar os dados.
+## 18. Contexto académico
 
-A estrutura MVC e os scripts locais `dev`, `build` e `start` permanecem disponíveis.
+Projeto desenvolvido no âmbito do **Mestrado em Engenharia Informática** do
+**Instituto Politécnico do Cávado e do Ave (IPCA)**.
+
+**Unidade curricular:** Arquiteturas e Integração de Sistemas
+
+**Ano letivo:** 2026/2027
+
+Este repositório representa uma entrega académica V1. As funcionalidades
+simuladas e as limitações explicitadas não devem ser interpretadas como
+características de um produto de produção.
